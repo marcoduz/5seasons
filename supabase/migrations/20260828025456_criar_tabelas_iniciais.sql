@@ -1,71 +1,63 @@
--- 1. Limpeza de segurança
-DROP TABLE IF EXISTS expedicoes;
+-- 0. Limpeza de segurança
 DROP TABLE IF EXISTS roteiros;
 DROP TABLE IF EXISTS pacotes;
-DROP TABLE IF EXISTS admins;
+DROP TABLE IF EXISTS expedicoes;
 
--- 2. Tabela de Administradores
-CREATE TABLE admins (
-  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-  nome TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- 3. Tabela Base de Pacotes (O template operacional)
-CREATE TABLE pacotes (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+-- 1. Tabela Base: Expedição (Roteiro fixo)
+CREATE TABLE expedicoes (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   nome TEXT NOT NULL,
   pais TEXT NOT NULL,
-  tipo_destino TEXT NOT NULL, 
-  categorias TEXT[],          
+  tipo_destino TEXT NOT NULL,
+  categorias TEXT[] DEFAULT '{}',
   descricao TEXT,
-  fotos TEXT[],               
-  incluso TEXT[],             
-  nao_incluso TEXT[],
-  observacoes TEXT[],         
+  fotos TEXT[] DEFAULT '{}',
+  incluso TEXT[] DEFAULT '{}',
+  nao_incluso TEXT[] DEFAULT '{}',
+  observacoes TEXT[] DEFAULT '{}',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 4. Tabela de Roteiros Diários
-CREATE TABLE roteiros (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  pacote_id UUID REFERENCES pacotes(id) ON DELETE CASCADE,
-  dia INT NOT NULL,           
-  titulo TEXT NOT NULL,       
-  descricao TEXT NOT NULL,
-  UNIQUE(pacote_id, dia)      
-);
-
--- 5. Tabela de Expedições (O produto vendido no site)
-CREATE TABLE expedicoes (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  pacote_id UUID REFERENCES pacotes(id) ON DELETE CASCADE,
-  titulo TEXT NOT NULL,
+-- 2. Tabela Instância: Pacote (Datas e Valores)
+CREATE TABLE pacotes (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  nome TEXT NOT NULL,
+  expedicao_id UUID REFERENCES expedicoes(id) ON DELETE CASCADE,
   data_inicio DATE NOT NULL,
   data_fim DATE NOT NULL,
-  vagas INT NOT NULL,
-  preco_duplo DECIMAL(10,2) NOT NULL, 
-  preco_single DECIMAL(10,2),         
-  status TEXT DEFAULT 'vagas abertas',
-  
-  -- Campos de Promoção
-  desconto_percentual DECIMAL(5,2) DEFAULT 0,
-  promocao_inicio TIMESTAMP WITH TIME ZONE,
-  promocao_fim TIMESTAMP WITH TIME ZONE
+  vagas INTEGER NOT NULL DEFAULT 0,
+  preco_duplo NUMERIC(10,2) NOT NULL,
+  preco_single NUMERIC(10,2),
+  status TEXT DEFAULT 'Ativo',
+  desconto_percentual NUMERIC(5,2) DEFAULT 0,
+  promocao_inicio DATE,
+  promocao_fim DATE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 6. Habilitar Políticas de Segurança (Row Level Security)
+-- 4. Tabela de Roteiro Diário
+CREATE TABLE roteiros (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  expedicao_id UUID REFERENCES expedicoes(id) ON DELETE CASCADE,
+  dia INTEGER NOT NULL,
+  titulo TEXT NOT NULL,
+  descricao TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 3. Segurança (RLS)
+ALTER TABLE expedicoes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pacotes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE roteiros ENABLE ROW LEVEL SECURITY;
-ALTER TABLE expedicoes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE admins ENABLE ROW LEVEL SECURITY;
 
--- 7. Permissões de Visualização (Visitantes)
-CREATE POLICY "Leitura publica pacotes" ON pacotes FOR SELECT USING (true);
-CREATE POLICY "Leitura publica roteiros" ON roteiros FOR SELECT USING (true);
-CREATE POLICY "Leitura publica expedicoes" ON expedicoes FOR SELECT USING (true);
+-- Leitura pública liberada (para o site principal no futuro)
+CREATE POLICY "Leitura publica de expedicoes" ON expedicoes FOR SELECT USING (true);
+CREATE POLICY "Leitura publica de pacotes" ON pacotes FOR SELECT USING (true);
 
--- 8. Permissões de Administração (Admins logados)
-CREATE POLICY "Controle total admins pacotes" ON pacotes FOR ALL USING (auth.uid() IN (SELECT id FROM admins));
-CREATE POLICY "Controle total admins roteiros" ON roteiros FOR ALL USING (auth.uid() IN (SELECT id FROM admins));
-CREATE POLICY "Controle total admins expedicoes" ON expedicoes FOR ALL USING (auth.uid() IN (SELECT id FROM admins));
+-- Acesso total liberado para usuários logados (Admin)
+CREATE POLICY "Admin total expedicoes" ON expedicoes FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY "Admin total pacotes" ON pacotes FOR ALL USING (auth.role() = 'authenticated');
+
+-- Políticas de Roteiros
+CREATE POLICY "Leitura publica de roteiros" ON roteiros FOR SELECT USING (true);
+CREATE POLICY "Admin total roteiros" ON roteiros FOR ALL USING (auth.role() = 'authenticated');
