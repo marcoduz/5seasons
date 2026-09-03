@@ -19,6 +19,7 @@ export interface Pacote {
   data_inicio: string;
   data_fim: string;
   vagas: number;
+  vagas_ocupadas: number;
   preco_duplo: number;
   preco_single?: number;
   status: string;
@@ -34,5 +35,22 @@ export interface Roteiro {
   dia: number;
   titulo: string;
   descricao: string;
+  created_at: string;
+}
+
+export interface Reserva {
+  id: string;
+  pacote_id: string;
+  nome_cliente: string;
+  email?: string;
+  telefone: string;
+  data_nascimento?: string;
+  cpf?: string;
+  passaporte?: string;
+  valor_pago: number;
+  forma_pagamento?: string;
+  status: string;
+  contato_emergencia?: string;
+  observacoes?: string;
   created_at: string;
 }

@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/services/supabase';
-import type { Expedicao } from '@/types';
-import './admin-theme.css';
+import type { Expedicao } from '@/types/index';
+import '../admin-theme.css';
 
-export function ExpedicaoList() {
+export function ExpedicoesList() {
   const [expedicoes, setExpedicoes] = useState<Expedicao[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -70,7 +70,7 @@ export function ExpedicaoList() {
           <h1 className="ui-page-title">Expedições</h1>
           <p className="ui-page-subtitle">Cadastre destinos, conteúdo e roteiro de cada expedição.</p>
         </div>
-        <Link to="/admin/expedicoes/nova" className="ui-btn-solid">
+        <Link to="/admin/expedicoes/new" className="ui-btn-solid">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M12 5v14M5 12h14" />
           </svg>
@@ -99,7 +99,7 @@ export function ExpedicaoList() {
       {!loading && !error && expedicoes.length === 0 && (
         <div className="ui-empty">
           <p>Nenhuma expedição cadastrada ainda.</p>
-          <Link to="/admin/expedicoes/nova" className="ui-btn-solid">
+          <Link to="/admin/expedicoes/new" className="ui-btn-solid">
             Cadastrar primeira expedição
           </Link>
         </div>
