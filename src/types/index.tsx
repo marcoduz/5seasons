@@ -54,3 +54,18 @@ export interface Reserva {
   observacoes?: string;
   created_at: string;
 }
+
+export interface Cliente {
+  id: string;
+  nome: string;
+  email?: string;
+  telefone: string;
+  instagram?: string;
+  data_nascimento?: string;
+  cpf?: string;
+  passaporte?: string;
+  contato_emergencia?: string;
+  observacoes?: string;
+  aceita_ofertas: boolean;
+  created_at: string;
+}

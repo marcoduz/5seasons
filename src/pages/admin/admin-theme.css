@@ -17,6 +17,7 @@
 .ui-page {
   font-family: 'Inter', -apple-system, sans-serif;
   color: var(--ink);
+  color-scheme: light; /* Força o navegador a usar o tema claro em elementos nativos */
 }
 
 .ui-back {
@@ -29,6 +30,7 @@
   margin-bottom: 18px;
   opacity: 0.85;
 }
+
 .ui-back:hover {
   opacity: 1;
 }
@@ -70,6 +72,7 @@
   padding: 48px 24px;
   text-align: center;
 }
+
 .ui-empty p {
   margin: 0 0 16px;
   color: var(--ink);
@@ -95,9 +98,11 @@
   white-space: nowrap;
   text-decoration: none;
 }
+
 .ui-btn-solid:hover:not(:disabled) {
   background-color: var(--forest-deep);
 }
+
 .ui-btn-solid:disabled {
   background-color: var(--sage);
   cursor: not-allowed;
@@ -119,9 +124,11 @@
   align-items: center;
   gap: 8px;
 }
+
 .ui-btn-ghost:hover:not(:disabled) {
   background: var(--cream);
 }
+
 .ui-btn-ghost:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -140,14 +147,17 @@
   cursor: pointer;
   transition: background-color 0.15s ease, opacity 0.15s ease;
 }
+
 .ui-icon-btn:hover:not(:disabled) {
   background: var(--cream);
 }
+
 .ui-icon-btn.danger:hover:not(:disabled) {
   background: var(--danger-bg);
   color: var(--danger-text);
   border-color: var(--danger-border);
 }
+
 .ui-icon-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
@@ -183,22 +193,27 @@
   color: var(--danger-text);
 }
 
-.ui-field.has-error input,
-.ui-field.has-error select,
+.ui-field.has-error input, 
+.ui-field.has-error select, 
 .ui-field.has-error textarea {
   border-color: var(--danger-text);
   background: rgba(154, 59, 47, 0.04);
 }
 
-.ui-field.has-error input:focus,
-.ui-field.has-error select:focus,
+.ui-field.has-error input:focus, 
+.ui-field.has-error select:focus, 
 .ui-field.has-error textarea:focus {
   box-shadow: 0 0 0 3px rgba(154, 59, 47, 0.15);
 }
 
+/* Abrange todos os tipos de input para manter o design consistente e evitar fundos escuros/autofill */
 .ui-field input[type='text'],
+.ui-field input[type='email'],
+.ui-field input[type='password'],
+.ui-field input[type='tel'],
 .ui-field input[type='number'],
 .ui-field input[type='url'],
+.ui-field input[type='date'],
 .ui-field textarea,
 .ui-field select {
   padding: 10px 12px;
@@ -210,24 +225,41 @@
   color: var(--ink);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   resize: vertical;
+  color-scheme: light;
 }
 
 .ui-field textarea {
   min-height: 96px;
 }
 
-.ui-field input:focus,
-.ui-field textarea:focus,
+.ui-field input:focus, 
+.ui-field textarea:focus, 
 .ui-field select:focus {
   outline: none;
   border-color: var(--sage);
   box-shadow: 0 0 0 3px rgba(151, 183, 177, 0.28);
 }
 
+/* Corrige o fundo escuro do autofill do navegador */
+.ui-field input:-webkit-autofill,
+.ui-field input:-webkit-autofill:hover, 
+.ui-field input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px var(--warm-white) inset !important;
+  -webkit-text-fill-color: var(--ink) !important;
+}
+
+.ui-field input[type='checkbox'] {
+  accent-color: var(--forest);
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
 .ui-form-row {
   display: flex;
   gap: 16px;
 }
+
 .ui-form-row > .ui-field {
   flex: 1;
 }
@@ -257,6 +289,7 @@
   display: flex;
   gap: 8px;
 }
+
 .ui-tag-input-row input {
   flex: 1;
 }
@@ -293,6 +326,7 @@
   cursor: pointer;
   padding: 0;
 }
+
 .ui-tag button:hover {
   background: rgba(47, 72, 66, 0.25);
 }
@@ -303,6 +337,7 @@
   align-items: flex-start;
   margin-bottom: 8px;
 }
+
 .ui-list-editor-row input {
   flex: 1;
 }
@@ -323,12 +358,14 @@
   border: 1px solid var(--cream);
   background: var(--cream);
 }
+
 .ui-photo-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
+
 .ui-photo-remove {
   position: absolute;
   top: 6px;
@@ -344,6 +381,7 @@
   border-radius: 50%;
   cursor: pointer;
 }
+
 .ui-photo-remove:hover {
   background: rgba(38, 51, 47, 0.85);
 }
@@ -383,21 +421,24 @@
   cursor: pointer;
   transition: opacity 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
+
 .ui-tab:hover:not(:disabled) {
   opacity: 0.85;
 }
+
 .ui-tab.active {
   opacity: 1;
   color: var(--forest-deep);
   border-bottom-color: var(--forest);
   font-weight: 600;
 }
+
 .ui-tab:disabled {
   opacity: 0.3;
   cursor: not-allowed;
 }
 
-/* ---------- card grid (expedição listing) ---------- */
+/* ---------- card grid ---------- */
 .ui-card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -415,6 +456,7 @@
   flex-direction: column;
   transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
+
 .ui-exp-card:hover {
   box-shadow: 0 10px 24px rgba(20, 32, 28, 0.1);
   transform: translateY(-2px);
@@ -423,12 +465,13 @@
 .ui-exp-card-photo {
   width: 100%;
   aspect-ratio: 16 / 10;
-  background: var(--cream) url('data:image/svg+xml;charset=UTF-8,') center / cover;
+  background: var(--cream);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--nude);
 }
+
 .ui-exp-card-photo img {
   width: 100%;
   height: 100%;
@@ -496,11 +539,13 @@
   margin-bottom: 22px;
   max-width: 340px;
 }
+
 .ui-search svg {
   flex-shrink: 0;
   color: var(--ink);
   opacity: 0.5;
 }
+
 .ui-search input {
   border: none;
   outline: none;
@@ -555,6 +600,7 @@
   cursor: pointer;
   padding: 2px;
 }
+
 .ui-modal-close:hover {
   opacity: 1;
 }
@@ -566,92 +612,7 @@
   margin-top: 4px;
 }
 
-/* ---------- roteiro timeline ---------- */
-.ui-day {
-  display: flex;
-  gap: 20px;
-}
-
-.ui-day-marker {
-  flex-shrink: 0;
-  width: 46px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.ui-day-circle {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  border: 1.5px solid var(--sage);
-  background: var(--warm-white);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Playfair Display', serif;
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--forest-deep);
-  flex-shrink: 0;
-}
-
-.ui-day-line {
-  flex: 1;
-  width: 1px;
-  background: var(--cream);
-  margin-top: 6px;
-}
-
-.ui-day-content {
-  flex: 1;
-  padding-bottom: 32px;
-}
-
-.ui-day-label {
-  font-size: 11.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--nude);
-  font-weight: 600;
-  margin: 10px 0 12px;
-}
-
-.ui-activity-card {
-  background: var(--warm-white);
-  border: 1px solid var(--cream);
-  border-radius: 6px;
-  padding: 15px 17px;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
-}
-
-.ui-activity-title {
-  font-weight: 600;
-  color: var(--forest-deep);
-  font-size: 14.5px;
-  margin: 0 0 4px;
-}
-
-.ui-activity-desc {
-  font-size: 13.5px;
-  color: var(--ink);
-  opacity: 0.75;
-  line-height: 1.55;
-  margin: 0;
-  white-space: pre-line;
-}
-
-.ui-activity-actions {
-  flex-shrink: 0;
-  display: flex;
-  gap: 4px;
-}
-
-/* ---------- step navigation (Próximo / Voltar / Salvar) ---------- */
+/* ---------- step actions ---------- */
 .ui-step-actions {
   display: flex;
   justify-content: space-between;
@@ -674,18 +635,21 @@
   background: rgba(151, 183, 177, 0.08);
   transition: background-color 0.15s ease;
 }
+
 .ui-file-upload:hover {
   background: rgba(151, 183, 177, 0.18);
 }
+
 .ui-file-upload.disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
 .ui-file-upload input {
   display: none;
 }
 
-/* ---------- roteiro: accordion por dia ---------- */
+/* ---------- accordion ---------- */
 .ui-accordion {
   border: 1px solid var(--cream);
   border-radius: 8px;
@@ -702,6 +666,7 @@
   background: var(--warm-white);
   transition: background-color 0.15s ease;
 }
+
 .ui-accordion-header:hover {
   background: rgba(151, 183, 177, 0.08);
 }
@@ -717,6 +682,7 @@
   flex-shrink: 0;
   transition: transform 0.18s ease;
 }
+
 .ui-accordion-chevron.open {
   transform: rotate(90deg);
 }
@@ -740,7 +706,6 @@
   border-top: 1px solid var(--cream);
 }
 
-/* ---------- roteiro: linhas de item dentro do modal "Adicionar Dia" ---------- */
 .ui-day-item-row {
   display: flex;
   gap: 10px;
@@ -749,6 +714,7 @@
   padding-bottom: 14px;
   border-bottom: 1px dashed var(--cream);
 }
+
 .ui-day-item-row:last-of-type {
   border-bottom: none;
   margin-bottom: 8px;

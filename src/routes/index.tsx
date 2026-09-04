@@ -7,6 +7,8 @@ import { PacotesList } from '@/pages/admin/Pacotes';
 import { PacoteForm } from '@/pages/admin/Pacotes/pacotesForm';
 import { ExpedicoesList } from '@/pages/admin/Expedicoes';
 import { ExpedicaoForm } from '@/pages/admin/Expedicoes/expedicaoForm';
+import { ClientesList } from '@/pages/admin/Clientes';
+import { ClienteForm } from '@/pages/admin/Clientes/clientesForm';
 
 const Home = () => <h1>Página Inicial Pública</h1>;
 
@@ -31,6 +33,12 @@ export function AppRoutes() {
               <Route index element={<ExpedicoesList />} />
               <Route path="new" element={<ExpedicaoForm />} />
               <Route path=":id" element={<ExpedicaoForm />} />
+            </Route>
+
+            <Route path="clientes">
+              <Route index element={<ClientesList />} />
+              <Route path="new" element={<ClienteForm />} />
+              <Route path=":id" element={<ClienteForm />} />
             </Route>
           </Route>
         </Route>
