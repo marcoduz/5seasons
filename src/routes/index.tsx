@@ -9,6 +9,8 @@ import { ExpedicoesList } from '@/pages/admin/Expedicoes';
 import { ExpedicaoForm } from '@/pages/admin/Expedicoes/expedicaoForm';
 import { ClientesList } from '@/pages/admin/Clientes';
 import { ClienteForm } from '@/pages/admin/Clientes/clientesForm';
+import { ReservasList } from '@/pages/admin/Reservas';
+import { ReservaForm } from '@/pages/admin/Reservas/reservasForm';
 
 const Home = () => <h1>Página Inicial Pública</h1>;
 
@@ -39,6 +41,12 @@ export function AppRoutes() {
               <Route index element={<ClientesList />} />
               <Route path="new" element={<ClienteForm />} />
               <Route path=":id" element={<ClienteForm />} />
+            </Route>
+
+            <Route path="reservas">
+              <Route index element={<ReservasList />} />
+              <Route path="new" element={<ReservaForm/>} />
+              <Route path=":id" element={<ReservaForm/>} />
             </Route>
           </Route>
         </Route>

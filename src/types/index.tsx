@@ -41,16 +41,10 @@ export interface Roteiro {
 export interface Reserva {
   id: string;
   pacote_id: string;
-  nome_cliente: string;
-  email?: string;
-  telefone: string;
-  data_nascimento?: string;
-  cpf?: string;
-  passaporte?: string;
+  cliente_id: string;
   valor_pago: number;
   forma_pagamento?: string;
   status: string;
-  contato_emergencia?: string;
   observacoes?: string;
   created_at: string;
 }

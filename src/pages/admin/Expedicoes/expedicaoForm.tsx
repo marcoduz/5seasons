@@ -44,6 +44,19 @@ function uid() {
     : `local-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
+// Transformação de formatação segura (Negrito, Itálico, Riscado e Quebras de Linha)
+export function formatarEstiloWhatsApp(texto: string) {
+  if (!texto) return { __html: '' };
+  
+  const htmlFormatado = texto
+    .replace(/\*([^*]+)\*/g, '<strong>$1</strong>')
+    .replace(/_([^_]+)_/g, '<i>$1</i>')
+    .replace(/~([^~]+)~/g, '<del>$1</del>')
+    .replace(/\n/g, '<br />');
+
+  return { __html: htmlFormatado };
+}
+
 export function ExpedicaoForm() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -209,7 +222,6 @@ export function ExpedicaoForm() {
     );
   }
 
-  // A função agora aceita um evento opcional e cancela qualquer envio acidental
   async function handleSave(e?: React.FormEvent | React.MouseEvent) {
     if (e) e.preventDefault();
     setError('');
@@ -351,13 +363,30 @@ export function ExpedicaoForm() {
   if (loading) {
     return (
       <div className="ui-page">
-        <div className="ui-state">Carregando expedição...</div>
+        <div className="ui-state">A carregar expedição...</div>
       </div>
     );
   }
 
   return (
     <div className="ui-page">
+      {/* Força a aplicação do Itálico e Negrito caso os estilos globais os anulem */}
+      <style>{`
+        .ui-formatted-text strong {
+          font-weight: 700 !important;
+          color: var(--forest-deep);
+        }
+        
+        .ui-formatted-text em, .ui-formatted-text i {
+          font-style: italic !important;
+        }
+        
+        .ui-formatted-text del {
+          text-decoration: line-through !important;
+          opacity: 0.7;
+        }
+      `}</style>
+      
       <Link to="/admin/expedicoes" className="ui-back">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="m15 18-6-6 6-6" />
@@ -370,7 +399,7 @@ export function ExpedicaoForm() {
           <h1 className="ui-page-title">{isNew ? 'Nova Expedição' : form.nome || 'Editar Expedição'}</h1>
           <p className="ui-page-subtitle">
             {isNew
-              ? 'Preencha os dados e salve para liberar o cadastro do roteiro.'
+              ? 'Preencha os dados e guarde para libertar o registo do roteiro.'
               : 'Atualize as informações da expedição.'}
           </p>
         </div>
@@ -400,7 +429,6 @@ export function ExpedicaoForm() {
       {error && <div className="ui-form-error">{error}</div>}
       {success && <div className="ui-form-success">{success}</div>}
 
-      {/* A tag <form> agora bloqueia 100% de qualquer disparo automático */}
       <form 
         onSubmit={(e) => e.preventDefault()}
         onKeyDown={(e) => {
@@ -419,7 +447,7 @@ export function ExpedicaoForm() {
                 <input
                   id="nome"
                   type="text"
-                  placeholder="Ex: Travessia Patagônia"
+                  placeholder="Ex: Travessia Patagónia"
                   value={form.nome}
                   onChange={(e) => {
                     updateField('nome', e.target.value);
@@ -487,7 +515,7 @@ export function ExpedicaoForm() {
           <div className="ui-field">
             <label>Fotos</label>
             <p className="ui-hint">
-              Envie imagens do computador (PNG ou JPG). Elas são enviadas de fato quando você clicar em Salvar.
+              Envie imagens do computador (PNG ou JPG). Elas são enviadas de facto quando clicar em Salvar.
             </p>
             {photoError && <div className="ui-form-error">{photoError}</div>}
             <label className={`ui-file-upload${saving ? ' disabled' : ''}`}>
@@ -549,20 +577,20 @@ export function ExpedicaoForm() {
         {tab === 'inclusoes' && (
           <>
             <ListEditor
-              label="O que está incluso"
-              placeholder="Ex: Café da manhã, transporte..."
+              label="O que está incluído"
+              placeholder="Ex: Pequeno-almoço, transporte..."
               values={form.incluso}
               onChange={(v) => updateField('incluso', v)}
             />
             <ListEditor
-              label="O que não está incluso"
-              placeholder="Ex: Passagens aéreas, seguro viagem..."
+              label="O que não está incluído"
+              placeholder="Ex: Voos, seguro de viagem..."
               values={form.nao_incluso}
               onChange={(v) => updateField('nao_incluso', v)}
             />
             <ListEditor
               label="Observações"
-              placeholder="Ex: Necessário preparo físico intermediário..."
+              placeholder="Ex: Necessário preparo físico intermédio..."
               values={form.observacoes}
               onChange={(v) => updateField('observacoes', v)}
             />
@@ -588,7 +616,7 @@ export function ExpedicaoForm() {
 
           {isLastDataTab ? (
             <button type="button" className="ui-btn-solid" disabled={saving} onClick={handleSave}>
-              {saving ? 'Salvando...' : 'Salvar'}
+              {saving ? 'A salvar...' : 'Salvar Expedição'}
             </button>
           ) : (
             <button type="button" className="ui-btn-solid" onClick={goToNextTab}>
@@ -706,6 +734,7 @@ function ListEditor({
   );
 }
 
+// --- Novo Editor de Roteiro (Formatação de Texto Simples) ---
 function RoteiroEditor({
   items,
   setItems,
@@ -716,28 +745,14 @@ function RoteiroEditor({
   onMarkDeleted: (ids: string[]) => void;
 }) {
   const [expandedDias, setExpandedDias] = useState<Set<number>>(new Set());
-  const [dayModalOpen, setDayModalOpen] = useState(false);
-  const [dayNumber, setDayNumber] = useState('');
-  const [dayItemRows, setDayItemRows] = useState<{ titulo: string; descricao: string }[]>([
-    { titulo: '', descricao: '' },
-  ]);
-  const [dayError, setDayError] = useState('');
+  
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [dayForm, setDayForm] = useState({ dia: '', titulo: '', descricao: '' });
+  const [modalError, setModalError] = useState('');
 
-  const [itemModalOpen, setItemModalOpen] = useState(false);
-  const [editingLocalId, setEditingLocalId] = useState<string | null>(null);
-  const [itemForm, setItemForm] = useState({ dia: '', titulo: '', descricao: '' });
-  const [itemError, setItemError] = useState('');
-
-  const dias = useMemo(() => {
-    const grupos = new Map<number, RoteiroDraftItem[]>();
-    for (const item of items) {
-      const lista = grupos.get(item.dia) ?? [];
-      lista.push(item);
-      grupos.set(item.dia, lista);
-    }
-    return Array.from(grupos.entries())
-      .sort(([a], [b]) => a - b)
-      .map(([dia, itens]) => ({ dia, itens }));
+  const diasOrdenados = useMemo(() => {
+    return [...items].sort((a, b) => a.dia - b.dia);
   }, [items]);
 
   function toggleDia(dia: number) {
@@ -749,128 +764,72 @@ function RoteiroEditor({
     });
   }
 
-  function openDayModal() {
-    const proximoDia = dias.length > 0 ? Math.max(...dias.map((d) => d.dia)) + 1 : 1;
-    setDayNumber(String(proximoDia));
-    setDayItemRows([{ titulo: '', descricao: '' }]);
-    setDayError('');
-    setDayModalOpen(true);
-  }
-  
-  function closeDayModal() {
-    setDayModalOpen(false);
-  }
-  
-  function addDayItemRow() {
-    setDayItemRows((prev) => [...prev, { titulo: '', descricao: '' }]);
-  }
-  
-  function removeDayItemRow(index: number) {
-    setDayItemRows((prev) => prev.filter((_, i) => i !== index));
-  }
-  
-  function updateDayItemRow(index: number, field: 'titulo' | 'descricao', value: string) {
-    setDayItemRows((prev) => prev.map((row, i) => (i === index ? { ...row, [field]: value } : row)));
+  function openAddModal() {
+    const proximoDia = diasOrdenados.length > 0 ? Math.max(...diasOrdenados.map((d) => d.dia)) + 1 : 1;
+    setEditingId(null);
+    setDayForm({ dia: String(proximoDia), titulo: '', descricao: '' });
+    setModalError('');
+    setModalOpen(true);
   }
 
-  function submitDayModal(e: React.MouseEvent | React.FormEvent) {
+  function openEditModal(item: RoteiroDraftItem) {
+    setEditingId(item.localId);
+    setDayForm({ dia: String(item.dia), titulo: item.titulo, descricao: item.descricao });
+    setModalError('');
+    setModalOpen(true);
+  }
+
+  function closeModal() {
+    setModalOpen(false);
+  }
+
+  function submitModal(e: React.MouseEvent | React.FormEvent) {
     e.preventDefault();
-    setDayError('');
-    const dia = Number(dayNumber);
-    if (!dia || dia < 1) {
-      setDayError('Informe um dia válido (1, 2, 3...).');
+    setModalError('');
+    
+    const diaNum = Number(dayForm.dia);
+    if (!diaNum || diaNum < 1) {
+      setModalError('Informe um dia válido (1, 2, 3...).');
       return;
     }
-    const validRows = dayItemRows.filter((row) => row.titulo.trim());
-    if (validRows.length === 0) {
-      setDayError('Adicione pelo menos uma atividade com título.');
-      return;
-    }
-
-    const novosItens: RoteiroDraftItem[] = validRows.map((row) => ({
-      localId: uid(),
-      dia,
-      titulo: row.titulo.trim(),
-      descricao: row.descricao.trim(),
-    }));
-
-    setItems((prev) => [...prev, ...novosItens]);
-    setExpandedDias((prev) => new Set(prev).add(dia));
-    setDayModalOpen(false);
-  }
-
-  function openAddItemModal(dia: number) {
-    setEditingLocalId(null);
-    setItemForm({ dia: String(dia), titulo: '', descricao: '' });
-    setItemError('');
-    setItemModalOpen(true);
-  }
-
-  function openEditItemModal(item: RoteiroDraftItem) {
-    setEditingLocalId(item.localId);
-    setItemForm({ dia: String(item.dia), titulo: item.titulo, descricao: item.descricao });
-    setItemError('');
-    setItemModalOpen(true);
-  }
-
-  function closeItemModal() {
-    setItemModalOpen(false);
-  }
-
-  function submitItemModal(e: React.MouseEvent | React.FormEvent) {
-    e.preventDefault();
-    setItemError('');
-    const dia = Number(itemForm.dia);
-    if (!dia || dia < 1) {
-      setItemError('Informe um dia válido.');
-      return;
-    }
-    if (!itemForm.titulo.trim()) {
-      setItemError('Informe um título para a atividade.');
+    if (!dayForm.titulo.trim()) {
+      setModalError('O título do dia é obrigatório.');
       return;
     }
 
-    if (editingLocalId) {
+    if (editingId) {
       setItems((prev) =>
-        prev.map((item) =>
-          item.localId === editingLocalId
-            ? { ...item, dia, titulo: itemForm.titulo.trim(), descricao: itemForm.descricao.trim() }
-            : item
+        prev.map((i) =>
+          i.localId === editingId
+            ? { ...i, dia: diaNum, titulo: dayForm.titulo.trim(), descricao: dayForm.descricao.trim() }
+            : i
         )
       );
     } else {
       setItems((prev) => [
         ...prev,
-        { localId: uid(), dia, titulo: itemForm.titulo.trim(), descricao: itemForm.descricao.trim() },
+        { localId: uid(), dia: diaNum, titulo: dayForm.titulo.trim(), descricao: dayForm.descricao.trim() },
       ]);
+      setExpandedDias((prev) => new Set(prev).add(diaNum));
     }
-    setItemModalOpen(false);
+    closeModal();
   }
 
-  function handleDeleteItem(item: RoteiroDraftItem) {
-    const confirmado = window.confirm(`Remover a atividade "${item.titulo}" do Dia ${item.dia}?`);
+  function handleDelete(item: RoteiroDraftItem) {
+    const confirmado = window.confirm(`Remover o Dia ${item.dia} do roteiro?`);
     if (!confirmado) return;
+
     if (item.id) onMarkDeleted([item.id]);
     setItems((prev) => prev.filter((i) => i.localId !== item.localId));
-  }
-
-  function handleDeleteDay(dia: number) {
-    const confirmado = window.confirm(`Remover o Dia ${dia} e todas as suas atividades?`);
-    if (!confirmado) return;
-
-    const idsExistentes = items.filter((i) => i.dia === dia && i.id).map((i) => i.id!);
-    if (idsExistentes.length > 0) onMarkDeleted(idsExistentes);
-
-    setItems((prev) => prev.filter((i) => i.dia !== dia));
   }
 
   return (
     <div>
       <div className="ui-page-header" style={{ marginBottom: 8 }}>
         <p className="ui-page-subtitle" style={{ margin: 0 }}>
-          Organize as atividades de cada dia da expedição.
+          Cadastre o cronograma e os acontecimentos de cada dia da expedição.
         </p>
-        <button type="button" className="ui-btn-solid" onClick={openDayModal}>
+        <button type="button" className="ui-btn-solid" onClick={openAddModal}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M12 5v14M5 12h14" />
           </svg>
@@ -879,23 +838,23 @@ function RoteiroEditor({
       </div>
 
       <p className="ui-hint" style={{ marginBottom: 20 }}>
-        As atividades ficam pendentes até você clicar em Salvar, no final do formulário.
+        Os dias adicionados ficam pendentes até clicar em Salvar Expedição, no final do formulário.
       </p>
 
-      {dias.length === 0 && (
+      {diasOrdenados.length === 0 && (
         <div className="ui-empty">
-          <p>Nenhum dia adicionado ainda.</p>
-          <button type="button" className="ui-btn-solid" onClick={openDayModal}>
+          <p>Nenhum dia de roteiro registado ainda.</p>
+          <button type="button" className="ui-btn-solid" onClick={openAddModal}>
             Adicionar primeiro dia
           </button>
         </div>
       )}
 
-      {dias.map(({ dia, itens }) => {
-        const isOpen = expandedDias.has(dia);
+      {diasOrdenados.map((item) => {
+        const isOpen = expandedDias.has(item.dia);
         return (
-          <div className="ui-accordion" key={dia}>
-            <div className="ui-accordion-header" onClick={() => toggleDia(dia)}>
+          <div className="ui-accordion" key={item.localId}>
+            <div className="ui-accordion-header" onClick={() => toggleDia(item.dia)}>
               <div className="ui-accordion-header-left">
                 <svg
                   className={`ui-accordion-chevron${isOpen ? ' open' : ''}`}
@@ -908,77 +867,64 @@ function RoteiroEditor({
                 >
                   <path d="m9 6 6 6-6 6" />
                 </svg>
-                <p className="ui-accordion-title">Dia {dia}</p>
-                <span className="ui-accordion-count">
-                  {itens.length} {itens.length === 1 ? 'atividade' : 'atividades'}
-                </span>
+                <p className="ui-accordion-title">Dia {item.dia} - {item.titulo}</p>
               </div>
-              <button
-                type="button"
-                className="ui-icon-btn danger"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDeleteDay(dia);
-                }}
-                title="Remover dia"
-              >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                  <path d="M3 6h18" />
-                  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                </svg>
-              </button>
-            </div>
-            {isOpen && (
-              <div className="ui-accordion-body">
-                {itens.map((item) => (
-                  <div className="ui-activity-card" key={item.localId}>
-                    <div>
-                      <p className="ui-activity-title">{item.titulo}</p>
-                      {item.descricao && <p className="ui-activity-desc">{item.descricao}</p>}
-                    </div>
-                    <div className="ui-activity-actions">
-                      <button
-                        type="button"
-                        className="ui-icon-btn"
-                        onClick={() => openEditItemModal(item)}
-                        title="Editar"
-                      >
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                          <path d="M12 20h9" />
-                          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
-                        </svg>
-                      </button>
-                      <button
-                        type="button"
-                        className="ui-icon-btn danger"
-                        onClick={() => handleDeleteItem(item)}
-                        title="Remover"
-                      >
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                          <path d="M3 6h18" />
-                          <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-                <button type="button" className="ui-btn-ghost" onClick={() => openAddItemModal(dia)}>
-                  + Adicionar item
+              
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <button
+                  type="button"
+                  className="ui-icon-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openEditModal(item);
+                  }}
+                  title="Editar Dia"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 20h9" />
+                    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                  </svg>
                 </button>
+                <button
+                  type="button"
+                  className="ui-icon-btn danger"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(item);
+                  }}
+                  title="Remover Dia"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M3 6h18" />
+                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {isOpen && (
+              <div className="ui-accordion-body" style={{ lineHeight: '1.6', fontSize: '14.5px', color: 'var(--ink)' }}>
+                {item.descricao ? (
+                   <div 
+                     className="ui-formatted-text" 
+                     dangerouslySetInnerHTML={formatarEstiloWhatsApp(item.descricao)} 
+                   />
+                ) : (
+                  <em style={{ opacity: 0.5 }}>Nenhuma descrição informada.</em>
+                )}
               </div>
             )}
           </div>
         );
       })}
 
-      {dayModalOpen && (
-        <div className="ui-modal-overlay" onClick={closeDayModal}>
-          <div className="ui-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520 }}>
+      {modalOpen && (
+        <div className="ui-modal-overlay" onClick={closeModal}>
+          <div className="ui-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 600 }}>
             <div className="ui-modal-header">
-              <h2 className="ui-modal-title">Adicionar Dia</h2>
-              <button type="button" className="ui-modal-close" onClick={closeDayModal}>
+              <h2 className="ui-modal-title">{editingId ? 'Editar Dia' : 'Adicionar Dia'}</h2>
+              <button type="button" className="ui-modal-close" onClick={closeModal}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                   <path d="M18 6 6 18" />
                   <path d="m6 6 12 12" />
@@ -987,134 +933,55 @@ function RoteiroEditor({
             </div>
             
             <div>
-              {dayError && <div className="ui-form-error">{dayError}</div>}
-              <div className="ui-field" style={{ maxWidth: 110 }}>
-                <label htmlFor="dayNumber">Dia</label>
-                <input
-                  id="dayNumber"
-                  type="number"
-                  min={1}
-                  step={1}
-                  value={dayNumber}
-                  onChange={(e) => setDayNumber(e.target.value)}
-                  required
-                />
-              </div>
-
-              <label style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--forest-deep)' }}>
-                Atividades do dia
-              </label>
+              {modalError && <div className="ui-form-error">{modalError}</div>}
               
-              {dayItemRows.map((row, i) => (
-                <div className="ui-day-item-row" key={i}>
-                  <div className="ui-day-item-fields">
-                    <div className="ui-field" style={{ marginBottom: 0 }}>
-                      <input
-                        type="text"
-                        placeholder="Título da atividade"
-                        value={row.titulo}
-                        onChange={(e) => updateDayItemRow(i, 'titulo', e.target.value)}
-                      />
-                    </div>
-                    <div className="ui-field" style={{ marginBottom: 0 }}>
-                      <textarea
-                        placeholder="Descrição (opcional)"
-                        value={row.descricao}
-                        onChange={(e) => updateDayItemRow(i, 'descricao', e.target.value)}
-                        style={{ minHeight: 60 }}
-                      />
-                    </div>
-                  </div>
-                  {dayItemRows.length > 1 && (
-                    <button
-                      type="button"
-                      className="ui-icon-btn danger"
-                      onClick={() => removeDayItemRow(i)}
-                      title="Remover atividade"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                        <path d="M3 6h18" />
-                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              ))}
-              
-              <button type="button" className="ui-btn-ghost" onClick={addDayItemRow} style={{ marginBottom: 20 }}>
-                + Adicionar outra atividade
-              </button>
-
-              <div className="ui-modal-footer">
-                <button type="button" className="ui-btn-ghost" onClick={closeDayModal}>
-                  Cancelar
-                </button>
-                <button type="button" className="ui-btn-solid" onClick={submitDayModal}>
-                  Adicionar Dia
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {itemModalOpen && (
-        <div className="ui-modal-overlay" onClick={closeItemModal}>
-          <div className="ui-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="ui-modal-header">
-              <h2 className="ui-modal-title">{editingLocalId ? 'Editar Atividade' : 'Nova Atividade'}</h2>
-              <button type="button" className="ui-modal-close" onClick={closeItemModal}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                  <path d="M18 6 6 18" />
-                  <path d="m6 6 12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            <div>
-              {itemError && <div className="ui-form-error">{itemError}</div>}
               <div className="ui-form-row">
                 <div className="ui-field" style={{ maxWidth: 110 }}>
-                  <label htmlFor="itemDia">Dia</label>
+                  <label htmlFor="dayNumber">Dia</label>
                   <input
-                    id="itemDia"
+                    id="dayNumber"
                     type="number"
                     min={1}
                     step={1}
-                    value={itemForm.dia}
-                    onChange={(e) => setItemForm((f) => ({ ...f, dia: e.target.value }))}
+                    value={dayForm.dia}
+                    onChange={(e) => setDayForm(f => ({...f, dia: e.target.value}))}
                     required
                   />
                 </div>
-                <div className="ui-field">
-                  <label htmlFor="itemTitulo">Título</label>
+                <div className="ui-field" style={{ flex: 1 }}>
+                  <label htmlFor="dayTitle">Título do Dia</label>
                   <input
-                    id="itemTitulo"
+                    id="dayTitle"
                     type="text"
-                    placeholder="Ex: Trilha até a cachoeira"
-                    value={itemForm.titulo}
-                    onChange={(e) => setItemForm((f) => ({ ...f, titulo: e.target.value }))}
+                    placeholder="Ex: Chegada em San Pedro de Atacama"
+                    value={dayForm.titulo}
+                    onChange={(e) => setDayForm(f => ({...f, titulo: e.target.value}))}
                     required
                   />
                 </div>
-              </div>
-              <div className="ui-field">
-                <label htmlFor="itemDescricao">Descrição</label>
-                <textarea
-                  id="itemDescricao"
-                  placeholder="Detalhes da atividade, horários, pontos de encontro..."
-                  value={itemForm.descricao}
-                  onChange={(e) => setItemForm((f) => ({ ...f, descricao: e.target.value }))}
-                />
               </div>
 
-              <div className="ui-modal-footer">
-                <button type="button" className="ui-btn-ghost" onClick={closeItemModal}>
+              <div className="ui-field">
+                <label htmlFor="dayDesc">Descrição Completa</label>
+                <textarea
+                  id="dayDesc"
+                  placeholder="Descreva o que vai acontecer neste dia...&#10;Use *texto* para negrito, _texto_ para itálico e ~texto~ para riscado."
+                  value={dayForm.descricao}
+                  onChange={(e) => setDayForm(f => ({...f, descricao: e.target.value}))}
+                  style={{ minHeight: 180, lineHeight: 1.5 }}
+                />
+                {/* DICA VISUAL CORRIGIDA! Sem duplicar caracteres. */}
+                <span className="ui-hint" style={{ marginTop: '4px' }}>
+                  <strong>Dica de formatação:</strong> Igual ao WhatsApp! Envolva a palavra em <strong>*asterisco*</strong> para negrito, <i>_underline_</i> para itálico ou <del>~til~</del> para riscado.
+                </span>
+              </div>
+
+              <div className="ui-modal-footer" style={{ marginTop: '24px' }}>
+                <button type="button" className="ui-btn-ghost" onClick={closeModal}>
                   Cancelar
                 </button>
-                <button type="button" className="ui-btn-solid" onClick={submitItemModal}>
-                  {editingLocalId ? 'Atualizar' : 'Adicionar'}
+                <button type="button" className="ui-btn-solid" onClick={submitModal}>
+                  {editingId ? 'Concluir' : 'Adicionar Dia'}
                 </button>
               </div>
             </div>
