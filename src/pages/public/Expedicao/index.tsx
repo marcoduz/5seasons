@@ -59,7 +59,6 @@ export function ExpedicaoPublica() {
     const [expRes, rotRes, pacRes] = await Promise.all([
       supabase.from('expedicoes').select('*').eq('id', id).single(),
       supabase.from('roteiros').select('*').eq('expedicao_id', id).order('dia', { ascending: true }),
-      // Busca pacotes e já inclui a tabela relacionada pacote_lotes
       supabase.from('pacotes').select('*, pacote_lotes(*)').eq('expedicao_id', id).in('status', ['Ativo', 'Esgotado']).order('data_inicio', { ascending: true })
     ]);
 
@@ -79,23 +78,12 @@ export function ExpedicaoPublica() {
   const imagemCapa = expedicao.fotos && expedicao.fotos.length > 0 ? expedicao.fotos[0] : '';
   const galeria = expedicao.fotos && expedicao.fotos.length > 1 ? expedicao.fotos.slice(1) : [];
   
-  const pacotesAtivos = pacotes.filter(p => p.status === 'Ativo');
-  
-  // Calcula o Menor Preço cruzando cada pacote ativo com seu lote atual correspondente
-  const precosAtivos = pacotesAtivos.map(p => {
-    const lote = p.pacote_lotes?.find((l: any) => l.lote_numero === p.lote_atual) || p.pacote_lotes?.[0];
-    return lote ? lote.preco_duplo : p.preco_duplo;
-  });
-  const menorPreco = precosAtivos.length > 0 ? Math.min(...precosAtivos) : 0;
-  
-  // Identifica o pacote principal para exibir no hero e cruza o preço do lote
   const pacotePrincipal = pacotes.find(p => p.id === selectedPacoteId) || pacotes[0];
   const loteAtivoPacote = pacotePrincipal?.pacote_lotes?.find((l: any) => l.lote_numero === pacotePrincipal.lote_atual) || pacotePrincipal?.pacote_lotes?.[0];
   
   const precoExibido = loteAtivoPacote ? loteAtivoPacote.preco_duplo : (pacotePrincipal?.preco_duplo || 0);
   const outrosPacotes = pacotes.filter(p => p.id !== pacotePrincipal?.id);
   
-  // Monta link do WhatsApp com nome da expedição, nome do pacote e o lote atual
   const nomeCompletoWhatsapp = pacotePrincipal ? `${expedicao.nome} - ${pacotePrincipal.nome} (Lote ${pacotePrincipal.lote_atual || 1})` : expedicao.nome;
   const linkWhatsApp = `https://wa.me/5549999999999?text=Ol%C3%A1%21%20Gostaria%20de%20me%20inscrever%20na%20expedi%C3%A7%C3%A3o%20${encodeURIComponent(nomeCompletoWhatsapp)}`;
 
@@ -258,7 +246,6 @@ export function ExpedicaoPublica() {
               </span>
             </div>
 
-            {/* Outras Datas (Agora Botões Clicáveis) */}
             {outrosPacotes.length > 0 && (
               <div style={{ marginTop: '28px' }}>
                 <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>
