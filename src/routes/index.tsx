@@ -11,16 +11,25 @@ import { ClientesList } from '@/pages/admin/Clientes';
 import { ClienteForm } from '@/pages/admin/Clientes/clientesForm';
 import { ReservasList } from '@/pages/admin/Reservas';
 import { ReservaForm } from '@/pages/admin/Reservas/reservasForm';
+import { PublicLayout } from '@/pages/public/Layout';
+import { HomePublica } from '@/pages/public/Home';
+import { ExpedicaoPublica } from '@/pages/public/Expedicao';
 
-const Home = () => <h1>Página Inicial Pública</h1>;
 
 export function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
+        {/* ROTAS PÚBLICS DE ACESSO DO CLIENTE */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<HomePublica />} />
+        </Route>
 
+        {/* ROTA PUBLICA DO LOGIN */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/expedicao/:id" element={<ExpedicaoPublica />} />
+
+        {/* ROTAS PRIVADAS ACESSO SOMENTE DO ADMIN COM LOGIN */}
         <Route element={<PrivateRoute />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />

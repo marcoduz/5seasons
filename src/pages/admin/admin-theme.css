@@ -2,12 +2,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap');
 
 :root {
-  --forest: #3c5a53;
-  --forest-deep: #2f4842;
-  --sage: #97b7b1;
-  --nude: #d1b39d;
-  --cream: #e8dad1;
-  --warm-white: #fffaf8;
+  --forest: var(--verde-escuro);
+  --forest-deep: #2f4842; /* Tom extra-escuro mantido para contraste de textos fortes */
+  --sage: var(--verde-claro);
+  --nude: var(--beje-escuro);
+  --cream: var(--beje-claro);
+  --warm-white: var(--branco-gelo);
   --ink: #26332f;
   --danger-text: #9a3b2f;
   --danger-bg: #f7e9e4;
