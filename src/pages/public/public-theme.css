@@ -165,7 +165,7 @@ body {
   top: 8px;
   bottom: 8px;
   border-radius: 99px;
-  background-color: var(--brand-dark);
+  background-color: var(--brand-dark, #2f4842);
   transition: left 0.35s cubic-bezier(0.65, 0, 0.35, 1), width 0.35s cubic-bezier(0.65, 0, 0.35, 1),
     opacity 0.2s ease;
   z-index: 1;

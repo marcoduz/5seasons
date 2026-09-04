@@ -33,7 +33,7 @@ export function ExpedicaoPublica() {
   const [expedicao, setExpedicao] = useState<any>(null);
   const [roteiros, setRoteiros] = useState<any[]>([]);
   const [pacotes, setPacotes] = useState<any[]>([]);
-  const [selectedPacoteId, setSelectedPacoteId] = useState<string | null>(null); // Novo estado para o pacote selecionado
+  const [selectedPacoteId, setSelectedPacoteId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [diaAberto, setDiaAberto] = useState<number | null>(1);
   const [currentFotoIndex, setCurrentFotoIndex] = useState(0);
@@ -59,14 +59,14 @@ export function ExpedicaoPublica() {
     const [expRes, rotRes, pacRes] = await Promise.all([
       supabase.from('expedicoes').select('*').eq('id', id).single(),
       supabase.from('roteiros').select('*').eq('expedicao_id', id).order('dia', { ascending: true }),
-      supabase.from('pacotes').select('*').eq('expedicao_id', id).in('status', ['Ativo', 'Esgotado']).order('data_inicio', { ascending: true })
+      // Busca pacotes e já inclui a tabela relacionada pacote_lotes
+      supabase.from('pacotes').select('*, pacote_lotes(*)').eq('expedicao_id', id).in('status', ['Ativo', 'Esgotado']).order('data_inicio', { ascending: true })
     ]);
 
     if (expRes.data) setExpedicao(expRes.data);
     if (rotRes.data) setRoteiros(rotRes.data);
     if (pacRes.data && pacRes.data.length > 0) {
       setPacotes(pacRes.data);
-      // Seleciona o primeiro pacote ativo por padrão, ou o primeiro esgotado se não houver ativos
       const ativos = pacRes.data.filter((p: any) => p.status === 'Ativo');
       setSelectedPacoteId(ativos.length > 0 ? ativos[0].id : pacRes.data[0].id);
     }
@@ -79,13 +79,24 @@ export function ExpedicaoPublica() {
   const imagemCapa = expedicao.fotos && expedicao.fotos.length > 0 ? expedicao.fotos[0] : '';
   const galeria = expedicao.fotos && expedicao.fotos.length > 1 ? expedicao.fotos.slice(1) : [];
   
-  // Lógica de Pacote Selecionado
-  const pacotePrincipal = pacotes.find(p => p.id === selectedPacoteId) || pacotes[0];
-  const outrosPacotes = pacotes.filter(p => p.id !== pacotePrincipal?.id);
-  const precoExibido = pacotePrincipal?.preco_duplo || 0;
+  const pacotesAtivos = pacotes.filter(p => p.status === 'Ativo');
   
-  // Link dinâmico com o nome do pacote atual selecionado
-  const nomeCompletoWhatsapp = pacotePrincipal ? `${expedicao.nome} - ${pacotePrincipal.nome}` : expedicao.nome;
+  // Calcula o Menor Preço cruzando cada pacote ativo com seu lote atual correspondente
+  const precosAtivos = pacotesAtivos.map(p => {
+    const lote = p.pacote_lotes?.find((l: any) => l.lote_numero === p.lote_atual) || p.pacote_lotes?.[0];
+    return lote ? lote.preco_duplo : p.preco_duplo;
+  });
+  const menorPreco = precosAtivos.length > 0 ? Math.min(...precosAtivos) : 0;
+  
+  // Identifica o pacote principal para exibir no hero e cruza o preço do lote
+  const pacotePrincipal = pacotes.find(p => p.id === selectedPacoteId) || pacotes[0];
+  const loteAtivoPacote = pacotePrincipal?.pacote_lotes?.find((l: any) => l.lote_numero === pacotePrincipal.lote_atual) || pacotePrincipal?.pacote_lotes?.[0];
+  
+  const precoExibido = loteAtivoPacote ? loteAtivoPacote.preco_duplo : (pacotePrincipal?.preco_duplo || 0);
+  const outrosPacotes = pacotes.filter(p => p.id !== pacotePrincipal?.id);
+  
+  // Monta link do WhatsApp com nome da expedição, nome do pacote e o lote atual
+  const nomeCompletoWhatsapp = pacotePrincipal ? `${expedicao.nome} - ${pacotePrincipal.nome} (Lote ${pacotePrincipal.lote_atual || 1})` : expedicao.nome;
   const linkWhatsApp = `https://wa.me/5549999999999?text=Ol%C3%A1%21%20Gostaria%20de%20me%20inscrever%20na%20expedi%C3%A7%C3%A3o%20${encodeURIComponent(nomeCompletoWhatsapp)}`;
 
   function nextFoto() {
@@ -147,7 +158,6 @@ export function ExpedicaoPublica() {
         .hero-pills { display: flex; gap: 12px; flex-wrap: wrap; }
         .hero-pill { background: rgba(255,255,255,0.15); backdrop-filter: blur(4px); padding: 10px 20px; border-radius: 99px; font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
 
-        /* Estilo do Botão Clicável das Outras Datas */
         .outra-data-btn {
           background: transparent;
           border: none;
@@ -162,16 +172,9 @@ export function ExpedicaoPublica() {
           font-family: inherit;
           transition: color 0.2s ease;
         }
-        .outra-data-btn strong {
-          color: white;
-          transition: color 0.2s ease;
-        }
-        .outra-data-btn:hover {
-          color: var(--brand-orange);
-        }
-        .outra-data-btn:hover strong {
-          color: var(--brand-orange);
-        }
+        .outra-data-btn strong { color: white; transition: color 0.2s ease; }
+        .outra-data-btn:hover { color: var(--brand-orange); }
+        .outra-data-btn:hover strong { color: var(--brand-orange); }
 
         .section-padding { padding: 80px 0; }
         .section-title { font-family: 'Playfair Display', serif; font-size: 32px; color: var(--verde-escuro); margin: 0 0 12px; text-transform: uppercase; letter-spacing: 1px; }

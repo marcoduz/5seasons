@@ -79,7 +79,6 @@ export function HomePublica() {
   async function fetchDadosIniciais() {
     setLoading(true);
 
-    // Executa em paralelo a busca dos pacotes no Supabase e a cotação atual do Dólar na Web
     const [pacotesRes, dolarRes] = await Promise.all([
       supabase
         .from('pacotes')
@@ -88,21 +87,28 @@ export function HomePublica() {
           nome,
           data_inicio, 
           data_fim, 
+          preco_single,
           preco_duplo, 
           status, 
           expedicao_id,
+          lote_atual,
           expedicoes (
             descricao, 
             tipo_destino, 
             fotos
+          ),
+          pacote_lotes (
+            lote_numero,
+            preco_duplo,
+            preco_single
           )
         `)
         .in('status', ['Ativo', 'Esgotado'])
         .order('data_inicio', { ascending: true }),
-
+      
       fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL')
-        .then((res) => res.json())
-        .catch(() => null),
+        .then(res => res.json())
+        .catch(() => null)
     ]);
 
     if (!pacotesRes.error && pacotesRes.data) {
@@ -110,7 +116,6 @@ export function HomePublica() {
     }
 
     if (dolarRes && dolarRes.USDBRL) {
-      // Pega o valor de venda atual do dólar comercial
       setCotacaoDolar(Number(dolarRes.USDBRL.bid));
     }
 
@@ -126,7 +131,7 @@ export function HomePublica() {
     if (filtroAtivo === 'Internacionais') return exp.tipo_destino === 'Internacional';
     if (filtroAtivo === '2026') return pacote.data_inicio.startsWith('2026');
     if (filtroAtivo === '2027') return pacote.data_inicio.startsWith('2027');
-
+    
     return true;
   });
 
@@ -188,33 +193,32 @@ export function HomePublica() {
             const statusLabel = pacote.status === 'Ativo' ? 'VAGAS ABERTAS' : 'ESGOTADO';
             const statusColor = pacote.status === 'Ativo' ? 'var(--brand-green)' : '#9a3b2f';
 
-            // Calcula o valor em Dólar se a cotação foi obtida com sucesso
-            const valorEmDolar = cotacaoDolar ? pacote.preco_duplo / cotacaoDolar : null;
+            // NOVO: Descobre o preço com base no lote_atual
+            const loteAtualInfo = pacote.pacote_lotes?.find((l: any) => l.lote_numero === pacote.lote_atual) || pacote.pacote_lotes?.[0];
+            const precoFinal = loteAtualInfo ? loteAtualInfo.preco_single : pacote.preco_single;
+
+            // Calcula o valor em Dólar baseado no preço do lote atual
+            const valorEmDolar = cotacaoDolar ? precoFinal / cotacaoDolar : null;
 
             return (
               <Link to={`/expedicao/${pacote.expedicao_id}`} className="exp-card" key={pacote.id}>
-                <div
-                  className="exp-card-bg"
-                  style={{ backgroundImage: `url(${imagemCapa})`, backgroundColor: '#e8dad1' }}
-                ></div>
+                <div className="exp-card-bg" style={{ backgroundImage: `url(${imagemCapa})`, backgroundColor: '#e8dad1' }}></div>
                 <div className="exp-card-overlay"></div>
-
+                
                 <div className="exp-card-badges">
                   <span className="badge">{exp.tipo_destino.toUpperCase()}</span>
-                  <span className="badge" style={{ backgroundColor: statusColor }}>
-                    {statusLabel}
-                  </span>
+                  <span className="badge" style={{ backgroundColor: statusColor }}>{statusLabel}</span>
                 </div>
 
                 <div className="exp-card-content">
                   <div className="exp-card-date">{formatarDataCard(pacote.data_inicio, pacote.data_fim)}</div>
                   <h3 className="exp-card-title">{pacote.nome}</h3>
                   <p className="exp-card-desc">{exp.descricao}</p>
-
+                  
                   <div className="exp-card-footer">
                     <div className="exp-card-price">
-                      <small>VALOR</small>
-                      <strong style={{ display: 'block' }}>{formatarMoedaBRL(pacote.preco_duplo)}</strong>
+                      <small>LOTE {pacote.lote_atual || 1}</small>
+                      <strong style={{ display: 'block' }}>{formatarMoedaBRL(precoFinal)}</strong>
                       {valorEmDolar !== null && (
                         <span style={{ fontSize: '12px', opacity: 0.8, fontWeight: 500, color: 'var(--brand-orange)' }}>
                           ≈ {formatarMoedaUSD(valorEmDolar)}

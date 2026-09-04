@@ -26,6 +26,8 @@ export interface Pacote {
   desconto_percentual: number;
   promocao_inicio?: string;
   promocao_fim?: string;
+  lote_atual?: number;
+  pacote_lotes?: PacoteLote[];
   created_at: string;
 }
 
@@ -62,4 +64,13 @@ export interface Cliente {
   observacoes?: string;
   aceita_ofertas: boolean;
   created_at: string;
+}
+
+export interface PacoteLote {
+  id: string;
+  pacote_id: string;
+  lote_numero: number;
+  preco_duplo: number;
+  preco_single?: number;
+  vagas_gatilho: number;
 }
