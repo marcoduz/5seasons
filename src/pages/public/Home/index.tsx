@@ -189,31 +189,33 @@ export function HomePublica() {
         <section className="cards-grid">
           {pacotesFiltrados.map((pacote) => {
             const exp = pacote.expedicoes;
-            const imagemCapa = exp.fotos && exp.fotos.length > 0 ? exp.fotos[0] : '';
+            const imagemCapa = exp?.fotos && exp.fotos.length > 0 ? exp.fotos[0] : '';
             const statusLabel = pacote.status === 'Ativo' ? 'VAGAS ABERTAS' : 'ESGOTADO';
             const statusColor = pacote.status === 'Ativo' ? 'var(--brand-green)' : '#9a3b2f';
 
-            // NOVO: Descobre o preço com base no lote_atual
+            // Cruza com o lote atual para exibir o valor correto na home
             const loteAtualInfo = pacote.pacote_lotes?.find((l: any) => l.lote_numero === pacote.lote_atual) || pacote.pacote_lotes?.[0];
-            const precoFinal = loteAtualInfo ? loteAtualInfo.preco_single : pacote.preco_single;
+            const precoFinal = loteAtualInfo ? loteAtualInfo.preco_duplo : pacote.preco_duplo;
 
-            // Calcula o valor em Dólar baseado no preço do lote atual
             const valorEmDolar = cotacaoDolar ? precoFinal / cotacaoDolar : null;
 
             return (
               <Link to={`/expedicao/${pacote.expedicao_id}`} className="exp-card" key={pacote.id}>
-                <div className="exp-card-bg" style={{ backgroundImage: `url(${imagemCapa})`, backgroundColor: '#e8dad1' }}></div>
+                <div 
+                  className="exp-card-bg" 
+                  style={{ backgroundImage: imagemCapa ? `url(${imagemCapa})` : 'none', backgroundColor: '#e8dad1' }}
+                ></div>
                 <div className="exp-card-overlay"></div>
                 
                 <div className="exp-card-badges">
-                  <span className="badge">{exp.tipo_destino.toUpperCase()}</span>
+                  <span className="badge">{exp?.tipo_destino?.toUpperCase()}</span>
                   <span className="badge" style={{ backgroundColor: statusColor }}>{statusLabel}</span>
                 </div>
 
                 <div className="exp-card-content">
                   <div className="exp-card-date">{formatarDataCard(pacote.data_inicio, pacote.data_fim)}</div>
                   <h3 className="exp-card-title">{pacote.nome}</h3>
-                  <p className="exp-card-desc">{exp.descricao}</p>
+                  <p className="exp-card-desc">{exp?.descricao}</p>
                   
                   <div className="exp-card-footer">
                     <div className="exp-card-price">
