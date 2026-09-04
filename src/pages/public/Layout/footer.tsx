@@ -9,14 +9,13 @@ export function Footer() {
             
             {/* Esquerda: Logo e Informações da Empresa */}
             <div className="footer-left">
-              <Link to="/" style={{ display: 'inline-block', marginBottom: '20px' }}>
-                 {/* Garanta que 5seasons.svg seja o arquivo sem a escrita em baixo */}
+              <Link to="/" style={{ marginBottom: '20px' }} className='public-brand'>
                  <img src="/5seasonsLogo_semEscrita.svg" alt="5 Seasons" style={{ height: '48px', objectFit: 'contain' }} />
+                 <span className="public-brand-name">5 Seasons</span>
               </Link>
               
               <div className="footer-company-info">
                 <p>5 SEASONS - 00.000.000/0000-00</p>
-                <p>Support by <strong>Somakers</strong></p>
               </div>
             </div>
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/services/supabase';
 
@@ -30,15 +30,51 @@ function formatarMoedaUSD(valor: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(valor);
 }
 
+const FILTROS = ['Todos', 'Nacionais', 'Internacionais', '2026', '2027'];
+
 export function HomePublica() {
   const [filtroAtivo, setFiltroAtivo] = useState('Todos');
   const [pacotes, setPacotes] = useState<any[]>([]);
   const [cotacaoDolar, setCotacaoDolar] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const filterBarRef = useRef<HTMLDivElement>(null);
+  const filterBtnRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [filterPill, setFilterPill] = useState({ left: 0, width: 0, opacity: 0 });
+
   useEffect(() => {
     fetchDadosIniciais();
   }, []);
+
+  function updateFilterPill() {
+    const activeIndex = FILTROS.indexOf(filtroAtivo);
+    const activeEl = filterBtnRefs.current[activeIndex];
+    const barEl = filterBarRef.current;
+
+    if (!activeEl || !barEl) {
+      setFilterPill((p) => ({ ...p, opacity: 0 }));
+      return;
+    }
+
+    const barRect = barEl.getBoundingClientRect();
+    const btnRect = activeEl.getBoundingClientRect();
+    setFilterPill({
+      left: btnRect.left - barRect.left,
+      width: btnRect.width,
+      opacity: 1,
+    });
+  }
+
+  useLayoutEffect(() => {
+    updateFilterPill();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtroAtivo]);
+
+  useEffect(() => {
+    window.addEventListener('resize', updateFilterPill);
+    return () => window.removeEventListener('resize', updateFilterPill);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtroAtivo]);
 
   async function fetchDadosIniciais() {
     setLoading(true);
@@ -63,10 +99,10 @@ export function HomePublica() {
         `)
         .in('status', ['Ativo', 'Esgotado'])
         .order('data_inicio', { ascending: true }),
-      
+
       fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL')
-        .then(res => res.json())
-        .catch(() => null)
+        .then((res) => res.json())
+        .catch(() => null),
     ]);
 
     if (!pacotesRes.error && pacotesRes.data) {
@@ -90,7 +126,7 @@ export function HomePublica() {
     if (filtroAtivo === 'Internacionais') return exp.tipo_destino === 'Internacional';
     if (filtroAtivo === '2026') return pacote.data_inicio.startsWith('2026');
     if (filtroAtivo === '2027') return pacote.data_inicio.startsWith('2027');
-    
+
     return true;
   });
 
@@ -100,13 +136,39 @@ export function HomePublica() {
         <div className="eyebrow">Saídas Programadas</div>
         <h1 className="hero-title">Escolha sua próxima aventura</h1>
 
-        <div className="filter-bar">
-          <button className={`filter-btn ${filtroAtivo === 'Todos' ? 'active' : ''}`} onClick={() => setFiltroAtivo('Todos')}>Todos</button>
-          <button className={`filter-btn ${filtroAtivo === 'Nacionais' ? 'active' : ''}`} onClick={() => setFiltroAtivo('Nacionais')}>Nacionais</button>
-          <button className={`filter-btn ${filtroAtivo === 'Internacionais' ? 'active' : ''}`} onClick={() => setFiltroAtivo('Internacionais')}>Internacionais</button>
+        <div className="filter-bar" ref={filterBarRef}>
+          <div
+            className="filter-pill"
+            style={{ left: filterPill.left, width: filterPill.width, opacity: filterPill.opacity }}
+          />
+
+          {FILTROS.slice(0, 3).map((filtro, i) => (
+            <button
+              key={filtro}
+              ref={(el) => {
+                filterBtnRefs.current[i] = el;
+              }}
+              className={`filter-btn ${filtroAtivo === filtro ? 'active' : ''}`}
+              onClick={() => setFiltroAtivo(filtro)}
+            >
+              {filtro}
+            </button>
+          ))}
+
           <div className="filter-divider"></div>
-          <button className={`filter-btn ${filtroAtivo === '2026' ? 'active' : ''}`} onClick={() => setFiltroAtivo('2026')}>2026</button>
-          <button className={`filter-btn ${filtroAtivo === '2027' ? 'active' : ''}`} onClick={() => setFiltroAtivo('2027')}>2027</button>
+
+          {FILTROS.slice(3).map((filtro, i) => (
+            <button
+              key={filtro}
+              ref={(el) => {
+                filterBtnRefs.current[i + 3] = el;
+              }}
+              className={`filter-btn ${filtroAtivo === filtro ? 'active' : ''}`}
+              onClick={() => setFiltroAtivo(filtro)}
+            >
+              {filtro}
+            </button>
+          ))}
         </div>
       </section>
 
@@ -131,12 +193,12 @@ export function HomePublica() {
 
             return (
               <Link to={`/expedicao/${pacote.expedicao_id}`} className="exp-card" key={pacote.id}>
-                <div 
-                  className="exp-card-bg" 
+                <div
+                  className="exp-card-bg"
                   style={{ backgroundImage: `url(${imagemCapa})`, backgroundColor: '#e8dad1' }}
                 ></div>
                 <div className="exp-card-overlay"></div>
-                
+
                 <div className="exp-card-badges">
                   <span className="badge">{exp.tipo_destino.toUpperCase()}</span>
                   <span className="badge" style={{ backgroundColor: statusColor }}>
@@ -148,7 +210,7 @@ export function HomePublica() {
                   <div className="exp-card-date">{formatarDataCard(pacote.data_inicio, pacote.data_fim)}</div>
                   <h3 className="exp-card-title">{pacote.nome}</h3>
                   <p className="exp-card-desc">{exp.descricao}</p>
-                  
+
                   <div className="exp-card-footer">
                     <div className="exp-card-price">
                       <small>VALOR</small>
