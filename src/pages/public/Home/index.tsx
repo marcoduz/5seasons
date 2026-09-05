@@ -103,7 +103,7 @@ export function HomePublica() {
             preco_single
           )
         `)
-        .in('status', ['Ativo', 'Esgotado'])
+        .in('status', ['Ativo', 'Esgotado', 'Em breve'])
         .order('data_inicio', { ascending: true }),
       
       fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL')
@@ -190,13 +190,20 @@ export function HomePublica() {
           {pacotesFiltrados.map((pacote) => {
             const exp = pacote.expedicoes;
             const imagemCapa = exp?.fotos && exp.fotos.length > 0 ? exp.fotos[0] : '';
-            const statusLabel = pacote.status === 'Ativo' ? 'VAGAS ABERTAS' : 'ESGOTADO';
-            const statusColor = pacote.status === 'Ativo' ? 'var(--brand-green)' : '#9a3b2f';
+            
+            let statusLabel = 'ESGOTADO';
+            let statusColor = '#9a3b2f';
 
-            // Cruza com o lote atual para exibir o valor correto na home
+            if (pacote.status === 'Ativo') {
+              statusLabel = 'VAGAS ABERTAS';
+              statusColor = 'var(--brand-green)';
+            } else if (pacote.status === 'Em breve') {
+              statusLabel = 'EM BREVE';
+              statusColor = '#d97706';
+            }
+
             const loteAtualInfo = pacote.pacote_lotes?.find((l: any) => l.lote_numero === pacote.lote_atual) || pacote.pacote_lotes?.[0];
-            const precoFinal = loteAtualInfo ? loteAtualInfo.preco_duplo : pacote.preco_duplo;
-
+            const precoFinal = loteAtualInfo ? loteAtualInfo.preco_single : pacote.preco_single;
             const valorEmDolar = cotacaoDolar ? precoFinal / cotacaoDolar : null;
 
             return (

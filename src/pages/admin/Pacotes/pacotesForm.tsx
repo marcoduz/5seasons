@@ -40,7 +40,6 @@ export function PacoteForm() {
   const [expedicoes, setExpedicoes] = useState<{ id: string; nome: string }[]>([]);
   const [vagasOcupadas, setVagasOcupadas] = useState(0); 
   
-  // NOVO: Estado dos Lotes
   const [lotes, setLotes] = useState([
     { lote_numero: 1, preco_duplo: 0, preco_single: 0, vagas_gatilho: 0 }
   ]);
@@ -86,12 +85,10 @@ export function PacoteForm() {
         });
         setVagasOcupadas(p.vagas_ocupadas || 0);
 
-        // Busca os lotes vinculados
         const { data: lotesData } = await supabase.from('pacote_lotes').select('*').eq('pacote_id', id).order('lote_numero');
         if (lotesData && lotesData.length > 0) {
           setLotes(lotesData);
         } else {
-          // Fallback para pacotes antigos sem lote
           setLotes([{ lote_numero: 1, preco_duplo: p.preco_duplo || 0, preco_single: p.preco_single || 0, vagas_gatilho: 0 }]);
         }
       } else {
@@ -105,7 +102,6 @@ export function PacoteForm() {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  // GERENCIAMENTO DOS LOTES DINÂMICOS
   function updateLote(index: number, field: string, value: number) {
     const newLotes = [...lotes];
     newLotes[index] = { ...newLotes[index], [field]: value };
@@ -163,7 +159,6 @@ export function PacoteForm() {
     
     setSaving(true);
 
-    // Sincroniza o preço do pacote principal com o lote ativo
     const loteAtivo = lotes.find(l => l.lote_numero === form.lote_atual) || lotes[0];
 
     const payload = {
@@ -193,7 +188,6 @@ export function PacoteForm() {
         if (updateError) throw updateError;
       }
 
-      // Deleta lotes antigos e insere os novos atualizados
       await supabase.from('pacote_lotes').delete().eq('pacote_id', pacoteId);
       
       const lotesToInsert = lotes.map(l => ({
@@ -217,6 +211,8 @@ export function PacoteForm() {
   }
 
   if (loading) return <div className="ui-page"><div className="ui-state">Carregando formulário...</div></div>;
+
+  const loteAtivoInfo = lotes.find(l => l.lote_numero === form.lote_atual) || lotes[0];
 
   return (
     <div className="ui-page">
@@ -262,6 +258,7 @@ export function PacoteForm() {
                 <label>Status</label>
                 <select value={form.status} onChange={(e) => updateField('status', e.target.value)}>
                   <option value="Ativo">Ativo</option>
+                  <option value="Em breve">Em breve</option>
                   <option value="Esgotado">Esgotado</option>
                   <option value="Encerrado">Encerrado</option>
                   <option value="Cancelado">Cancelado</option>
@@ -295,55 +292,97 @@ export function PacoteForm() {
 
         {tab === 'valores' && (
           <>
-            <h3 style={{ fontFamily: 'var(--heading)', fontSize: 16, color: 'var(--forest-deep)', margin: '0 0 16px' }}>Configuração de Lotes</h3>
+            <div style={{ background: '#eef7db', border: '1px solid #c8e09f', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+              <div>
+                <span style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '700', color: 'var(--forest-deep)', display: 'block', marginBottom: '4px' }}>
+                  Status Atual do Lote em Vigor
+                </span>
+                <h4 style={{ margin: 0, fontFamily: 'var(--heading)', fontSize: '20px', color: 'var(--forest-deep)' }}>
+                  Lote {form.lote_atual || 1}
+                </h4>
+                <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text-muted)' }}>
+                  Vagas ocupadas no momento: <strong>{vagasOcupadas}</strong>
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: '24px', background: 'white', padding: '12px 20px', borderRadius: '8px', border: '1px solid #d5e8b4' }}>
+                <div>
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block' }}>Preço Quarto Duplo</span>
+                  <strong style={{ fontSize: '16px', color: 'var(--forest-deep)' }}>
+                    {loteAtivoInfo ? formatarParaMoeda(loteAtivoInfo.preco_duplo) : '0,00'}
+                  </strong>
+                </div>
+                {loteAtivoInfo?.preco_single ? (
+                  <div>
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block' }}>Preço Quarto Single</span>
+                    <strong style={{ fontSize: '16px', color: 'var(--forest-deep)' }}>
+                      {formatarParaMoeda(loteAtivoInfo.preco_single)}
+                    </strong>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+
+            <h3 style={{ fontFamily: 'var(--heading)', fontSize: 16, color: 'var(--forest-deep)', margin: '0 0 16px' }}>Gerenciamento de Lotes</h3>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px' }}>
-              {lotes.map((lote, index) => (
-                <div key={index} style={{ border: '1px solid var(--cream)', padding: '16px', borderRadius: '8px', background: 'var(--warm-white)' }}>
-                  
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                    <h4 style={{ margin: 0, color: 'var(--forest-deep)', fontSize: '15px' }}>
-                      Lote {lote.lote_numero} {lote.lote_numero === 1 && '(Lançamento)'}
-                    </h4>
+              {lotes.map((lote, index) => {
+                const isCurrent = lote.lote_numero === form.lote_atual;
+                return (
+                  <div key={index} style={{ border: isCurrent ? '2px solid var(--forest-deep)' : '1px solid var(--cream)', padding: '16px', borderRadius: '8px', background: isCurrent ? 'rgba(38, 51, 47, 0.02)' : 'var(--warm-white)' }}>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <h4 style={{ margin: 0, color: 'var(--forest-deep)', fontSize: '15px' }}>
+                          Lote {lote.lote_numero} {lote.lote_numero === 1 && '(Padrão / Inicial)'}
+                        </h4>
+                        {isCurrent && (
+                          <span style={{ background: 'var(--forest-deep)', color: 'white', fontSize: '10px', padding: '2px 8px', borderRadius: '99px', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                            Em Vigor
+                          </span>
+                        )}
+                      </div>
+                      {lote.lote_numero > 1 && (
+                        <button type="button" onClick={() => removerLote(index)} style={{ color: 'var(--danger-text)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>Remover Lote</button>
+                      )}
+                    </div>
+                    
+                    <div className="ui-form-row">
+                      <div className="ui-field">
+                        <label>Preço Quarto Duplo (R$) <span className="ui-required">*</span></label>
+                        <input type="text" placeholder="0,00" value={lote.preco_duplo ? formatarParaMoeda(lote.preco_duplo) : ''} onChange={(e) => updateLote(index, 'preco_duplo', moedaParaNumero(e.target.value))} />
+                      </div>
+                      <div className="ui-field">
+                        <label>Preço Quarto Single (R$)</label>
+                        <input type="text" placeholder="0,00" value={lote.preco_single ? formatarParaMoeda(lote.preco_single) : ''} onChange={(e) => updateLote(index, 'preco_single', moedaParaNumero(e.target.value))} />
+                      </div>
+                    </div>
+
                     {lote.lote_numero > 1 && (
-                      <button type="button" onClick={() => removerLote(index)} style={{ color: 'var(--danger-text)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>Remover Lote</button>
+                      <div className="ui-form-row" style={{ marginTop: '8px' }}>
+                        <div className="ui-field" style={{ flex: 1 }}>
+                          <label>Mudar para este lote após X vagas ocupadas</label>
+                          <input type="number" min="1" placeholder="Ex: Ao atingir 5 vagas, ativa o Lote 2" value={lote.vagas_gatilho} onChange={(e) => updateLote(index, 'vagas_gatilho', Number(e.target.value))} />
+                        </div>
+                        <div style={{ flex: 1 }}></div>
+                      </div>
                     )}
                   </div>
-                  
-                  <div className="ui-form-row">
-                    <div className="ui-field">
-                      <label>Preço Quarto Duplo (R$) <span className="ui-required">*</span></label>
-                      <input type="text" placeholder="0,00" value={lote.preco_duplo ? formatarParaMoeda(lote.preco_duplo) : ''} onChange={(e) => updateLote(index, 'preco_duplo', moedaParaNumero(e.target.value))} />
-                    </div>
-                    <div className="ui-field">
-                      <label>Preço Quarto Single (R$)</label>
-                      <input type="text" placeholder="0,00" value={lote.preco_single ? formatarParaMoeda(lote.preco_single) : ''} onChange={(e) => updateLote(index, 'preco_single', moedaParaNumero(e.target.value))} />
-                    </div>
-                  </div>
-
-                  {lote.lote_numero > 1 && (
-                    <div className="ui-form-row" style={{ marginTop: '8px' }}>
-                      <div className="ui-field" style={{ flex: 1 }}>
-                        <label>Mudar para este lote após X vagas ocupadas</label>
-                        <input type="number" min="1" placeholder="Ex: Ao atingir 5 vagas, ativa o Lote 2" value={lote.vagas_gatilho} onChange={(e) => updateLote(index, 'vagas_gatilho', Number(e.target.value))} />
-                      </div>
-                      <div style={{ flex: 1 }}></div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
               
               <button type="button" className="ui-btn-ghost" onClick={adicionarLote} style={{ alignSelf: 'flex-start' }}>+ Adicionar Novo Lote</button>
             </div>
 
-            <div className="ui-field" style={{ borderTop: '1px solid var(--cream)', paddingTop: '24px', maxWidth: '300px' }}>
-              <label>Lote em Vigor Manual</label>
+            <div className="ui-field" style={{ borderTop: '1px solid var(--cream)', paddingTop: '24px', maxWidth: '350px' }}>
+              <label>Forçar Lote em Vigor (Manual)</label>
               <select value={form.lote_atual} onChange={(e) => updateField('lote_atual', Number(e.target.value))}>
                 {lotes.map((l) => (
-                  <option key={l.lote_numero} value={l.lote_numero}>Lote {l.lote_numero} (R$ {formatarParaMoeda(l.preco_duplo)})</option>
+                  <option key={l.lote_numero} value={l.lote_numero}>
+                    Lote {l.lote_numero} — R$ {formatarParaMoeda(l.preco_duplo)}
+                  </option>
                 ))}
               </select>
-              <span className="ui-hint">Geralmente sobe automaticamente com as reservas, mas você pode forçá-lo por aqui.</span>
+              <span className="ui-hint">O sistema avança automaticamente com as reservas, mas você pode sobrescrevê-lo manualmente aqui se necessário.</span>
             </div>
           </>
         )}

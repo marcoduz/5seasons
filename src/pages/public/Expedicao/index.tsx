@@ -59,7 +59,7 @@ export function ExpedicaoPublica() {
     const [expRes, rotRes, pacRes] = await Promise.all([
       supabase.from('expedicoes').select('*').eq('id', id).single(),
       supabase.from('roteiros').select('*').eq('expedicao_id', id).order('dia', { ascending: true }),
-      supabase.from('pacotes').select('*, pacote_lotes(*)').eq('expedicao_id', id).in('status', ['Ativo', 'Esgotado']).order('data_inicio', { ascending: true })
+      supabase.from('pacotes').select('*, pacote_lotes(*)').eq('expedicao_id', id).in('status', ['Ativo', 'Esgotado', 'Em breve']).order('data_inicio', { ascending: true })
     ]);
 
     if (expRes.data) setExpedicao(expRes.data);
@@ -84,7 +84,7 @@ export function ExpedicaoPublica() {
   const precoExibido = loteAtivoPacote ? loteAtivoPacote.preco_duplo : (pacotePrincipal?.preco_duplo || 0);
   const outrosPacotes = pacotes.filter(p => p.id !== pacotePrincipal?.id);
   
-  const nomeCompletoWhatsapp = pacotePrincipal ? `${expedicao.nome} - ${pacotePrincipal.nome} (Lote ${pacotePrincipal.lote_atual || 1})` : expedicao.nome;
+  const nomeCompletoWhatsapp = pacotePrincipal ? `${expedicao.nome} - ${pacotePrincipal.nome}` : expedicao.nome;
   const linkWhatsApp = `https://wa.me/5549999999999?text=Ol%C3%A1%21%20Gostaria%20de%20me%20inscrever%20na%20expedi%C3%A7%C3%A3o%20${encodeURIComponent(nomeCompletoWhatsapp)}`;
 
   function nextFoto() {
@@ -132,7 +132,7 @@ export function ExpedicaoPublica() {
           box-shadow: 0 24px 48px rgba(0,0,0,0.3);
         }
         .hero-price-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #a1a1aa; margin-bottom: 8px; }
-        .hero-price { font-size: 36px; font-weight: 700; color: #34d399; margin: 0 0 24px; line-height: 1; transition: color 0.3s; }
+        .hero-price { font-size: 36px; font-weight: 700; margin: 0 0 24px; line-height: 1; transition: color 0.3s; }
         .hero-features { list-style: none; padding: 0; margin: 0 0 32px; }
         .hero-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; margin-bottom: 12px; color: #e4e4e7; }
         .hero-features svg { flex-shrink: 0; color: #34d399; margin-top: 2px; }
@@ -210,7 +210,10 @@ export function ExpedicaoPublica() {
           
           <div className="hero-card">
             <div className="hero-price-title">Valor do Investimento</div>
-            <div className="hero-price" style={{ color: pacotePrincipal?.status === 'Ativo' ? '#34d399' : '#f87171' }}>
+            <div className="hero-price" style={{ 
+              color: pacotePrincipal?.status === 'Ativo' ? '#34d399' : 
+                     pacotePrincipal?.status === 'Em breve' ? '#fbbf24' : '#f87171' 
+            }}>
               {precoExibido > 0 ? formatarMoeda(precoExibido) : 'Sob Consulta'}
             </div>
             
@@ -224,7 +227,8 @@ export function ExpedicaoPublica() {
             </ul>
             
             <a href={linkWhatsApp} target="_blank" rel="noreferrer" className="btn-orange">
-              {pacotePrincipal?.status === 'Ativo' ? 'QUERO ME INSCREVER →' : 'CONSULTAR VAGAS →'}
+              {pacotePrincipal?.status === 'Ativo' ? 'QUERO ME INSCREVER →' : 
+               pacotePrincipal?.status === 'Em breve' ? 'TENHO INTERESSE →' : 'CONSULTAR VAGAS →'}
             </a>
           </div>
 
