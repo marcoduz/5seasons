@@ -8,7 +8,7 @@ export function ExpedicoesList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [busca, setBusca] = useState("");
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  // const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchExpedicoes();
@@ -32,31 +32,31 @@ export function ExpedicoesList() {
     setLoading(false);
   }
 
-  async function handleDelete(e: React.MouseEvent, expedicao: any) {
-    e.preventDefault();
-    e.stopPropagation();
+  // async function handleDelete(e: React.MouseEvent, expedicao: any) {
+  //   e.preventDefault();
+  //   e.stopPropagation();
 
-    const confirmado = window.confirm(
-      `Remover a expedição "${expedicao.nome}"?\nIsso não poderá ser desfeito se não houver pacotes atrelados.`,
-    );
-    if (!confirmado) return;
+  //   const confirmado = window.confirm(
+  //     `Remover a expedição "${expedicao.nome}"?\nIsso não poderá ser desfeito se não houver pacotes atrelados.`,
+  //   );
+  //   if (!confirmado) return;
 
-    setDeletingId(expedicao.id);
-    const { error } = await supabase
-      .from("expedicoes")
-      .delete()
-      .eq("id", expedicao.id);
-    setDeletingId(null);
+  //   setDeletingId(expedicao.id);
+  //   const { error } = await supabase
+  //     .from("expedicoes")
+  //     .delete()
+  //     .eq("id", expedicao.id);
+  //   setDeletingId(null);
 
-    if (error) {
-      window.alert(
-        "Erro ao excluir. Verifique se existem pacotes vinculados a esta expedição.",
-      );
-      return;
-    }
+  //   if (error) {
+  //     window.alert(
+  //       "Erro ao excluir. Verifique se existem pacotes vinculados a esta expedição.",
+  //     );
+  //     return;
+  //   }
 
-    setExpedicoes((prev) => prev.filter((p) => p.id !== expedicao.id));
-  }
+  //   setExpedicoes((prev) => prev.filter((p) => p.id !== expedicao.id));
+  // }
 
   const expedicoesFiltradas = useMemo(() => {
     const termo = busca.toLowerCase().trim();
