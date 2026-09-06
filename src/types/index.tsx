@@ -29,6 +29,7 @@ export interface Pacote {
   lote_atual?: number;
   pacote_lotes?: PacoteLote[];
   created_at: string;
+  oculto?: boolean;
 }
 
 export interface Roteiro {

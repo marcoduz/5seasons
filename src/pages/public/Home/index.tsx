@@ -103,6 +103,7 @@ export function HomePublica() {
             preco_single
           )
         `)
+        .eq('oculto', false)
         .in('status', ['Ativo', 'Esgotado', 'Em breve'])
         .order('data_inicio', { ascending: true }),
       

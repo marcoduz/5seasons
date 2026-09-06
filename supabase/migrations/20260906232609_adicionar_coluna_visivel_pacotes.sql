@@ -1,0 +1,1 @@
+ALTER TABLE pacotes ADD COLUMN oculto BOOLEAN DEFAULT false;

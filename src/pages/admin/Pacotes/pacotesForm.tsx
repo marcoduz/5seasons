@@ -19,6 +19,7 @@ const EMPTY_FORM = {
   promocao_inicio: '',
   promocao_fim: '',
   lote_atual: 1,
+  oculto: false,
 };
 
 function formatarParaMoeda(valor: number): string {
@@ -82,6 +83,7 @@ export function PacoteForm() {
           promocao_inicio: p.promocao_inicio || '',
           promocao_fim: p.promocao_fim || '',
           lote_atual: p.lote_atual || 1,
+          oculto: p.oculto !== false, // Garante que seja true caso seja undefined no banco
         });
         setVagasOcupadas(p.vagas_ocupadas || 0);
 
@@ -174,6 +176,7 @@ export function PacoteForm() {
       lote_atual: form.lote_atual,
       preco_duplo: loteAtivo.preco_duplo,
       preco_single: loteAtivo.preco_single || null,
+      oculto: form.oculto,
     };
 
     try {
@@ -286,6 +289,23 @@ export function PacoteForm() {
                 <label>Vagas Ocupadas</label>
                 <input type="number" value={vagasOcupadas} disabled style={{ backgroundColor: 'rgba(151, 183, 177, 0.15)', borderColor: 'transparent', fontWeight: '600' }} />
               </div>
+            </div>
+
+            <div style={{ marginTop: '24px', padding: '16px', border: '1px solid var(--cream)', borderRadius: '8px', background: 'var(--warm-white)' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', margin: 0 }}>
+                <input 
+                  type="checkbox" 
+                  checked={form.oculto} 
+                  onChange={(e) => updateField('oculto', e.target.checked)} 
+                  style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                />
+                <span style={{ fontWeight: 600, color: 'var(--forest-deep)' }}>
+                  Ocultar pacote do site
+                </span>
+              </label>
+              <p style={{ margin: '4px 0 0 28px', fontSize: '12px', color: 'var(--text-muted)' }}>
+                Marque para ocultar este pacote das páginas públicas sem precisar excluí-lo.
+              </p>
             </div>
           </>
         )}
