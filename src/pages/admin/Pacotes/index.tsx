@@ -104,7 +104,7 @@ export function PacotesList() {
     <div className="ui-page">
       <div className="ui-page-header">
         <div>
-          <h1 className="ui-page-title">Pacotes (Datas e Valores)</h1>
+          <h1 className="ui-page-title">Pacotes</h1>
           <p className="ui-page-subtitle">Gerencie as datas de saída, preços e vagas das suas expedições.</p>
         </div>
         <Link to="/admin/pacotes/new" className="ui-btn-solid">
@@ -142,6 +142,7 @@ export function PacotesList() {
           <option value="Esgotado">Esgotado</option>
           <option value="Encerrado">Encerrado</option>
           <option value="Cancelado">Cancelado</option>
+          <option value="Em breve">Em breve</option>
         </select>
 
         {/* Filtro por Data */}
@@ -218,9 +219,14 @@ export function PacotesList() {
             <tbody>
               {pacotesFiltrados.map((pacote) => {
                 const esgotado = (pacote.vagas_ocupadas || 0) >= pacote.vagas;
-                const badgeStyle = esgotado || pacote.status !== 'Ativo' 
-                  ? { background: 'var(--danger-bg)', color: 'var(--danger-text)' }
-                  : { background: 'rgba(151, 183, 177, 0.2)', color: 'var(--forest-deep)' };
+                
+                let badgeStyle = { background: 'rgba(151, 183, 177, 0.2)', color: 'var(--forest-deep)' }; // Padrão: Ativo
+
+                if (esgotado || pacote.status === 'Esgotado' || pacote.status === 'Cancelado' || pacote.status === 'Encerrado') {
+                  badgeStyle = { background: 'var(--danger-bg)', color: 'var(--danger-text)' };
+                } else if (pacote.status === 'Em breve') {
+                  badgeStyle = { background: '#fef3c7', color: '#d97706' }; // Fundo amarelinho claro com texto amarelo escuro
+                }
 
                 return (
                   <tr key={pacote.id} style={{ borderBottom: '1px solid var(--cream)', transition: 'background-color 0.15s ease' }}>
