@@ -138,8 +138,8 @@ export function ExpedicoesList() {
           gap: 6px;
         }
         .ui-chip-sm {
-          background: var(--branco-gelo);
-          color: var(--text-main);
+          background: var(--verde-claro);
+          color: var(--verde-escuro);
           padding: 4px 10px;
           border-radius: 99px;
           font-size: 11px;
