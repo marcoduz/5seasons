@@ -83,9 +83,15 @@ export function ExpedicaoPublica() {
   
   const precoExibido = loteAtivoPacote ? loteAtivoPacote.preco_duplo : (pacotePrincipal?.preco_duplo || 0);
   const outrosPacotes = pacotes.filter(p => p.id !== pacotePrincipal?.id);
-  
+
   const nomeCompletoWhatsapp = pacotePrincipal ? `${expedicao.nome} - ${pacotePrincipal.nome}` : expedicao.nome;
-  const linkWhatsApp = `https://wa.me/5549999999999?text=Ol%C3%A1%21%20Gostaria%20de%20me%20inscrever%20na%20expedi%C3%A7%C3%A3o%20${encodeURIComponent(nomeCompletoWhatsapp)}`;
+  let textoWhatsApp = `Olá! Gostaria de me inscrever na expedição ${nomeCompletoWhatsapp}.`; 
+  if (pacotePrincipal?.status === 'Em breve') {
+    textoWhatsApp = `Olá! Tenho interesse na expedição ${nomeCompletoWhatsapp}. Podem me avisar quando as vagas estiverem disponíveis?`;
+  } else if (pacotePrincipal?.status === 'Esgotado') {
+    textoWhatsApp = `Olá! Vi que a expedição ${nomeCompletoWhatsapp} está esgotada. Gostaria de entrar na lista de espera, por favor.`;
+  }
+  const linkWhatsApp = `https://wa.me/5554996468737?text=${encodeURIComponent(textoWhatsApp)}`;
 
   function nextFoto() {
     setCurrentFotoIndex((prev) => (prev === galeria.length - 1 ? 0 : prev + 1));

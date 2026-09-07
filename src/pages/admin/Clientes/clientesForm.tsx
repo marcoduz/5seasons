@@ -263,7 +263,7 @@ export function ClienteForm() {
             <input
               id="telefone"
               type="text"
-              placeholder="Ex: (49) 99999-9999"
+              placeholder="Ex: (99) 99999-9999"
               value={form.telefone}
               onChange={(e) => {
                 const formatado = formatarTelefone(e.target.value);

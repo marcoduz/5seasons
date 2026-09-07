@@ -613,7 +613,7 @@ export function ReservaForm() {
                   <label>Telefone / WhatsApp <span className="ui-required">*</span></label>
                   <input
                     type="text"
-                    placeholder="(49) 99999-9999"
+                    placeholder="(99) 99999-9999"
                     value={clientForm.telefone}
                     onChange={(e) => {
                       setClientForm(f => ({ ...f, telefone: formatarTelefone(e.target.value) }));
