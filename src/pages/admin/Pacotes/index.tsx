@@ -113,7 +113,11 @@ export function PacotesList() {
     return `${dia}/${mes}/${ano}`;
   }
 
-  function formatarMoeda(valor: number) {
+  function formatarMoeda(valor: number | null | undefined) {
+    if (valor === null || valor === undefined || valor === 0) {
+      return "";
+    }
+    
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
@@ -490,7 +494,7 @@ export function PacotesList() {
                     Vagas
                   </th>
                   <th style={{ padding: "14px 16px", fontWeight: 600 }}>
-                    Valor (Duplo)
+                    Valor (Individual)
                   </th>
                   <th style={{ padding: "14px 16px", fontWeight: 600 }}>
                     Status
@@ -618,7 +622,7 @@ export function PacotesList() {
                           fontWeight: 500,
                         }}
                       >
-                        {formatarMoeda(pacote.preco_duplo)}
+                        {formatarMoeda(pacote.preco_single)}
                       </td>
                       <td style={{ padding: "14px 16px" }}>
                         <span

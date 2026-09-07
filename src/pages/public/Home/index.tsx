@@ -227,12 +227,18 @@ export function HomePublica() {
                   
                   <div className="exp-card-footer">
                     <div className="exp-card-price">
-                      <small>LOTE {pacote.lote_atual || 1}</small>
-                      <strong style={{ display: 'block' }}>{formatarMoedaBRL(precoFinal)}</strong>
-                      {valorEmDolar !== null && (
-                        <span style={{ fontSize: '12px', opacity: 0.8, fontWeight: 500, color: 'var(--brand-orange)' }}>
-                          ≈ {formatarMoedaUSD(valorEmDolar)}
-                        </span>
+                      {precoFinal ? (
+                        <>
+                          <small>LOTE {pacote.lote_atual || 1}</small>
+                          <strong style={{ display: 'block' }}>{formatarMoedaBRL(precoFinal)}</strong>
+                          {valorEmDolar !== null && (
+                            <span style={{ fontSize: '12px', opacity: 0.8, fontWeight: 500, color: 'var(--brand-orange)' }}>
+                              ≈ {formatarMoedaUSD(valorEmDolar)}
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        <strong></strong>
                       )}
                     </div>
                     <div style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 16px', borderRadius: '99px', fontSize: '12px', fontWeight: 'bold' }}>

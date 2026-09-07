@@ -20,8 +20,8 @@ export interface Pacote {
   data_fim: string;
   vagas: number;
   vagas_ocupadas: number;
-  preco_duplo: number;
-  preco_single?: number;
+  preco_duplo?: number | null;
+  preco_single?: number | null;
   status: string;
   desconto_percentual: number;
   promocao_inicio?: string;

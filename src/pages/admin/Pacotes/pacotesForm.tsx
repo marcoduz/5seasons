@@ -22,8 +22,8 @@ const EMPTY_FORM = {
   oculto: false,
 };
 
-function formatarParaMoeda(valor: number): string {
-  if (!valor || isNaN(valor)) return '';
+function formatarParaMoeda(valor: number | null): string {
+  if (valor === null || valor === undefined || isNaN(valor) || valor === 0) return '';
   return valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
@@ -83,7 +83,7 @@ export function PacoteForm() {
           promocao_inicio: p.promocao_inicio || '',
           promocao_fim: p.promocao_fim || '',
           lote_atual: p.lote_atual || 1,
-          oculto: p.oculto !== false, // Garante que seja true caso seja undefined no banco
+          oculto: p.oculto !== false,
         });
         setVagasOcupadas(p.vagas_ocupadas || 0);
 
@@ -146,10 +146,7 @@ export function PacoteForm() {
   }
 
   function validateValores(): boolean {
-    let valid = true;
-    lotes.forEach(l => { if (l.preco_duplo <= 0) valid = false; });
-    if (!valid) setError('O Preço Duplo de todos os lotes deve ser maior que zero.');
-    return valid;
+    return true;
   }
 
   async function handleSave() {
@@ -174,7 +171,7 @@ export function PacoteForm() {
       promocao_inicio: form.promocao_inicio || null,
       promocao_fim: form.promocao_fim || null,
       lote_atual: form.lote_atual,
-      preco_duplo: loteAtivo.preco_duplo,
+      preco_duplo: loteAtivo.preco_duplo || null, 
       preco_single: loteAtivo.preco_single || null,
       oculto: form.oculto,
     };
@@ -196,7 +193,7 @@ export function PacoteForm() {
       const lotesToInsert = lotes.map(l => ({
         pacote_id: pacoteId,
         lote_numero: l.lote_numero,
-        preco_duplo: l.preco_duplo,
+        preco_duplo: l.preco_duplo || null, 
         preco_single: l.preco_single || null,
         vagas_gatilho: l.lote_numero === 1 ? 0 : (l.vagas_gatilho || 0)
       }));
@@ -326,16 +323,16 @@ export function PacoteForm() {
               </div>
               <div style={{ display: 'flex', gap: '24px', background: 'white', padding: '12px 20px', borderRadius: '8px', border: '1px solid #d5e8b4' }}>
                 <div>
-                  <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block' }}>Preço Quarto Duplo</span>
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block' }}>Preço individual</span>
                   <strong style={{ fontSize: '16px', color: 'var(--forest-deep)' }}>
-                    {loteAtivoInfo ? formatarParaMoeda(loteAtivoInfo.preco_duplo) : '0,00'}
+                    {`R$ ${formatarParaMoeda(loteAtivoInfo.preco_single)}`}
                   </strong>
                 </div>
-                {loteAtivoInfo?.preco_single ? (
+                {loteAtivoInfo?.preco_duplo ? (
                   <div>
-                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block' }}>Preço Quarto Single</span>
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block' }}>Preço compartilhado</span>
                     <strong style={{ fontSize: '16px', color: 'var(--forest-deep)' }}>
-                      {formatarParaMoeda(loteAtivoInfo.preco_single)}
+                      {loteAtivoInfo?.preco_duplo ? `R$ ${formatarParaMoeda(loteAtivoInfo.preco_duplo)}` : 'Não definido'}
                     </strong>
                   </div>
                 ) : null}
@@ -368,12 +365,12 @@ export function PacoteForm() {
                     
                     <div className="ui-form-row">
                       <div className="ui-field">
-                        <label>Preço Quarto Duplo (R$) <span className="ui-required">*</span></label>
-                        <input type="text" placeholder="0,00" value={lote.preco_duplo ? formatarParaMoeda(lote.preco_duplo) : ''} onChange={(e) => updateLote(index, 'preco_duplo', moedaParaNumero(e.target.value))} />
+                        <label>Preço Quarto Individual (R$)</label>
+                        <input type="text" placeholder="Preço individual" value={lote.preco_single ? formatarParaMoeda(lote.preco_single) : ''} onChange={(e) => updateLote(index, 'preco_single', moedaParaNumero(e.target.value))} />
                       </div>
                       <div className="ui-field">
-                        <label>Preço Quarto Single (R$)</label>
-                        <input type="text" placeholder="0,00" value={lote.preco_single ? formatarParaMoeda(lote.preco_single) : ''} onChange={(e) => updateLote(index, 'preco_single', moedaParaNumero(e.target.value))} />
+                        <label>Preço Quarto Compartilhado (R$)</label>
+                        <input type="text" placeholder="Preço compatilhado" value={lote.preco_duplo ? formatarParaMoeda(lote.preco_duplo) : ''} onChange={(e) => updateLote(index, 'preco_duplo', moedaParaNumero(e.target.value))} />
                       </div>
                     </div>
 
@@ -398,7 +395,7 @@ export function PacoteForm() {
               <select value={form.lote_atual} onChange={(e) => updateField('lote_atual', Number(e.target.value))}>
                 {lotes.map((l) => (
                   <option key={l.lote_numero} value={l.lote_numero}>
-                    Lote {l.lote_numero} — R$ {formatarParaMoeda(l.preco_duplo)}
+                    Lote {l.lote_numero} {l.preco_duplo ? `— R$ ${formatarParaMoeda(l.preco_duplo)}` : '— Não definido'}
                   </option>
                 ))}
               </select>

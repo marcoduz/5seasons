@@ -1,0 +1,2 @@
+ALTER TABLE pacotes ALTER COLUMN preco_duplo DROP NOT NULL;
+ALTER TABLE pacote_lotes ALTER COLUMN preco_duplo DROP NOT NULL;
