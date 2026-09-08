@@ -1,21 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap');
 
 :root {
-  --brand-green: var(--verde-escuro);
   --brand-dark: #2f4842;
-  --brand-light: var(--branco-gelo);
-  --brand-orange: var(--beje-escuro);
-  --bg-page: var(--branco-gelo);
   --text-main: #26332f;
   --text-muted: rgba(38, 51, 47, 0.65);
-  --cream: var(--beje-claro);
-  --sage: var(--verde-claro);
 }
 
 body {
   margin: 0;
   font-family: 'Inter', -apple-system, sans-serif;
-  background-color: var(--bg-page);
+  background-color: var(--branco-gelo);
   color: var(--text-main);
   -webkit-font-smoothing: antialiased;
 }
@@ -28,7 +22,7 @@ body {
 }
 
 .public-header {
-  background-color: var(--brand-green);
+  background-color: var(--verde-escuro);
   color: white;
   padding: 16px 0;
   position: sticky;
@@ -127,7 +121,7 @@ body {
 }
 
 .eyebrow {
-  color: var(--brand-orange);
+  color: var(--beje-escuro);
   text-transform: uppercase;
   font-size: 13px;
   font-weight: 600;
@@ -136,7 +130,7 @@ body {
 }
 
 .hero-title {
-  color: var(--brand-green);
+  color: var(--verde-escuro);
   font-family: 'Playfair Display', serif;
   font-size: 42px;
   font-weight: 600;
@@ -196,7 +190,7 @@ body {
   z-index: 2;
   width: 1px;
   height: 24px;
-  background-color: var(--cream);
+  background-color: var(--beje-claro);
   margin: 0 8px;
 }
 
@@ -268,7 +262,7 @@ body {
 }
 
 .exp-card-date {
-  color: var(--brand-orange);
+  color: var(--beje-escuro);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 1px;
@@ -315,8 +309,8 @@ body {
 
 /* ================= Footer Atualizado ================= */
 .public-footer {
-  background-color: var(--brand-green); 
-  color: var(--brand-light);
+  background-color: var(--verde-escuro); 
+  color: var(--branco-gelo);
   padding: 60px 0;
 }
 

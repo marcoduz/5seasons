@@ -197,7 +197,7 @@ export function HomePublica() {
 
             if (pacote.status === 'Ativo') {
               statusLabel = 'VAGAS ABERTAS';
-              statusColor = 'var(--brand-green)';
+              statusColor = 'var(--verde-escuro)';
             } else if (pacote.status === 'Em breve') {
               statusLabel = 'EM BREVE';
               statusColor = '#d97706';
@@ -232,7 +232,7 @@ export function HomePublica() {
                           <small>LOTE {pacote.lote_atual || 1}</small>
                           <strong style={{ display: 'block' }}>{formatarMoedaBRL(precoFinal)}</strong>
                           {valorEmDolar !== null && (
-                            <span style={{ fontSize: '12px', opacity: 0.8, fontWeight: 500, color: 'var(--brand-orange)' }}>
+                            <span style={{ fontSize: '12px', opacity: 0.8, fontWeight: 500, color: 'var(--beje-escuro)' }}>
                               ≈ {formatarMoedaUSD(valorEmDolar)}
                             </span>
                           )}

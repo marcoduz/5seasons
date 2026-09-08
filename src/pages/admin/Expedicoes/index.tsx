@@ -98,7 +98,7 @@ export function ExpedicoesList() {
         
         .exp-card {
           background: white;
-          border: 1px solid var(--cream);
+          border: 1px solid var(--beje-claro);
           border-radius: 12px;
           overflow: hidden;
           transition: transform 0.2s, box-shadow 0.2s;
@@ -146,7 +146,7 @@ export function ExpedicoesList() {
           font-weight: 600;
         }
         .exp-actions {
-          border-top: 1px solid var(--cream);
+          border-top: 1px solid var(--beje-claro);
           padding: 12px 20px;
           display: flex;
           justify-content: flex-end;

@@ -38,6 +38,7 @@ export interface Roteiro {
   dia: number;
   titulo: string;
   descricao: string;
+  imagens?: string[];
   created_at: string;
 }
 

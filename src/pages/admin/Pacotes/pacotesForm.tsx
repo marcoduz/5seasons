@@ -269,11 +269,11 @@ export function PacoteForm() {
             <div className="ui-form-row">
               <div className={`ui-field${fieldErrors.data_inicio ? ' has-error' : ''}`}>
                 <label>Data de Início <span className="ui-required">*</span></label>
-                <input type="date" min={dataHoje} value={form.data_inicio} onChange={(e) => { updateField('data_inicio', e.target.value); if (fieldErrors.data_inicio) setFieldErrors(f => ({ ...f, data_inicio: false })); }} style={{ padding: '10px 12px', border: '1px solid var(--cream)', borderRadius: '5px' }} />
+                <input type="date" min={dataHoje} value={form.data_inicio} onChange={(e) => { updateField('data_inicio', e.target.value); if (fieldErrors.data_inicio) setFieldErrors(f => ({ ...f, data_inicio: false })); }} style={{ padding: '10px 12px', border: '1px solid var(--beje-claro)', borderRadius: '5px' }} />
               </div>
               <div className={`ui-field${fieldErrors.data_fim ? ' has-error' : ''}`}>
                 <label>Data de Fim <span className="ui-required">*</span></label>
-                <input type="date" min={form.data_inicio || dataHoje} value={form.data_fim} onChange={(e) => { updateField('data_fim', e.target.value); if (fieldErrors.data_fim) setFieldErrors(f => ({ ...f, data_fim: false })); }} style={{ padding: '10px 12px', border: '1px solid var(--cream)', borderRadius: '5px' }} />
+                <input type="date" min={form.data_inicio || dataHoje} value={form.data_fim} onChange={(e) => { updateField('data_fim', e.target.value); if (fieldErrors.data_fim) setFieldErrors(f => ({ ...f, data_fim: false })); }} style={{ padding: '10px 12px', border: '1px solid var(--beje-claro)', borderRadius: '5px' }} />
               </div>
             </div>
             
@@ -288,7 +288,7 @@ export function PacoteForm() {
               </div>
             </div>
 
-            <div style={{ marginTop: '24px', padding: '16px', border: '1px solid var(--cream)', borderRadius: '8px', background: 'var(--warm-white)' }}>
+            <div style={{ marginTop: '24px', padding: '16px', border: '1px solid var(--beje-claro)', borderRadius: '8px', background: 'var(--warm-white)' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', margin: 0 }}>
                 <input 
                   type="checkbox" 
@@ -345,7 +345,7 @@ export function PacoteForm() {
               {lotes.map((lote, index) => {
                 const isCurrent = lote.lote_numero === form.lote_atual;
                 return (
-                  <div key={index} style={{ border: isCurrent ? '2px solid var(--forest-deep)' : '1px solid var(--cream)', padding: '16px', borderRadius: '8px', background: isCurrent ? 'rgba(38, 51, 47, 0.02)' : 'var(--warm-white)' }}>
+                  <div key={index} style={{ border: isCurrent ? '2px solid var(--forest-deep)' : '1px solid var(--beje-claro)', padding: '16px', borderRadius: '8px', background: isCurrent ? 'rgba(38, 51, 47, 0.02)' : 'var(--warm-white)' }}>
                     
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', alignItems: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -390,7 +390,7 @@ export function PacoteForm() {
               <button type="button" className="ui-btn-ghost" onClick={adicionarLote} style={{ alignSelf: 'flex-start' }}>+ Adicionar Novo Lote</button>
             </div>
 
-            <div className="ui-field" style={{ borderTop: '1px solid var(--cream)', paddingTop: '24px', maxWidth: '350px' }}>
+            <div className="ui-field" style={{ borderTop: '1px solid var(--beje-claro)', paddingTop: '24px', maxWidth: '350px' }}>
               <label>Forçar Lote em Vigor (Manual)</label>
               <select value={form.lote_atual} onChange={(e) => updateField('lote_atual', Number(e.target.value))}>
                 {lotes.map((l) => (

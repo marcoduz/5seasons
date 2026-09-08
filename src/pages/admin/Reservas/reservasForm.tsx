@@ -356,7 +356,7 @@ export function ReservaForm() {
           left: 0;
           right: 0;
           background: var(--warm-white);
-          border: 1px solid var(--sage);
+          border: 1px solid var(--verde-claro);
           border-radius: 6px;
           margin-top: 4px;
           max-height: 220px;
@@ -368,7 +368,7 @@ export function ReservaForm() {
         .custom-dropdown-item {
           padding: 10px 14px;
           cursor: pointer;
-          border-bottom: 1px solid var(--cream);
+          border-bottom: 1px solid var(--beje-claro);
           transition: background-color 0.1s ease;
         }
 

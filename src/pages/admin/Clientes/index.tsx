@@ -113,10 +113,10 @@ export function ClientesList() {
       )}
 
       {!loading && !error && clientesFiltrados.length > 0 && (
-        <div style={{ backgroundColor: 'var(--warm-white)', border: '1px solid var(--cream)', borderRadius: 8, overflow: 'hidden' }}>
+        <div style={{ backgroundColor: 'var(--warm-white)', border: '1px solid var(--beje-claro)', borderRadius: 8, overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 14 }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid var(--cream)', backgroundColor: 'rgba(151, 183, 177, 0.08)', color: 'var(--forest-deep)' }}>
+              <tr style={{ borderBottom: '1px solid var(--beje-claro)', backgroundColor: 'rgba(151, 183, 177, 0.08)', color: 'var(--forest-deep)' }}>
                 <th style={{ padding: '14px 16px', fontWeight: 600 }}>Nome / Contato</th>
                 <th style={{ padding: '14px 16px', fontWeight: 600 }}>Documentos</th>
                 <th style={{ padding: '14px 16px', fontWeight: 600 }}>Instagram</th>
@@ -125,7 +125,7 @@ export function ClientesList() {
             </thead>
             <tbody>
               {clientesFiltrados.map((cliente) => (
-                <tr key={cliente.id} style={{ borderBottom: '1px solid var(--cream)', transition: 'background-color 0.15s ease' }}>
+                <tr key={cliente.id} style={{ borderBottom: '1px solid var(--beje-claro)', transition: 'background-color 0.15s ease' }}>
                   <td style={{ padding: '14px 16px' }}>
                     <div style={{ fontWeight: 600, color: 'var(--forest-deep)', marginBottom: 2 }}>{cliente.nome}</div>
                     <div style={{ fontSize: 12.5, color: 'var(--ink)', opacity: 0.7 }}>

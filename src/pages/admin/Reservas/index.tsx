@@ -110,7 +110,7 @@ export function ReservasList() {
         <select
           value={statusFiltro}
           onChange={(e) => setStatusFiltro(e.target.value)}
-          style={{ padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--cream)', background: 'var(--warm-white)', color: 'var(--ink)', fontSize: '14px', fontFamily: 'inherit' }}
+          style={{ padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--beje-claro)', background: 'var(--warm-white)', color: 'var(--ink)', fontSize: '14px', fontFamily: 'inherit' }}
         >
           <option value="">Todos os Status</option>
           <option value="Confirmada">Confirmada</option>
@@ -141,10 +141,10 @@ export function ReservasList() {
       )}
 
       {!loading && !error && reservasFiltradas.length > 0 && (
-        <div style={{ backgroundColor: 'var(--warm-white)', border: '1px solid var(--cream)', borderRadius: 8, overflow: 'hidden' }}>
+        <div style={{ backgroundColor: 'var(--warm-white)', border: '1px solid var(--beje-claro)', borderRadius: 8, overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 14 }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid var(--cream)', backgroundColor: 'rgba(151, 183, 177, 0.08)', color: 'var(--forest-deep)' }}>
+              <tr style={{ borderBottom: '1px solid var(--beje-claro)', backgroundColor: 'rgba(151, 183, 177, 0.08)', color: 'var(--forest-deep)' }}>
                 <th style={{ padding: '14px 16px', fontWeight: 600 }}>Cliente</th>
                 <th style={{ padding: '14px 16px', fontWeight: 600 }}>Pacote</th>
                 <th style={{ padding: '14px 16px', fontWeight: 600 }}>Valor Pago</th>
@@ -160,7 +160,7 @@ export function ReservasList() {
                 else badgeStyle = { background: '#fef3c7', color: '#92400e' };
 
                 return (
-                  <tr key={reserva.id} style={{ borderBottom: '1px solid var(--cream)', transition: 'background-color 0.15s ease' }}>
+                  <tr key={reserva.id} style={{ borderBottom: '1px solid var(--beje-claro)', transition: 'background-color 0.15s ease' }}>
                     <td style={{ padding: '14px 16px' }}>
                       <div style={{ fontWeight: 600, color: 'var(--forest-deep)', marginBottom: 2 }}>{reserva.clientes?.nome || 'Cliente não encontrado'}</div>
                       <div style={{ fontSize: 12.5, color: 'var(--ink)', opacity: 0.7 }}>
