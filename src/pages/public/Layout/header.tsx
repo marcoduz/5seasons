@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 const NAV_ITEMS = [
   // { label: 'Nossa História', to: '/sobre', match: (path: string) => path === '/sobre' },
   { label: 'Expedições', to: '/', match: (path: string) => path === '/' || path.startsWith('/expedicao/') },
-  // { label: 'Duvidas', to: '/depoimentos', match: (path: string) => path === '/depoimentos' },
+  { label: 'Duvidas', to: '/duvidas', match: (path: string) => path === '/duvidas' },
   // { label: 'Fidelidade', to: '/contato', match: (path: string) => path === '/fidelidade' },
 ];
 
