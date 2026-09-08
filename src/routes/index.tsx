@@ -21,6 +21,7 @@ import { ClientesList } from '@/pages/admin/Clientes';
 import { ClienteForm } from '@/pages/admin/Clientes/clientesForm';
 import { ReservasList } from '@/pages/admin/Reservas';
 import { ReservaForm } from '@/pages/admin/Reservas/reservasForm';
+import { NossaHistoria } from '@/pages/public/NossaHistoria';
 import { Duvidas } from '@/pages/public/Duvidas';
 
 export function AppRoutes() {
@@ -33,6 +34,7 @@ export function AppRoutes() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<HomePublica />} />
           <Route path="/expedicao/:id" element={<ExpedicaoPublica />} />
+          <Route path="/nossa/historia" element={<NossaHistoria />} />
           <Route path="/duvidas" element={<Duvidas />} />
           <Route path="/politica" element={<PoliticaPrivacidade />} />
         </Route>
