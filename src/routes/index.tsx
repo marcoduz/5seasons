@@ -8,6 +8,7 @@ import { PublicLayout } from '@/pages/public/Layout';
 // Páginas Públicas
 import { HomePublica } from '@/pages/public/Home';
 import { ExpedicaoPublica } from '@/pages/public/Expedicao';
+import { PoliticaPrivacidade } from '@/pages/public/Politica';
 
 // Páginas Admin
 import { AdminLogin } from '@/pages/admin/Login';
@@ -31,6 +32,7 @@ export function AppRoutes() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<HomePublica />} />
           <Route path="/expedicao/:id" element={<ExpedicaoPublica />} />
+          <Route path="/politica" element={<PoliticaPrivacidade />} />
         </Route>
 
         {/* ==========================================
