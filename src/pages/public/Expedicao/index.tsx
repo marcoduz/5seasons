@@ -85,7 +85,15 @@ export function ExpedicaoPublica() {
   const outrosPacotes = pacotes.filter(p => p.id !== pacotePrincipal?.id);
   
   const nomeCompletoWhatsapp = pacotePrincipal ? `${expedicao.nome} - ${pacotePrincipal.nome}` : expedicao.nome;
-  const linkWhatsApp = `https://wa.me/5549999999999?text=Ol%C3%A1%21%20Gostaria%20de%20me%20inscrever%20na%20expedi%C3%A7%C3%A3o%20${encodeURIComponent(nomeCompletoWhatsapp)}`;
+  
+  let textoWhatsApp = `Olá! Gostaria de me inscrever na expedição ${nomeCompletoWhatsapp}.`;
+  if (pacotePrincipal?.status === 'Em breve') {
+    textoWhatsApp = `Olá! Tenho interesse na expedição ${nomeCompletoWhatsapp}. Podem me avisar quando as vagas estiverem disponíveis?`;
+  } else if (pacotePrincipal?.status === 'Esgotado') {
+    textoWhatsApp = `Olá! Vi que a expedição ${nomeCompletoWhatsapp} está esgotada. Gostaria de entrar na lista de espera, por favor.`;
+  }
+  
+  const linkWhatsApp = `https://wa.me/5554996468737?text=${encodeURIComponent(textoWhatsApp)}`;
 
   function nextFoto() {
     setCurrentFotoIndex((prev) => (prev === galeria.length - 1 ? 0 : prev + 1));
@@ -135,6 +143,8 @@ export function ExpedicaoPublica() {
         .hero-price { font-size: 36px; font-weight: 700; margin: 0 0 24px; line-height: 1; transition: color 0.3s; }
         .hero-features { list-style: none; padding: 0; margin: 0 0 32px; }
         .hero-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; margin-bottom: 12px; color: #e4e4e7; }
+        /* Adicionado para justificar o texto da lista do Hero */
+        .hero-features li span { flex: 1; text-align: justify; }
         .hero-features svg { flex-shrink: 0; color: #34d399; margin-top: 2px; }
         .btn-orange { display: block; text-align: center; background: #fdb17f; color: #151e1b; padding: 16px; border-radius: 8px; font-weight: 700; text-decoration: none; transition: transform 0.2s; }
         .btn-orange:hover { transform: translateY(-2px); }
@@ -173,7 +183,8 @@ export function ExpedicaoPublica() {
         .rot-gal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
         .accordion-item { border: 1px solid var(--cream); border-radius: 8px; margin-bottom: 12px; background: white; overflow: hidden; }
         .accordion-header { padding: 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; color: var(--verde-escuro); font-weight: 600; font-size: 15px; }
-        .accordion-body { padding: 0 16px 16px 44px; font-size: 14.5px; line-height: 1.6; color: var(--text-main); }
+        /* Adicionado text-align justify para o corpo do roteiro */
+        .accordion-body { padding: 0 16px 16px 44px; font-size: 14.5px; line-height: 1.6; color: var(--text-main); text-align: justify; }
         .accordion-body strong { color: var(--verde-escuro); }
         
         .carousel-container { position: relative; width: 100%; border-radius: 16px; overflow: hidden; aspect-ratio: 4/3; }
@@ -196,6 +207,8 @@ export function ExpedicaoPublica() {
 
         .obs-box { background: #eef7db; border-radius: 16px; padding: 40px; max-width: 800px; margin: 0 auto; }
         .obs-box h3 { text-align: center; color: var(--verde-escuro); font-family: 'Playfair Display', serif; font-size: 24px; margin: 0 0 24px; }
+        /* Adicionado para justificar o texto dentro de observações importantes */
+        .obs-box .serv-list li { text-align: justify; }
 
         @media (max-width: 900px) {
           .hero-grid { grid-template-columns: 1fr; gap: 40px; }
@@ -209,33 +222,35 @@ export function ExpedicaoPublica() {
         <div className="container hero-grid">
           
           <div className="hero-card">
-            <div className="hero-price-title">Valor do Investimento</div>
-            <div className="hero-price" style={{ 
-              color: pacotePrincipal?.status === 'Ativo' ? '#34d399' : 
-                     pacotePrincipal?.status === 'Em breve' ? '#fbbf24' : '#f87171' 
-            }}>
-              {precoExibido > 0 ? formatarMoeda(precoExibido) : 'Sob Consulta'}
+            <div className="hero-price-title"> 
+              {pacotePrincipal?.status === 'Em breve' ? 'Faça seu pré-registro' : 
+               pacotePrincipal?.status === 'Esgotado' ? 'Entre na lista de espera' : 
+               'Valor do Investimento'}
+            </div>
+            
+            <div className="hero-price" style={{ color: '#34d399'}}>
+              {precoExibido && precoExibido > 0 ? formatarMoeda(precoExibido) : 'Sob Consulta'}
             </div>
             
             <ul className="hero-features">
               {expedicao.incluso?.slice(0, 6).map((item: string, i: number) => (
                 <li key={i}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  {item}
+                  <span dangerouslySetInnerHTML={formatarEstiloWhatsApp(item)} />
                 </li>
               ))}
             </ul>
             
             <a href={linkWhatsApp} target="_blank" rel="noreferrer" className="btn-orange">
               {pacotePrincipal?.status === 'Ativo' ? 'QUERO ME INSCREVER →' : 
-               pacotePrincipal?.status === 'Em breve' ? 'TENHO INTERESSE →' : 'CONSULTAR VAGAS →'}
+               pacotePrincipal?.status === 'Em breve' ? 'PRÉ REGISTRO →' : 'LISTA DE ESPERA →'}
             </a>
           </div>
 
           <div className="hero-text-area">
             <span className="hero-tag">Expedição {expedicao.tipo_destino}</span>
             <h1 className="hero-title">{expedicao.nome}</h1>
-            <p className="hero-desc">{expedicao.descricao.split('\n')[0]}</p>
+            <p className="hero-desc" dangerouslySetInnerHTML={formatarEstiloWhatsApp(expedicao.descricao?.split('\n')[0] || '')} />
             
             <div className="hero-pills">
               {pacotePrincipal && (
@@ -277,9 +292,7 @@ export function ExpedicaoPublica() {
       <section className="bg-beige">
         <div className="section-padding container" style={{ paddingBottom: '60px' }}>
           <div className="section-subtitle" style={{ textAlign: 'center' }}>A Expedição</div>
-          <div className="desc-centered">
-            "{expedicao.descricao}"
-          </div>
+          <div className="desc-centered" dangerouslySetInnerHTML={formatarEstiloWhatsApp(expedicao.descricao || '')} />
         </div>
       </section>
 
@@ -351,7 +364,7 @@ export function ExpedicaoPublica() {
                 O que está incluso
               </h3>
               <ul className="serv-list">
-                {expedicao.incluso?.map((item: string, i: number) => <li key={i}>{item}</li>)}
+                {expedicao.incluso?.map((item: string, i: number) => <li key={i} dangerouslySetInnerHTML={formatarEstiloWhatsApp(item)} />)}
               </ul>
             </div>
             
@@ -361,7 +374,7 @@ export function ExpedicaoPublica() {
                 O que não está incluso
               </h3>
               <ul className="serv-list">
-                {expedicao.nao_incluso?.map((item: string, i: number) => <li key={i}>{item}</li>)}
+                {expedicao.nao_incluso?.map((item: string, i: number) => <li key={i} dangerouslySetInnerHTML={formatarEstiloWhatsApp(item)} />)}
               </ul>
             </div>
           </div>
@@ -374,7 +387,7 @@ export function ExpedicaoPublica() {
             <div className="obs-box">
               <h3>Observações Importantes</h3>
               <ul className="serv-list" style={{ gap: '12px' }}>
-                {expedicao.observacoes.map((item: string, i: number) => <li key={i}>{item}</li>)}
+                {expedicao.observacoes.map((item: string, i: number) => <li key={i} dangerouslySetInnerHTML={formatarEstiloWhatsApp(item)} />)}
               </ul>
             </div>
           </div>
