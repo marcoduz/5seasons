@@ -105,6 +105,7 @@ export function HomePublica() {
         `)
         .eq('oculto', false)
         .in('status', ['Ativo', 'Esgotado', 'Em breve'])
+        .order('status', { ascending: true })
         .order('data_inicio', { ascending: true }),
       
       fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL')
