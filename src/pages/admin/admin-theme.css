@@ -4,9 +4,9 @@
 :root {
   --forest: var(--verde-escuro);
   --forest-deep: #2f4842; /* Tom extra-escuro mantido para contraste de textos fortes */
-  --sage: var(--verde-claro);
+  --verde-claro: var(--verde-claro);
   --nude: var(--beje-escuro);
-  --cream: var(--beje-claro);
+  --beje-claro: var(--beje-claro);
   --warm-white: var(--branco-gelo);
   --ink: #26332f;
   --danger-text: #9a3b2f;
@@ -68,7 +68,7 @@
 }
 
 .ui-empty {
-  border: 1px dashed var(--cream);
+  border: 1px dashed var(--beje-claro);
   border-radius: 8px;
   padding: 48px 24px;
   text-align: center;
@@ -105,14 +105,14 @@
 }
 
 .ui-btn-solid:disabled {
-  background-color: var(--sage);
+  background-color: var(--verde-claro);
   cursor: not-allowed;
 }
 
 .ui-btn-ghost {
   padding: 10px 16px;
   background: transparent;
-  border: 1px solid var(--cream);
+  border: 1px solid var(--beje-claro);
   border-radius: 6px;
   color: var(--forest-deep);
   font-family: inherit;
@@ -127,7 +127,7 @@
 }
 
 .ui-btn-ghost:hover:not(:disabled) {
-  background: var(--cream);
+  background: var(--beje-claro);
 }
 
 .ui-btn-ghost:disabled {
@@ -142,7 +142,7 @@
   align-items: center;
   justify-content: center;
   background: var(--warm-white);
-  border: 1px solid var(--cream);
+  border: 1px solid var(--beje-claro);
   border-radius: 6px;
   color: var(--forest);
   cursor: pointer;
@@ -150,7 +150,7 @@
 }
 
 .ui-icon-btn:hover:not(:disabled) {
-  background: var(--cream);
+  background: var(--beje-claro);
 }
 
 .ui-icon-btn.danger:hover:not(:disabled) {
@@ -219,7 +219,7 @@
 .ui-field select {
   padding: 10px 12px;
   border-radius: 5px;
-  border: 1px solid var(--cream);
+  border: 1px solid var(--beje-claro);
   background: var(--warm-white);
   font-family: inherit;
   font-size: 14px;
@@ -237,7 +237,7 @@
 .ui-field textarea:focus, 
 .ui-field select:focus {
   outline: none;
-  border-color: var(--sage);
+  border-color: var(--verde-claro);
   box-shadow: 0 0 0 3px rgba(151, 183, 177, 0.28);
 }
 
@@ -278,7 +278,7 @@
 .ui-form-success {
   color: var(--forest-deep);
   background-color: rgba(151, 183, 177, 0.2);
-  border: 1px solid var(--sage);
+  border: 1px solid var(--verde-claro);
   padding: 10px 12px;
   border-radius: 5px;
   font-size: 13px;
@@ -307,7 +307,7 @@
   align-items: center;
   gap: 6px;
   padding: 6px 6px 6px 12px;
-  background: var(--cream);
+  background: var(--beje-claro);
   color: var(--forest-deep);
   border-radius: 999px;
   font-size: 13px;
@@ -356,8 +356,8 @@
   aspect-ratio: 1;
   border-radius: 6px;
   overflow: hidden;
-  border: 1px solid var(--cream);
-  background: var(--cream);
+  border: 1px solid var(--beje-claro);
+  background: var(--beje-claro);
 }
 
 .ui-photo-thumb img {
@@ -404,7 +404,7 @@
 .ui-tabs {
   display: flex;
   gap: 4px;
-  border-bottom: 1px solid var(--cream);
+  border-bottom: 1px solid var(--beje-claro);
   margin-bottom: 26px;
 }
 
@@ -448,7 +448,7 @@
 
 .ui-exp-card {
   background: var(--warm-white);
-  border: 1px solid var(--cream);
+  border: 1px solid var(--beje-claro);
   border-radius: 8px;
   overflow: hidden;
   text-decoration: none;
@@ -466,7 +466,7 @@
 .ui-exp-card-photo {
   width: 100%;
   aspect-ratio: 16 / 10;
-  background: var(--cream);
+  background: var(--beje-claro);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -525,7 +525,7 @@
   justify-content: flex-end;
   gap: 6px;
   padding: 10px 12px;
-  border-top: 1px solid var(--cream);
+  border-top: 1px solid var(--beje-claro);
 }
 
 /* ---------- search ---------- */
@@ -534,7 +534,7 @@
   align-items: center;
   gap: 8px;
   padding: 9px 14px;
-  border: 1px solid var(--cream);
+  border: 1px solid var(--beje-claro);
   border-radius: 6px;
   background: var(--warm-white);
   margin-bottom: 22px;
@@ -627,7 +627,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  border: 1px dashed var(--sage);
+  border: 1px dashed var(--verde-claro);
   border-radius: 6px;
   color: var(--forest-deep);
   font-size: 13.5px;
@@ -652,7 +652,7 @@
 
 /* ---------- accordion ---------- */
 .ui-accordion {
-  border: 1px solid var(--cream);
+  border: 1px solid var(--beje-claro);
   border-radius: 8px;
   margin-bottom: 12px;
   overflow: hidden;
@@ -704,7 +704,7 @@
 
 .ui-accordion-body {
   padding: 14px 16px 16px;
-  border-top: 1px solid var(--cream);
+  border-top: 1px solid var(--beje-claro);
 }
 
 .ui-day-item-row {
@@ -713,7 +713,7 @@
   align-items: flex-start;
   margin-bottom: 14px;
   padding-bottom: 14px;
-  border-bottom: 1px dashed var(--cream);
+  border-bottom: 1px dashed var(--beje-claro);
 }
 
 .ui-day-item-row:last-of-type {

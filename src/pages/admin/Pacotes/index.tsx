@@ -322,7 +322,7 @@ export function PacotesList() {
             style={{
               padding: "10px 12px",
               borderRadius: "6px",
-              border: "1px solid var(--cream)",
+              border: "1px solid var(--beje-claro)",
               background: "var(--warm-white)",
               color: "var(--ink)",
               fontSize: "13px",
@@ -344,7 +344,7 @@ export function PacotesList() {
               alignItems: "center",
               gap: "6px",
               background: "var(--warm-white)",
-              border: "1px solid var(--cream)",
+              border: "1px solid var(--beje-claro)",
               borderRadius: "6px",
               padding: "4px 10px",
             }}
@@ -397,7 +397,7 @@ export function PacotesList() {
             style={{
               padding: "10px 12px",
               borderRadius: "6px",
-              border: "1px solid var(--cream)",
+              border: "1px solid var(--beje-claro)",
               background: "var(--warm-white)",
               color: "var(--ink)",
               fontSize: "13px",
@@ -463,7 +463,7 @@ export function PacotesList() {
           <div
             style={{
               backgroundColor: "var(--warm-white)",
-              border: "1px solid var(--cream)",
+              border: "1px solid var(--beje-claro)",
               borderRadius: 8,
               overflow: "hidden",
             }}
@@ -479,7 +479,7 @@ export function PacotesList() {
               <thead>
                 <tr
                   style={{
-                    borderBottom: "1px solid var(--cream)",
+                    borderBottom: "1px solid var(--beje-claro)",
                     backgroundColor: "rgba(151, 183, 177, 0.08)",
                     color: "var(--forest-deep)",
                   }}
@@ -534,7 +534,7 @@ export function PacotesList() {
                     <tr
                       key={pacote.id}
                       style={{
-                        borderBottom: "1px solid var(--cream)",
+                        borderBottom: "1px solid var(--beje-claro)",
                         transition: "background-color 0.15s ease",
                         opacity: isOculto ? 0.75 : 1,
                       }}

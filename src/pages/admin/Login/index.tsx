@@ -36,9 +36,9 @@ export function AdminLogin() {
         :root {
           --forest: #3c5a53;
           --forest-deep: #2f4842;
-          --sage: #97b7b1;
+          --verde-claro: #97b7b1;
           --nude: #d1b39d;
-          --cream: #e8dad1;
+          --beje-claro: #e8dad1;
           --warm-white: #fffaf8;
           --ink: #26332f;
         }
@@ -89,7 +89,7 @@ export function AdminLogin() {
         .login-brand-rule-line {
           flex: 1;
           height: 1px;
-          background: var(--cream);
+          background: var(--beje-claro);
         }
 
         .login-brand-label {
@@ -123,7 +123,7 @@ export function AdminLogin() {
         .login-field input {
           padding: 11px 13px;
           border-radius: 4px;
-          border: 1px solid var(--cream);
+          border: 1px solid var(--beje-claro);
           background-color: var(--warm-white);
           font-family: inherit;
           font-size: 14.5px;
@@ -133,7 +133,7 @@ export function AdminLogin() {
 
         .login-field input:focus {
           outline: none;
-          border-color: var(--sage);
+          border-color: var(--verde-claro);
           box-shadow: 0 0 0 3px rgba(151, 183, 177, 0.28);
         }
 
@@ -157,7 +157,7 @@ export function AdminLogin() {
         }
 
         .login-submit:disabled {
-          background-color: var(--sage);
+          background-color: var(--verde-claro);
           cursor: not-allowed;
         }
       `}</style>

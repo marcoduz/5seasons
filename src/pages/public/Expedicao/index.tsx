@@ -35,13 +35,21 @@ export function ExpedicaoPublica() {
   const [pacotes, setPacotes] = useState<any[]>([]);
   const [selectedPacoteId, setSelectedPacoteId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [diaAberto, setDiaAberto] = useState<number | null>(1);
+  const [diaAberto, setDiaAberto] = useState<number | null>(null);
   const [currentFotoIndex, setCurrentFotoIndex] = useState(0);
+  
+  // NOVO: Estado para controlar o índice do carrossel do dia selecionado no cronograma
+  const [currentRoteiroFotoIndex, setCurrentRoteiroFotoIndex] = useState(0);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     fetchExpedicaoCompleta();
   }, [id]);
+
+  // Sempre que mudar o dia aberto, reseta o índice da foto do cronograma para 0
+  useEffect(() => {
+    setCurrentRoteiroFotoIndex(0);
+  }, [diaAberto]);
 
   useEffect(() => {
     const totalGaleria = expedicao?.fotos?.length > 1 ? expedicao.fotos.length - 1 : 0;
@@ -63,7 +71,12 @@ export function ExpedicaoPublica() {
     ]);
 
     if (expRes.data) setExpedicao(expRes.data);
-    if (rotRes.data) setRoteiros(rotRes.data);
+    
+    if (rotRes.data && rotRes.data.length > 0) {
+      setRoteiros(rotRes.data);
+      setDiaAberto(rotRes.data[0].dia);
+    }
+
     if (pacRes.data && pacRes.data.length > 0) {
       setPacotes(pacRes.data);
       const ativos = pacRes.data.filter((p: any) => p.status === 'Ativo');
@@ -101,6 +114,18 @@ export function ExpedicaoPublica() {
 
   function prevFoto() {
     setCurrentFotoIndex((prev) => (prev === 0 ? galeria.length - 1 : prev - 1));
+  }
+
+  const roteiroSelecionado = roteiros.find(rot => rot.dia === diaAberto);
+  const imagensRoteiro = roteiroSelecionado?.imagens || [];
+
+  // Funções de controle do carrossel do cronograma
+  function nextRoteiroFoto() {
+    setCurrentRoteiroFotoIndex((prev) => (prev === imagensRoteiro.length - 1 ? 0 : prev + 1));
+  }
+
+  function prevRoteiroFoto() {
+    setCurrentRoteiroFotoIndex((prev) => (prev === 0 ? imagensRoteiro.length - 1 : prev - 1));
   }
 
   return (
@@ -143,9 +168,8 @@ export function ExpedicaoPublica() {
         .hero-price { font-size: 36px; font-weight: 700; margin: 0 0 24px; line-height: 1; transition: color 0.3s; }
         .hero-features { list-style: none; padding: 0; margin: 0 0 32px; }
         .hero-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; margin-bottom: 12px; color: #e4e4e7; }
-        /* Adicionado para justificar o texto da lista do Hero */
         .hero-features li span { flex: 1; text-align: justify; }
-        .hero-features svg { flex-shrink: 0; color: #34d399; margin-top: 2px; }
+        .hero-features svg { flex-shrink: 0; color: var(--verde-vivo); margin-top: 2px; }
         .btn-orange { display: block; text-align: center; background: #fdb17f; color: #151e1b; padding: 16px; border-radius: 8px; font-weight: 700; text-decoration: none; transition: transform 0.2s; }
         .btn-orange:hover { transform: translateY(-2px); }
 
@@ -180,14 +204,7 @@ export function ExpedicaoPublica() {
         
         .desc-centered { max-width: 800px; margin: 0 auto; text-align: center; font-size: 18px; line-height: 1.8; color: var(--text-main); font-weight: 300; font-style: italic; }
         
-        .rot-gal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
-        .accordion-item { border: 1px solid var(--cream); border-radius: 8px; margin-bottom: 12px; background: white; overflow: hidden; }
-        .accordion-header { padding: 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; color: var(--verde-escuro); font-weight: 600; font-size: 15px; }
-        /* Adicionado text-align justify para o corpo do roteiro */
-        .accordion-body { padding: 0 16px 16px 44px; font-size: 14.5px; line-height: 1.6; color: var(--text-main); text-align: justify; }
-        .accordion-body strong { color: var(--verde-escuro); }
-        
-        .carousel-container { position: relative; width: 100%; border-radius: 16px; overflow: hidden; aspect-ratio: 4/3; }
+        .carousel-container { position: relative; width: 100%; max-width: 1000px; margin: 0 auto; border-radius: 16px; overflow: hidden; aspect-ratio: 16/9; }
         .carousel-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity 0.3s ease-in-out; }
         .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; background: rgba(38, 51, 47, 0.5); color: white; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; backdrop-filter: blur(4px); transition: background 0.2s; }
         .carousel-btn:hover { background: rgba(38, 51, 47, 0.8); }
@@ -195,25 +212,52 @@ export function ExpedicaoPublica() {
         .carousel-btn.next { right: 16px; }
         .carousel-counter { position: absolute; bottom: 16px; right: 16px; background: rgba(38, 51, 47, 0.7); color: white; padding: 6px 16px; border-radius: 99px; font-size: 13px; font-weight: 600; letter-spacing: 1px; backdrop-filter: blur(4px); }
 
-        .serv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
-        .inc-card { background: #edfaee; border: 1px solid #c6f0ce; border-radius: 16px; padding: 40px; height: 100%; }
-        .inc-card h3 { color: #2e7d32; display: flex; align-items: center; gap: 10px; margin: 0 0 24px; font-size: 20px; }
-        .exc-card { background: #fff0f0; border: 1px solid #fecdd3; border-radius: 16px; padding: 40px; height: 100%; }
-        .exc-card h3 { color: #be123c; display: flex; align-items: center; gap: 10px; margin: 0 0 24px; font-size: 20px; }
+        /* CRONOGRAMA */
+        .cronograma-card {
+          background: white; border: 1px solid var(--cream); border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); max-width: 1000px; margin: 0 auto;
+        }
+        .cronograma-header {
+          display: flex; align-items: center; gap: 10px; margin-bottom: 24px; color: var(--verde-escuro); font-size: 24px; font-weight: 700;
+        }
+        .cronograma-tabs {
+          display: flex; gap: 10px; margin-bottom: 40px; overflow-x: auto; padding-bottom: 24px; border-bottom: 1px solid var(--cream);
+        }
+        .cronograma-tab {
+          background: var(--branco-gelo); color: var(--text-main); border: none; padding: 10px 24px; border-radius: 99px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        }
+        .cronograma-tab:hover { background: #e2e8f0; }
+        .cronograma-tab.active { background: var(--verde-vivo); color: white; }
+        
+        .cronograma-content { display: grid; gap: 40px; }
+        .cronograma-content.has-image { grid-template-columns: 1.2fr 1fr; }
+        .cronograma-text h3 { font-size: 24px; color: var(--verde-escuro); margin: 0 0 8px; }
+        .cronograma-text .subtitle { color: var(--verde-vivo); font-weight: 600; margin-bottom: 24px; font-size: 16px; }
+        .cronograma-text .desc { color: var(--text-main); line-height: 1.7; text-align: justify; font-size: 15px; }
+        .cronograma-text .desc p { margin-bottom: 16px; }
+        .cronograma-text .desc strong { color: var(--verde-escuro); }
+        .cronograma-img-wrapper { border-radius: 12px; overflow: hidden; height: 100%; min-height: 300px; position: relative; }
+        .cronograma-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+
+        /*O QUE ESTÁ INCLUSO*/
+        .serv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; max-width: 1000px; margin: 0 auto; text-align: justify; }
+        .inc-card { background: var(--branco-gelo); border: 1px solid var(--branco-gelo); border-radius: 16px; padding: 40px; height: 100%; }
+        .inc-card h3 { color: var(--verde-escuro); display: flex; align-items: center; gap: 10px; margin: 0 0 24px; font-size: 20px; }
+        .exc-card { background: var(--beje-gelo); border: 1px solid var(--beje-gelo); border-radius: 16px; padding: 40px; height: 100%; color: #2d3b37; }
+        .exc-card h3 { color: var(--verde-escuro); display: flex; align-items: center; gap: 10px; margin: 0 0 24px; font-size: 20px; }
         .serv-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 16px; }
         .serv-list li { position: relative; padding-left: 20px; font-size: 15px; color: var(--text-main); line-height: 1.5; }
-        .inc-card .serv-list li::before { content: '•'; position: absolute; left: 0; color: #2e7d32; font-weight: bold; }
-        .exc-card .serv-list li::before { content: '•'; position: absolute; left: 0; color: #be123c; font-weight: bold; }
+        .inc-card .serv-list li::before { content: '•'; position: absolute; left: 0; color: var(--verde-escuro); font-weight: bold; }
+        .exc-card .serv-list li::before { content: '•'; position: absolute; left: 0px; color: var(--verde-escuro); font-weight: bold; }
 
         .obs-box { background: #eef7db; border-radius: 16px; padding: 40px; max-width: 800px; margin: 0 auto; }
         .obs-box h3 { text-align: center; color: var(--verde-escuro); font-family: 'Playfair Display', serif; font-size: 24px; margin: 0 0 24px; }
-        /* Adicionado para justificar o texto dentro de observações importantes */
         .obs-box .serv-list li { text-align: justify; }
 
         @media (max-width: 900px) {
           .hero-grid { grid-template-columns: 1fr; gap: 40px; }
           .hero-title { font-size: 40px; }
-          .rot-gal-grid, .serv-grid { grid-template-columns: 1fr; }
+          .cronograma-content.has-image { grid-template-columns: 1fr; }
+          .serv-grid { grid-template-columns: 1fr; }
         }
       `}</style>
 
@@ -228,7 +272,7 @@ export function ExpedicaoPublica() {
                'Valor do Investimento'}
             </div>
             
-            <div className="hero-price" style={{ color: '#34d399'}}>
+            <div className="hero-price" style={{ color: 'var(--verde-vivo)'}}>
               {precoExibido && precoExibido > 0 ? formatarMoeda(precoExibido) : 'Sob Consulta'}
             </div>
             
@@ -290,7 +334,7 @@ export function ExpedicaoPublica() {
       </section>
 
       <section className="bg-beige">
-        <div className="section-padding container" style={{ paddingBottom: '60px' }}>
+        <div className="section-padding container" style={{ paddingBottom: '40px' }}>
           <div className="section-subtitle" style={{ textAlign: 'center' }}>A Expedição</div>
           <div className="desc-centered" dangerouslySetInnerHTML={formatarEstiloWhatsApp(expedicao.descricao || '')} />
         </div>
@@ -298,64 +342,107 @@ export function ExpedicaoPublica() {
 
       <section className="bg-white">
         <div className="section-padding container">
-          <div className="rot-gal-grid">
-            <div>
-              <div className="section-subtitle">Dia a dia</div>
-              <h2 className="section-title">Roteiro da Expedição</h2>
-              <div style={{ marginTop: '32px' }}>
-                {roteiros.map((rot) => {
-                  const isOpen = diaAberto === rot.dia;
-                  return (
-                    <div className="accordion-item" key={rot.id}>
-                      <div className="accordion-header" onClick={() => setDiaAberto(isOpen ? null : rot.dia)}>
-                        <svg style={{ transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)', transition: '0.2s', color: 'var(--brand-orange)' }} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m9 18 6-6-6-6"/></svg>
-                        Dia {rot.dia} - {rot.titulo.toUpperCase()}
-                      </div>
-                      {isOpen && (
-                        <div className="accordion-body" dangerouslySetInnerHTML={formatarEstiloWhatsApp(rot.descricao)} />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div>
-              <div className="section-subtitle">Galeria de Fotos</div>
-              <h2 className="section-title">Registros Visuais</h2>
+          <div className="section-subtitle" style={{ textAlign: 'center' }}>Galeria de Fotos</div>
+          <h2 className="section-title" style={{ textAlign: 'center' }}>Registros Visuais</h2>
+          
+          {galeria.length > 0 ? (
+            <div className="carousel-container" style={{ marginTop: '40px' }}>
+              <img 
+                src={galeria[currentFotoIndex]} 
+                alt={`Galeria ${currentFotoIndex + 1}`} 
+                className="carousel-img" 
+              />
               
-              {galeria.length > 0 ? (
-                <div className="carousel-container" style={{ marginTop: '32px' }}>
-                  <img 
-                    src={galeria[currentFotoIndex]} 
-                    alt={`Galeria ${currentFotoIndex + 1}`} 
-                    className="carousel-img" 
-                  />
+              {galeria.length > 1 && (
+                <>
+                  <button className="carousel-btn prev" onClick={prevFoto}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                  </button>
+                  <button className="carousel-btn next" onClick={nextFoto}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                  </button>
                   
-                  {galeria.length > 1 && (
-                    <>
-                      <button className="carousel-btn prev" onClick={prevFoto}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                      </button>
-                      <button className="carousel-btn next" onClick={nextFoto}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                      </button>
-                      
-                      <div className="carousel-counter">
-                        {currentFotoIndex + 1}/{galeria.length}
-                      </div>
-                    </>
-                  )}
-                </div>
-              ) : (
-                <div style={{ marginTop: '32px', color: 'var(--text-muted)' }}>Nenhuma foto adicional disponível.</div>
+                  <div className="carousel-counter">
+                    {currentFotoIndex + 1}/{galeria.length}
+                  </div>
+                </>
               )}
             </div>
+          ) : (
+            <div style={{ marginTop: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>Nenhuma foto adicional disponível.</div>
+          )}
+        </div>
+      </section>
+
+      {/* SEÇÃO ROTEIRO / CRONOGRAMA */}
+      <section className="bg-beige">
+        <div className="section-padding container">
+          <div className="cronograma-card">
+            
+            <div className="cronograma-header">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--verde-vivo)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              Cronograma
+            </div>
+
+            {roteiros.length > 0 ? (
+              <>
+                <div className="cronograma-tabs">
+                  {roteiros.map((rot) => (
+                    <button
+                      key={rot.id}
+                      className={`cronograma-tab ${diaAberto === rot.dia ? 'active' : ''}`}
+                      onClick={() => setDiaAberto(rot.dia)}
+                    >
+                      Dia {rot.dia}
+                    </button>
+                  ))}
+                </div>
+
+                {roteiroSelecionado && (
+                  <div className={`cronograma-content ${imagensRoteiro.length > 0 ? 'has-image' : ''}`}>
+                    <div className="cronograma-text">
+                      <h3>Dia {roteiroSelecionado.dia}</h3>
+                      <div className="subtitle">{roteiroSelecionado.titulo}</div>
+                      <div className="desc" dangerouslySetInnerHTML={formatarEstiloWhatsApp(roteiroSelecionado.descricao)} />
+                    </div>
+                    
+                    {imagensRoteiro.length === 1 && (
+                      <div className="cronograma-img-wrapper">
+                        <img src={imagensRoteiro[0]} alt={`Atividade do Dia ${roteiroSelecionado.dia}`} />
+                      </div>
+                    )}
+
+                    {imagensRoteiro.length > 1 && (
+                      <div className="cronograma-img-wrapper" style={{ position: 'relative' }}>
+                        <img 
+                          src={imagensRoteiro[currentRoteiroFotoIndex]} 
+                          alt={`Atividade ${currentRoteiroFotoIndex + 1} do Dia ${roteiroSelecionado.dia}`} 
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                        <button className="carousel-btn prev" onClick={prevRoteiroFoto} style={{ width: '36px', height: '36px' }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                        </button>
+                        <button className="carousel-btn next" onClick={nextRoteiroFoto} style={{ width: '36px', height: '36px' }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                        </button>
+                        <div className="carousel-counter" style={{ padding: '4px 10px', fontSize: '11px' }}>
+                          {currentRoteiroFotoIndex + 1}/{imagensRoteiro.length}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div style={{ color: 'var(--text-muted)' }}>Nenhum roteiro cadastrado para esta expedição.</div>
+            )}
           </div>
         </div>
       </section>
 
-      <section className="bg-beige">
+      <section className="bg-white">
         <div className="section-padding container">
           <div className="serv-grid">
             <div className="inc-card">
@@ -382,7 +469,7 @@ export function ExpedicaoPublica() {
       </section>
 
       {expedicao.observacoes?.length > 0 && (
-        <section className="bg-white">
+        <section className="bg-beige">
           <div className="section-padding container">
             <div className="obs-box">
               <h3>Observações Importantes</h3>

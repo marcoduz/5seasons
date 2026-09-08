@@ -87,9 +87,9 @@ export function AdminLayout() {
         :root {
           --forest: #3c5a53;
           --forest-deep: #2f4842;
-          --sage: #97b7b1;
+          --verde-claro: #97b7b1;
           --nude: #d1b39d;
-          --cream: #e8dad1;
+          --beje-claro: #e8dad1;
           --warm-white: #fffaf8;
           --ink: #26332f;
         }
@@ -179,7 +179,7 @@ export function AdminLayout() {
         }
 
         .admin-nav-link.active {
-          background-color: var(--sage);
+          background-color: var(--verde-claro);
           color: var(--forest-deep);
         }
 
@@ -195,7 +195,7 @@ export function AdminLayout() {
           gap: 8px;
           padding: 11px;
           background: transparent;
-          color: var(--cream);
+          color: var(--beje-claro);
           border: 1px solid rgba(255, 250, 248, 0.28);
           border-radius: 8px;
           font-family: inherit;

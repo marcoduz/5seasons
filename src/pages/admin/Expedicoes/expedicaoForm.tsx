@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/services/supabase';
-import type { Expedicao, Roteiro } from '@/types';
+import type { Expedicao } from '@/types';
 import '../admin-theme.css';
 
 type Tab = 'geral' | 'fotos' | 'inclusoes' | 'roteiro';
@@ -24,6 +24,8 @@ type RoteiroDraftItem = {
   dia: number;
   titulo: string;
   descricao: string;
+  imagens?: string[];
+  pendingImageFile?: File | null;
 };
 
 const EMPTY_FORM: FormState = {
@@ -44,7 +46,6 @@ function uid() {
     : `local-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-// Transformação de formatação segura (Negrito, Itálico, Riscado e Quebras de Linha)
 export function formatarEstiloWhatsApp(texto: string) {
   if (!texto) return { __html: '' };
   
@@ -119,9 +120,17 @@ export function ExpedicaoForm() {
       observacoes: exp.observacoes ?? [],
     });
 
-    const roteiros = (roteiroResult.data ?? []) as Roteiro[];
+    const roteiros = (roteiroResult.data ?? []) as any[];
     setRoteiroItems(
-      roteiros.map((r) => ({ localId: r.id, id: r.id, dia: r.dia, titulo: r.titulo, descricao: r.descricao }))
+      roteiros.map((r) => ({ 
+        localId: r.id, 
+        id: r.id, 
+        dia: r.dia, 
+        titulo: r.titulo, 
+        descricao: r.descricao, 
+        imagens: r.imagens || [],
+        pendingImageFile: null 
+      }))
     );
     setDeletedRoteiroIds([]);
     setLoading(false);
@@ -167,8 +176,8 @@ export function ExpedicaoForm() {
 
     const novas: { file: File; previewUrl: string }[] = [];
     for (const file of Array.from(files)) {
-      if (!['image/png', 'image/jpeg'].includes(file.type)) {
-        setPhotoError('Envie apenas imagens PNG ou JPG.');
+      if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+        setPhotoError('Envie apenas imagens PNG, JPG ou WEBP.');
         continue;
       }
       novas.push({ file, previewUrl: URL.createObjectURL(file) });
@@ -216,9 +225,18 @@ export function ExpedicaoForm() {
       .eq('expedicao_id', currentId)
       .order('dia', { ascending: true })
       .order('created_at', { ascending: true });
-    const roteiros = (data ?? []) as Roteiro[];
+      
+    const roteiros = (data ?? []) as any[];
     setRoteiroItems(
-      roteiros.map((r) => ({ localId: r.id, id: r.id, dia: r.dia, titulo: r.titulo, descricao: r.descricao }))
+      roteiros.map((r) => ({ 
+        localId: r.id, 
+        id: r.id, 
+        dia: r.dia, 
+        titulo: r.titulo, 
+        descricao: r.descricao, 
+        imagens: r.imagens || [],
+        pendingImageFile: null 
+      }))
     );
   }
 
@@ -295,11 +313,30 @@ export function ExpedicaoForm() {
       }
     }
 
-    const paraAtualizar = roteiroItems.filter((item) => item.id);
+    const roteirosProcessados = await Promise.all(roteiroItems.map(async (item) => {
+      if (item.pendingImageFile) {
+        const ext = item.pendingImageFile.name.split('.').pop();
+        const path = `${currentId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error } = await supabase.storage.from('roteiros').upload(path, item.pendingImageFile);
+        
+        if (!error) {
+          const { data } = supabase.storage.from('roteiros').getPublicUrl(path);
+          return { ...item, imagens: [data.publicUrl], pendingImageFile: null };
+        }
+      }
+      return item;
+    }));
+
+    const paraAtualizar = roteirosProcessados.filter((item) => item.id);
     for (const item of paraAtualizar) {
       const { error: updError } = await supabase
         .from('roteiros')
-        .update({ dia: item.dia, titulo: item.titulo, descricao: item.descricao })
+        .update({ 
+          dia: item.dia, 
+          titulo: item.titulo, 
+          descricao: item.descricao, 
+          imagens: item.imagens || [] 
+        })
         .eq('id', item.id);
       if (updError) {
         setSaving(false);
@@ -308,7 +345,7 @@ export function ExpedicaoForm() {
       }
     }
 
-    const paraInserir = roteiroItems.filter((item) => !item.id);
+    const paraInserir = roteirosProcessados.filter((item) => !item.id);
     if (paraInserir.length > 0) {
       const { error: insError } = await supabase.from('roteiros').insert(
         paraInserir.map((item) => ({
@@ -316,6 +353,7 @@ export function ExpedicaoForm() {
           dia: item.dia,
           titulo: item.titulo,
           descricao: item.descricao,
+          imagens: item.imagens || [] 
         }))
       );
       if (insError) {
@@ -370,7 +408,6 @@ export function ExpedicaoForm() {
 
   return (
     <div className="ui-page">
-      {/* Força a aplicação do Itálico e Negrito caso os estilos globais os anulem */}
       <style>{`
         .ui-formatted-text strong {
           font-weight: 700 !important;
@@ -734,7 +771,6 @@ function ListEditor({
   );
 }
 
-// --- Novo Editor de Roteiro (Formatação de Texto Simples) ---
 function RoteiroEditor({
   items,
   setItems,
@@ -748,7 +784,11 @@ function RoteiroEditor({
   
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [dayForm, setDayForm] = useState({ dia: '', titulo: '', descricao: '' });
+  
+  const [dayForm, setDayForm] = useState<{dia: string, titulo: string, descricao: string, imagens: string[], pendingImageFile: File | null}>({ 
+    dia: '', titulo: '', descricao: '', imagens: [], pendingImageFile: null 
+  });
+  
   const [modalError, setModalError] = useState('');
 
   const diasOrdenados = useMemo(() => {
@@ -767,20 +807,40 @@ function RoteiroEditor({
   function openAddModal() {
     const proximoDia = diasOrdenados.length > 0 ? Math.max(...diasOrdenados.map((d) => d.dia)) + 1 : 1;
     setEditingId(null);
-    setDayForm({ dia: String(proximoDia), titulo: '', descricao: '' });
+    setDayForm({ dia: String(proximoDia), titulo: '', descricao: '', imagens: [], pendingImageFile: null });
     setModalError('');
     setModalOpen(true);
   }
 
   function openEditModal(item: RoteiroDraftItem) {
     setEditingId(item.localId);
-    setDayForm({ dia: String(item.dia), titulo: item.titulo, descricao: item.descricao });
+    setDayForm({ 
+      dia: String(item.dia), 
+      titulo: item.titulo, 
+      descricao: item.descricao, 
+      imagens: item.imagens || [], 
+      pendingImageFile: item.pendingImageFile || null 
+    });
     setModalError('');
     setModalOpen(true);
   }
 
   function closeModal() {
     setModalOpen(false);
+  }
+
+  function handleImageSelection(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setModalError('');
+
+    const previewUrl = URL.createObjectURL(file);
+    
+    setDayForm(prev => ({ 
+      ...prev, 
+      imagens: [previewUrl],
+      pendingImageFile: file
+    }));
   }
 
   function submitModal(e: React.MouseEvent | React.FormEvent) {
@@ -801,14 +861,14 @@ function RoteiroEditor({
       setItems((prev) =>
         prev.map((i) =>
           i.localId === editingId
-            ? { ...i, dia: diaNum, titulo: dayForm.titulo.trim(), descricao: dayForm.descricao.trim() }
+            ? { ...i, dia: diaNum, titulo: dayForm.titulo.trim(), descricao: dayForm.descricao.trim(), imagens: dayForm.imagens, pendingImageFile: dayForm.pendingImageFile }
             : i
         )
       );
     } else {
       setItems((prev) => [
         ...prev,
-        { localId: uid(), dia: diaNum, titulo: dayForm.titulo.trim(), descricao: dayForm.descricao.trim() },
+        { localId: uid(), dia: diaNum, titulo: dayForm.titulo.trim(), descricao: dayForm.descricao.trim(), imagens: dayForm.imagens, pendingImageFile: dayForm.pendingImageFile },
       ]);
       setExpandedDias((prev) => new Set(prev).add(diaNum));
     }
@@ -913,6 +973,20 @@ function RoteiroEditor({
                 ) : (
                   <em style={{ opacity: 0.5 }}>Nenhuma descrição informada.</em>
                 )}
+                
+                {/* Exibição simples da foto no resumo do accordion caso ela exista */}
+                {item.imagens && item.imagens.length > 0 && (
+                  <div style={{ marginTop: '16px' }}>
+                    <img 
+                      src={item.imagens[0]} 
+                      alt={`Imagem do dia ${item.dia}`} 
+                      style={{ width: '120px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--beje-claro)' }} 
+                    />
+                    {item.pendingImageFile && (
+                      <span className="ui-photo-pending-badge" style={{ position: 'relative', display: 'inline-block', top: '-10px', left: '10px' }}>Pendente</span>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -970,10 +1044,43 @@ function RoteiroEditor({
                   onChange={(e) => setDayForm(f => ({...f, descricao: e.target.value}))}
                   style={{ minHeight: 180, lineHeight: 1.5 }}
                 />
-                {/* DICA VISUAL CORRIGIDA! Sem duplicar caracteres. */}
                 <span className="ui-hint" style={{ marginTop: '4px' }}>
                   <strong>Dica de formatação:</strong> Igual ao WhatsApp! Envolva a palavra em <strong>*asterisco*</strong> para negrito, <i>_underline_</i> para itálico ou <del>~til~</del> para riscado.
                 </span>
+              </div>
+
+              <div className="ui-field" style={{ marginTop: '16px' }}>
+                <label>Imagem do Dia (Opcional)</label>
+                <label className="ui-file-upload" style={{ marginTop: '8px' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <path d="M12 16V4" />
+                    <path d="m7 9 5-5 5 5" />
+                    <path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
+                  </svg>
+                  Selecionar Foto
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    onChange={handleImageSelection}
+                  />
+                </label>
+
+                {dayForm.imagens && dayForm.imagens.length > 0 && (
+                  <div style={{ marginTop: '12px', padding: '12px', border: '1px solid var(--beje-claro)', borderRadius: '8px', display: 'inline-block' }}>
+                    <img 
+                      src={dayForm.imagens[0]} 
+                      alt="Preview" 
+                      style={{ width: '200px', height: '120px', objectFit: 'cover', borderRadius: '4px', display: 'block' }} 
+                    />
+                    <button 
+                      type="button"
+                      onClick={() => setDayForm(prev => ({ ...prev, imagens: [], pendingImageFile: null }))}
+                      style={{ marginTop: '12px', color: '#be123c', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '13px' }}
+                    >
+                      Remover Imagem
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="ui-modal-footer" style={{ marginTop: '24px' }}>
