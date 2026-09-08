@@ -31,7 +31,6 @@ const PERGUNTAS = [
 export function Duvidas() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-  // Garante que a página inicie no topo
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -41,43 +40,36 @@ export function Duvidas() {
   }
 
   return (
-    <div className="container" style={{ padding: '60px 24px', minHeight: '80vh' }}>
+    <div className="container" style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 20px', color: 'var(--text-main)' }}>
       
-      {/* Botão de voltar (opcional) */}
+      {/* Botão para voltar (Igual ao da Política) */}
       <div style={{ marginBottom: '40px' }}>
         <Link 
           to="/" 
-          style={{ color: 'var(--beje-escuro)', textDecoration: 'none', fontSize: '14px', fontWeight: 'bold' }}
+          style={{ color: 'var(--verde-escuro)', textDecoration: 'none', fontSize: '14px', fontWeight: 'bold' }}
         >
           &larr; VOLTAR PARA O INÍCIO
         </Link>
       </div>
 
-      <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-        <div className="eyebrow" style={{ color: 'var(--beje-escuro)', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '13px', fontWeight: 600, marginBottom: '12px' }}>
-          Tire suas dúvidas
-        </div>
-        <h1 className="hero-title" style={{ color: 'var(--verde-escuro)', fontFamily: 'Playfair Display, serif', fontSize: '42px', margin: 0 }}>
-          Perguntas Frequentes
-        </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '16px', marginTop: '16px', maxWidth: '600px', margin: '16px auto 0' }}>
-          Reunimos aqui as dúvidas mais comuns dos nossos viajantes. Se não encontrar o que procura, fique à vontade para nos chamar no WhatsApp!
-        </p>
-      </div>
+      {/* Título (Igual ao da Política) */}
+      <h1 style={{ fontSize: '2.5rem', marginBottom: '10px', fontFamily: 'Playfair Display, serif', color: 'var(--verde-escuro)', textTransform: 'uppercase' }}>
+        Perguntas Frequentes
+      </h1>
+      <p style={{ fontSize: '14px', opacity: 0.8, marginBottom: '40px' }}>
+        Reunimos aqui as dúvidas mais comuns sobre nossas expedições e experiências.
+      </p>
 
-      <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {/* Lista de Dúvidas - Estilo Clean / Flat */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {PERGUNTAS.map((item, index) => {
           const isOpen = openIndex === index;
           return (
             <div 
               key={index} 
               style={{ 
-                background: 'white', 
-                border: '1px solid var(--beje-claro)', 
-                borderRadius: '12px', 
-                overflow: 'hidden',
-                transition: 'all 0.3s ease',
-                boxShadow: isOpen ? '0 8px 24px rgba(47, 72, 66, 0.08)' : 'none'
+                borderBottom: '1px solid var(--beje-claro)', 
+                overflow: 'hidden'
               }}
             >
               <button 
@@ -86,17 +78,17 @@ export function Duvidas() {
                   width: '100%',
                   background: 'transparent',
                   border: 'none',
-                  padding: '24px',
+                  padding: '24px 0',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   cursor: 'pointer',
                   textAlign: 'left',
-                  color: 'var(--forest-deep)',
-                  fontFamily: 'inherit'
+                  color: 'var(--verde-escuro)',
+                  fontFamily: 'Playfair Display, serif'
                 }}
               >
-                <span style={{ fontSize: '16px', fontWeight: 600, color: 'var(--verde-escuro)' }}>
+                <span style={{ fontSize: '1.3rem' }}>
                   {item.pergunta}
                 </span>
                 <svg 
@@ -109,7 +101,7 @@ export function Duvidas() {
                   style={{
                     transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                     transition: 'transform 0.3s ease',
-                    color: 'var(--beje-escuro)',
+                    color: 'var(--verde-escuro)',
                     flexShrink: 0,
                     marginLeft: '16px'
                   }}
@@ -124,21 +116,25 @@ export function Duvidas() {
                   opacity: isOpen ? 1 : 0,
                   overflow: 'hidden',
                   transition: 'all 0.3s ease-in-out',
-                  padding: isOpen ? '0 24px 24px' : '0 24px 0',
                   color: 'var(--text-main)',
                   lineHeight: 1.6,
                   fontSize: '15px'
                 }}
               >
-                {item.resposta}
+                <div style={{ paddingBottom: '24px' }}>
+                  {item.resposta}
+                </div>
               </div>
             </div>
           );
         })}
       </div>
 
-      <div style={{ textAlign: 'center', marginTop: '60px' }}>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '16px' }}>Ainda precisa de ajuda?</p>
+      {/* Rodapé da página de dúvidas */}
+      <div style={{ marginTop: '60px', paddingTop: '40px', borderTop: '1px solid var(--beje-claro)' }}>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '16px', fontSize: '15px' }}>
+          Não encontrou o que procurava? Fique à vontade para nos chamar!
+        </p>
         <a 
           href="https://wa.me/5554996468737?text=Olá!%20Dei%20uma%20olhada%20no%20FAQ%20mas%20ainda%20tenho%20uma%20dúvida." 
           target="_blank" 
@@ -148,7 +144,7 @@ export function Duvidas() {
             alignItems: 'center',
             gap: '8px',
             background: 'var(--verde-escuro)',
-            color: 'white',
+            color: 'var(--branco-gelo)',
             padding: '12px 24px',
             borderRadius: '99px',
             textDecoration: 'none',
