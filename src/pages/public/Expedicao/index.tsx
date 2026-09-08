@@ -271,7 +271,7 @@ export function ExpedicaoPublica() {
             </div>
             
             <div className="hero-price" style={{ color: 'var(--verde-vivo)'}}>
-              {precoExibido && precoExibido > 0 ? formatarMoeda(precoExibido) : 'Sob Consulta'}
+              {precoExibido && precoExibido > 0 ? formatarMoeda(precoExibido) : ''}
             </div>
             
             <ul className="hero-features">
