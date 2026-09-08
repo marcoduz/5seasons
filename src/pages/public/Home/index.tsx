@@ -30,12 +30,17 @@ function formatarMoedaUSD(valor: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(valor);
 }
 
+function formatarMoedaEUR(valor: number) {
+  return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(valor);
+}
+
 const FILTROS = ['Todos', 'Descubra o Brasil', 'Explore o Mundo', '2026', '2027'];
 
 export function HomePublica() {
   const [filtroAtivo, setFiltroAtivo] = useState('Todos');
   const [pacotes, setPacotes] = useState<any[]>([]);
   const [cotacaoDolar, setCotacaoDolar] = useState<number | null>(null);
+  const [cotacaoEuro, setCotacaoEuro] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
   const filterBarRef = useRef<HTMLDivElement>(null);
@@ -108,7 +113,7 @@ export function HomePublica() {
         .order('status', { ascending: true })
         .order('data_inicio', { ascending: true }),
       
-      fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL')
+      fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL')
         .then(res => res.json())
         .catch(() => null)
     ]);
@@ -119,6 +124,9 @@ export function HomePublica() {
 
     if (dolarRes && dolarRes.USDBRL) {
       setCotacaoDolar(Number(dolarRes.USDBRL.bid));
+    }
+    if (dolarRes && dolarRes.EURBRL) {
+      setCotacaoEuro(Number(dolarRes.EURBRL.bid));
     }
 
     setLoading(false);
@@ -205,8 +213,9 @@ export function HomePublica() {
             }
 
             const loteAtualInfo = pacote.pacote_lotes?.find((l: any) => l.lote_numero === pacote.lote_atual) || pacote.pacote_lotes?.[0];
-            const precoFinal = loteAtualInfo ? loteAtualInfo.preco_single : pacote.preco_single;
+            const precoFinal = loteAtualInfo ? loteAtualInfo.preco_duplo : pacote.preco_duplo;
             const valorEmDolar = cotacaoDolar ? precoFinal / cotacaoDolar : null;
+            const valorEmEuro = cotacaoEuro ? precoFinal / cotacaoEuro : null;
 
             return (
               <Link to={`/expedicao/${pacote.expedicao_id}`} className="exp-card" key={pacote.id}>
@@ -229,15 +238,26 @@ export function HomePublica() {
                   <div className="exp-card-footer">
                     <div className="exp-card-price">
                       {precoFinal ? (
-                        <>
-                          <small>LOTE {pacote.lote_atual || 1}</small>
-                          <strong style={{ display: 'block' }}>{formatarMoedaBRL(precoFinal)}</strong>
-                          {valorEmDolar !== null && (
-                            <span style={{ fontSize: '12px', opacity: 0.8, fontWeight: 500, color: 'var(--beje-escuro)' }}>
-                              ≈ {formatarMoedaUSD(valorEmDolar)}
-                            </span>
+                       <>
+                        <small>LOTE {pacote.lote_atual || 1}</small>
+                        <strong style={{ display: 'block' }}>{formatarMoedaBRL(precoFinal)}</strong>
+                        
+                        {/* Container para manter as moedas na mesma linha */}
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '12px', opacity: 0.8, fontWeight: 500, color: 'var(--beje-escuro)' }}>
+                          {valorEmEuro !== null && (
+                            <span>≈ {formatarMoedaEUR(valorEmEuro)}</span>
                           )}
-                        </>
+
+                          {/* Mostra o separador apenas se ambas as cotações existirem */}
+                          {valorEmEuro !== null && valorEmDolar !== null && (
+                            <span style={{ opacity: 0.5 }}>|</span>
+                          )}
+
+                          {valorEmDolar !== null && (
+                            <span>≈ {formatarMoedaUSD(valorEmDolar)}</span>
+                          )}
+                        </div>
+                      </>
                       ) : (
                         <strong></strong>
                       )}
