@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 const NAV_ITEMS = [
-  // { label: 'Nossa História', to: '/sobre', match: (path: string) => path === '/sobre' },
+  { label: 'Nossa História', to: '/nossa/historia', match: (path: string) => path === '/nossa/historia' },
   { label: 'Expedições', to: '/', match: (path: string) => path === '/' || path.startsWith('/expedicao/') },
   // { label: 'Duvidas', to: '/depoimentos', match: (path: string) => path === '/depoimentos' },
   // { label: 'Fidelidade', to: '/contato', match: (path: string) => path === '/fidelidade' },

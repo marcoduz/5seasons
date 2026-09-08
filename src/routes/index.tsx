@@ -20,6 +20,7 @@ import { ClientesList } from '@/pages/admin/Clientes';
 import { ClienteForm } from '@/pages/admin/Clientes/clientesForm';
 import { ReservasList } from '@/pages/admin/Reservas';
 import { ReservaForm } from '@/pages/admin/Reservas/reservasForm';
+import { NossaHistoria } from '@/pages/public/NossaHistoria';
 
 export function AppRoutes() {
   return (
@@ -31,6 +32,7 @@ export function AppRoutes() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<HomePublica />} />
           <Route path="/expedicao/:id" element={<ExpedicaoPublica />} />
+          <Route path="/nossa/historia" element={<NossaHistoria />} />
         </Route>
 
         {/* ==========================================
