@@ -36,13 +36,11 @@ export function Header() {
 
   useLayoutEffect(() => {
     updatePill();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIndex]);
 
   useEffect(() => {
     window.addEventListener('resize', updatePill);
     return () => window.removeEventListener('resize', updatePill);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIndex]);
 
   return (

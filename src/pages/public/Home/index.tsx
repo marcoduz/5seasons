@@ -30,7 +30,7 @@ function formatarMoedaUSD(valor: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(valor);
 }
 
-const FILTROS = ['Todos', 'Nacionais', 'Internacionais', '2026', '2027'];
+const FILTROS = ['Todos', 'Descubra o Brasil', 'Explore o Mundo', '2026', '2027'];
 
 export function HomePublica() {
   const [filtroAtivo, setFiltroAtivo] = useState('Todos');
@@ -128,8 +128,8 @@ export function HomePublica() {
     if (!exp) return false;
 
     if (filtroAtivo === 'Todos') return true;
-    if (filtroAtivo === 'Nacionais') return exp.tipo_destino === 'Nacional';
-    if (filtroAtivo === 'Internacionais') return exp.tipo_destino === 'Internacional';
+    if (filtroAtivo === 'Descubra o Brasil') return exp.tipo_destino === 'Nacional';
+    if (filtroAtivo === 'Explore o Mundo') return exp.tipo_destino === 'Internacional';
     if (filtroAtivo === '2026') return pacote.data_inicio.startsWith('2026');
     if (filtroAtivo === '2027') return pacote.data_inicio.startsWith('2027');
     
@@ -139,8 +139,8 @@ export function HomePublica() {
   return (
     <div className="container">
       <section className="hero-section">
-        <div className="eyebrow">Saídas Programadas</div>
-        <h1 className="hero-title">Escolha sua próxima aventura</h1>
+        <div className="eyebrow">Próximas Expedições</div>
+        <h1 className="hero-title">Qual será sua próxima experiência?</h1>
 
         <div className="filter-bar" ref={filterBarRef}>
           <div

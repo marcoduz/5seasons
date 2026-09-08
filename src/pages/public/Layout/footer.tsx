@@ -16,6 +16,11 @@ export function Footer() {
               
               <div className="footer-company-info">
                 <p>5 SEASONS - 00.000.000/0000-00</p>
+                <Link 
+                  to="/politica" 
+                  title="Política de privacidade" 
+                  style={{ color: 'var(--branco-gelo)', textDecoration: 'none' }}
+                > Política de privacidade</Link>
               </div>
             </div>
 
