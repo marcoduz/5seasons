@@ -52,6 +52,11 @@ export function HomePublica() {
   }, []);
 
   function updateFilterPill() {
+    if (window.innerWidth <= 768) {
+      setFilterPill((p) => ({ ...p, opacity: 0 }));
+      return;
+    }
+
     const activeIndex = FILTROS.indexOf(filtroAtivo);
     const activeEl = filterBtnRefs.current[activeIndex];
     const barEl = filterBarRef.current;
@@ -243,7 +248,7 @@ export function HomePublica() {
                         <strong style={{ display: 'block' }}>{formatarMoedaBRL(precoFinal)}</strong>
                         
                         {/* Container para manter as moedas na mesma linha */}
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '12px', opacity: 0.8, fontWeight: 500, color: 'var(--beje-escuro)' }}>
+                       <div className="moedas-estrangeiras" style={{ display: 'flex', gap: '8px', alignItems: 'center', opacity: 0.8, fontWeight: 500, color: 'var(--beje-escuro)' }}>
                           {valorEmEuro !== null && (
                             <span>≈ {formatarMoedaEUR(valorEmEuro)}</span>
                           )}
@@ -262,8 +267,8 @@ export function HomePublica() {
                         <strong></strong>
                       )}
                     </div>
-                    <div style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.3)', padding: '8px 16px', borderRadius: '99px', fontSize: '12px', fontWeight: 'bold' }}>
-                      VER EXPEDIÇÃO &rarr;
+                    <div className="btn-ver-expedicao" style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.3)', fontWeight: 'bold' }}>
+                      VER EXPEDIÇÃO <br /> &rarr;
                     </div>
                   </div>
                 </div>
