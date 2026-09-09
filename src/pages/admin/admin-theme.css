@@ -1,9 +1,8 @@
-/* @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap'); */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap');
 
 :root {
   --forest: var(--verde-escuro);
-  --forest-deep: #2f4842; /* Tom extra-escuro mantido para contraste de textos fortes */
+  --forest-deep: #2f4842; 
   --verde-claro: var(--verde-claro);
   --nude: var(--beje-escuro);
   --beje-claro: var(--beje-claro);
@@ -14,11 +13,183 @@
   --danger-border: #e7c9bd;
 }
 
-/* ---------- page shell ---------- */
+/* =========================================
+   ESTRUTURA DO PAINEL (SHELL & SIDEBAR)
+   ========================================= */
+
+.admin-shell {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--warm-white);
+  position: relative;
+}
+
+.admin-sidebar {
+  width: 264px;
+  flex-shrink: 0;
+  background-color: var(--forest);
+  color: var(--warm-white);
+  padding: 36px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  transition: transform 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.admin-brand {
+  text-align: center;
+  margin-bottom: 44px;
+}
+
+.admin-brand-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--warm-white);
+}
+
+.admin-brand-rule {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.admin-brand-rule span:first-child,
+.admin-brand-rule span:last-child {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 250, 248, 0.28);
+}
+
+.admin-brand-rule-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 250, 248, 0.28);
+}
+
+.admin-brand-label {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--nude);
+  white-space: nowrap;
+}
+
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.admin-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 8px;
+  color: rgba(255, 250, 248, 0.78);
+  text-decoration: none;
+  font-size: 14.5px;
+  font-weight: 500;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.admin-nav-link:hover {
+  background-color: rgba(255, 250, 248, 0.08);
+  color: var(--warm-white);
+}
+
+.admin-nav-link.active {
+  background-color: var(--verde-claro);
+  color: var(--forest-deep);
+}
+
+.admin-nav-link svg {
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.admin-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px;
+  background: transparent;
+  color: var(--beje-claro);
+  border: 1px solid rgba(255, 250, 248, 0.28);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.admin-logout:hover {
+  background-color: rgba(255, 250, 248, 0.08);
+  border-color: rgba(255, 250, 248, 0.45);
+}
+
+.admin-main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; 
+}
+
+.admin-mobile-topbar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background-color: var(--forest);
+  color: var(--warm-white);
+}
+
+.admin-mobile-topbar .brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.admin-menu-toggle {
+  background: none;
+  border: none;
+  color: var(--warm-white);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-main {
+  padding: 40px 44px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.admin-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(38, 51, 47, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 90;
+}
+
+/* =========================================
+   ELEMENTOS DE INTERFACE (UI)
+   ========================================= */
+
 .ui-page {
   font-family: 'Inter', -apple-system, sans-serif;
   color: var(--ink);
-  color-scheme: light; /* Força o navegador a usar o tema claro em elementos nativos */
+  color-scheme: light; 
 }
 
 .ui-back {
@@ -207,7 +378,6 @@
   box-shadow: 0 0 0 3px rgba(154, 59, 47, 0.15);
 }
 
-/* Abrange todos os tipos de input para manter o design consistente e evitar fundos escuros/autofill */
 .ui-field input[type='text'],
 .ui-field input[type='email'],
 .ui-field input[type='password'],
@@ -241,7 +411,6 @@
   box-shadow: 0 0 0 3px rgba(151, 183, 177, 0.28);
 }
 
-/* Corrige o fundo escuro do autofill do navegador */
 .ui-field input:-webkit-autofill,
 .ui-field input:-webkit-autofill:hover, 
 .ui-field input:-webkit-autofill:focus {
@@ -285,7 +454,7 @@
   margin-bottom: 16px;
 }
 
-/* ---------- tag list editor (categorias, incluso, etc.) ---------- */
+/* ---------- tag list editor ---------- */
 .ui-tag-input-row {
   display: flex;
   gap: 8px;
@@ -727,4 +896,134 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+/* =========================================
+   TABELAS E GRIDS DO ADMIN
+   ========================================= */
+
+.admin-table-container {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--beje-claro);
+  border-radius: 8px;
+  background: var(--warm-white);
+}
+
+.admin-table {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+}
+
+.admin-table th, 
+.admin-table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--beje-claro);
+  font-size: 14px;
+}
+
+.admin-table th {
+  background: rgba(151, 183, 177, 0.1);
+  color: var(--forest-deep);
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* =========================================
+   RESPONSIVIDADE GERAL DO ADMIN
+   ========================================= */
+
+@media (max-width: 768px) {
+  
+  /* --- SIDEBAR & TOPBAR MOBILE --- */
+  .admin-shell {
+    flex-direction: column;
+  }
+  
+  .admin-mobile-topbar {
+    display: flex; 
+  }
+  
+  .admin-main {
+    padding: 24px 16px; 
+  }
+  
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%); 
+  }
+  
+  .admin-sidebar.is-open {
+    transform: translateX(0);
+  }
+  
+  .admin-overlay.is-open {
+    display: block; 
+  }
+
+  /* --- FORMULÁRIOS & CAMPOS RESPONSIVOS --- */
+  .ui-form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .ui-step-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .ui-step-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .ui-photo-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ui-page-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .ui-page-header > button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .ui-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  
+  .ui-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .ui-tab {
+    margin-right: 12px;
+    white-space: nowrap;
+  }
+
+  .ui-list-editor-row {
+    flex-direction: column;
+  }
+  
+  .ui-list-editor-row button {
+    align-self: flex-end;
+  }
 }

@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/services/supabase';
+import '../admin-theme.css';
 
 const NAV_ITEMS = [
   {
@@ -69,6 +71,11 @@ const NAV_ITEMS = [
 export function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -81,143 +88,12 @@ export function AdminLayout() {
 
   return (
     <div className="admin-shell">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap');
+      <div 
+        className={`admin-overlay ${isSidebarOpen ? 'is-open' : ''}`} 
+        onClick={() => setIsSidebarOpen(false)}
+      />
 
-        :root {
-          --forest: #3c5a53;
-          --forest-deep: #2f4842;
-          --verde-claro: #97b7b1;
-          --nude: #d1b39d;
-          --beje-claro: #e8dad1;
-          --warm-white: #fffaf8;
-          --ink: #26332f;
-        }
-
-        .admin-shell {
-          display: flex;
-          min-height: 100vh;
-          background-color: var(--warm-white);
-          font-family: 'Inter', -apple-system, sans-serif;
-          color: var(--ink);
-        }
-
-        .admin-sidebar {
-          width: 264px;
-          flex-shrink: 0;
-          background-color: var(--forest);
-          color: var(--warm-white);
-          padding: 36px 24px 28px;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .admin-brand {
-          text-align: center;
-          margin-bottom: 44px;
-        }
-
-        .admin-brand-name {
-          font-family: 'Playfair Display', serif;
-          font-size: 26px;
-          font-weight: 600;
-          letter-spacing: 0.01em;
-          color: var(--warm-white);
-        }
-
-        .admin-brand-rule {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          margin-top: 10px;
-        }
-
-        .admin-brand-rule span:first-child,
-        .admin-brand-rule span:last-child {
-          content: '';
-          flex: 1;
-          height: 1px;
-          background: rgba(255, 250, 248, 0.28);
-        }
-
-        .admin-brand-rule-line {
-          flex: 1;
-          height: 1px;
-          background: rgba(255, 250, 248, 0.28);
-        }
-
-        .admin-brand-label {
-          font-size: 11px;
-          letter-spacing: 0.16em;
-          color: var(--nude);
-          white-space: nowrap;
-        }
-
-        .admin-nav {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-          flex: 1;
-        }
-
-        .admin-nav-link {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 11px 14px;
-          border-radius: 8px;
-          color: rgba(255, 250, 248, 0.78);
-          text-decoration: none;
-          font-size: 14.5px;
-          font-weight: 500;
-          transition: background-color 0.15s ease, color 0.15s ease;
-        }
-
-        .admin-nav-link:hover {
-          background-color: rgba(255, 250, 248, 0.08);
-          color: var(--warm-white);
-        }
-
-        .admin-nav-link.active {
-          background-color: var(--verde-claro);
-          color: var(--forest-deep);
-        }
-
-        .admin-nav-link svg {
-          flex-shrink: 0;
-          opacity: 0.9;
-        }
-
-        .admin-logout {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          padding: 11px;
-          background: transparent;
-          color: var(--beje-claro);
-          border: 1px solid rgba(255, 250, 248, 0.28);
-          border-radius: 8px;
-          font-family: inherit;
-          font-size: 14px;
-          font-weight: 500;
-          cursor: pointer;
-          transition: background-color 0.15s ease, border-color 0.15s ease;
-        }
-
-        .admin-logout:hover {
-          background-color: rgba(255, 250, 248, 0.08);
-          border-color: rgba(255, 250, 248, 0.45);
-        }
-
-        .admin-main {
-          flex: 1;
-          padding: 40px 44px;
-          overflow-y: auto;
-        }
-      `}</style>
-
-      <aside className="admin-sidebar">
+      <aside className={`admin-sidebar ${isSidebarOpen ? 'is-open' : ''}`}>
         <div className="admin-brand">
           <div className="admin-brand-name">5Seasons</div>
           <div className="admin-brand-rule">
@@ -250,9 +126,26 @@ export function AdminLayout() {
         </button>
       </aside>
 
-      <main className="admin-main">
-        <Outlet />
-      </main>
+      <div className="admin-main-wrapper">
+        <header className="admin-mobile-topbar">
+          <div className="brand">5Seasons Admin</div>
+          <button 
+            className="admin-menu-toggle" 
+            onClick={() => setIsSidebarOpen(true)}
+            aria-label="Abrir Menu"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+        </header>
+
+        <main className="admin-main">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }
