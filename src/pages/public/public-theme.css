@@ -416,3 +416,164 @@ body {
   transition: transform 0.2s;
 }
 .whatsapp-float:hover { transform: scale(1.1); }
+
+/* ================= Botão Menu Mobile ================= */
+.mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  grid-column: 3;
+  justify-self: end;
+  padding: 4px;
+}
+
+/* ================= Responsividade (Mobile) ================= */
+@media (max-width: 768px) {
+  
+  /* --- HEADER & NAVEGAÇÃO --- */
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .public-nav {
+    position: fixed;
+    top: 74px; /* Altura do header */
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 74px);
+    background-color: var(--verde-escuro);
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 32px 24px;
+    gap: 16px;
+    transform: translateX(100%); /* Esconde a gaveta para a direita */
+    transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1);
+    z-index: 99;
+  }
+
+  /* Classe ativada pelo React quando clica no hambúrguer */
+  .public-nav.mobile-open {
+    transform: translateX(0); /* Desliza a gaveta para dentro */
+  }
+
+  .public-nav-pill {
+    display: none !important; /* Esconde a pílula no celular */
+  }
+
+  .public-nav-link {
+    font-size: 20px;
+    padding: 12px 0;
+    width: 100%;
+    display: block;
+    text-transform: none; /* Deixa o texto mais natural no menu lateral */
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-radius: 0;
+  }
+
+  .public-nav-link.active {
+    color: var(--brand-orange, #fdb17f); /* Muda a cor de destaque no celular */
+    border-bottom-color: var(--brand-orange, #fdb17f);
+  }
+
+  /* --- FOOTER --- */
+  .footer-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 40px;
+  }
+
+  .public-footer {
+    padding: 40px 0 100px; /* Mais espaço embaixo para o botão do WhatsApp flutuante */
+  }
+
+  /* --- HOME: HERO & FILTROS --- */
+  .hero-section {
+    padding: 60px 0 20px;
+  }
+
+  .hero-title {
+    font-size: 32px;
+  }
+
+  /* Filtro Flexível (Adapta-se ao tamanho do texto do cliente) */
+  .filter-bar {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap; /* Permite que os botões quebrem de linha naturalmente */
+    justify-content: center; /* Centraliza tudo */
+    gap: 8px;
+    padding: 12px;
+    border-radius: 16px;
+    background: white;
+  }
+  
+  .filter-btn {
+    flex: 1 1 auto; /* Faz o botão esticar para preencher os buracos vazios */
+    padding: 10px 14px; 
+    font-size: 13px;  
+    width: auto;
+    text-align: center;
+    white-space: nowrap; /* Proíbe o texto do cliente de quebrar em duas linhas dentro do botão */
+  }
+
+  .filter-btn.active {
+    background-color: var(--brand-dark, #2f4842);
+    color: white;
+  }
+
+  .filter-divider {
+    display: none;
+  }
+
+  /* --- HOME: CARDS DE EXPEDIÇÃO --- */
+  .cards-grid {
+    grid-template-columns: 1fr; 
+    gap: 20px;
+    padding: 20px 0 60px;
+  }
+
+  .exp-card {
+    aspect-ratio: auto; /* Tira a proporção fixa para o card crescer de acordo com o conteúdo */
+    min-height: 480px; /* Garante uma altura mínima bonita */
+  }
+
+  .exp-card-title {
+    font-size: 22px;
+  }
+
+  /* Ajuste do rodapé do card para mobile */
+  .exp-card-footer {
+    display: grid;
+    grid-template-columns: 1fr auto; /* Preços na esquerda, botão na direita */
+    gap: 12px;
+    align-items: end; /* Alinha pelo botão */
+  }
+
+  .exp-card-price strong {
+    font-size: 16px; /* Diminui a fonte do preço principal */
+  }
+  
+  .exp-card-price small {
+    font-size: 9px;
+  }
+
+  .exp-card-price .moedas-estrangeiras {
+    flex-wrap: wrap; /* Permite que Euro e Dólar quebrem linha se necessário */
+    gap: 4px;
+    font-size: 11px;
+  }
+
+  /* Diminui e arredonda o botão "Ver Expedição" no mobile */
+  .btn-ver-expedicao {
+    padding: 10px 14px;
+    font-size: 11px;
+    text-align: center;
+    line-height: 1.2;
+    border-radius: 20px; /* Formato de "pílula" como na sua imagem */
+    white-space: nowrap; /* Impede o botão de quebrar linha internamente */
+  }
+}

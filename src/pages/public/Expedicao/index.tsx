@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/services/supabase';
+import './expedicao.css'; // <-- Importando o nosso novo arquivo limpo
 
 function formatarEstiloWhatsApp(texto: string) {
   if (!texto) return { __html: '' };
@@ -38,7 +39,6 @@ export function ExpedicaoPublica() {
   const [diaAberto, setDiaAberto] = useState<number | null>(null);
   const [currentFotoIndex, setCurrentFotoIndex] = useState(0);
   
-  // NOVO: Estado para controlar o índice do carrossel do dia selecionado no cronograma
   const [currentRoteiroFotoIndex, setCurrentRoteiroFotoIndex] = useState(0);
 
   useEffect(() => {
@@ -46,7 +46,6 @@ export function ExpedicaoPublica() {
     fetchExpedicaoCompleta();
   }, [id]);
 
-  // Sempre que mudar o dia aberto, reseta o índice da foto do cronograma para 0
   useEffect(() => {
     setCurrentRoteiroFotoIndex(0);
   }, [diaAberto]);
@@ -117,7 +116,6 @@ export function ExpedicaoPublica() {
   const roteiroSelecionado = roteiros.find(rot => rot.dia === diaAberto);
   const imagensRoteiro = roteiroSelecionado?.imagens || [];
 
-  // Funções de controle do carrossel do cronograma
   function nextRoteiroFoto() {
     setCurrentRoteiroFotoIndex((prev) => (prev === imagensRoteiro.length - 1 ? 0 : prev + 1));
   }
@@ -128,137 +126,6 @@ export function ExpedicaoPublica() {
 
   return (
     <div>
-      <style>{`
-        .bg-beige { background-color: var(--branco-gelo); } 
-        .bg-white { background-color: #ffffff; }
-
-        .hero-banner {
-          position: relative;
-          min-height: 80vh;
-          display: flex;
-          align-items: center;
-          background-size: cover;
-          background-position: center;
-          padding: 80px 0;
-        }
-        .hero-overlay {
-          position: absolute;
-          inset: 0;
-          background: rgba(17, 26, 23, 0.65);
-        }
-        .hero-grid {
-          position: relative;
-          z-index: 2;
-          display: grid;
-          grid-template-columns: 380px 1fr;
-          gap: 60px;
-          align-items: center;
-        }
-        
-        .hero-card {
-          background: #151e1b;
-          border-radius: 16px;
-          padding: 40px 32px;
-          color: white;
-          box-shadow: 0 24px 48px rgba(0,0,0,0.3);
-        }
-        .hero-price-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #a1a1aa; margin-bottom: 8px; }
-        .hero-price { font-size: 36px; font-weight: 700; margin: 0 0 24px; line-height: 1; transition: color 0.3s; }
-        .hero-features { list-style: none; padding: 0; margin: 0 0 32px; }
-        .hero-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; margin-bottom: 12px; color: #e4e4e7; }
-        .hero-features li span { flex: 1; text-align: justify; }
-        .hero-features svg { flex-shrink: 0; color: var(--verde-vivo); margin-top: 2px; }
-        .btn-orange { display: block; text-align: center; background: #fdb17f; color: #151e1b; padding: 16px; border-radius: 8px; font-weight: 700; text-decoration: none; transition: transform 0.2s; }
-        .btn-orange:hover { transform: translateY(-2px); }
-
-        .hero-text-area { color: white; }
-        .hero-tag { font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #fdb17f; margin-bottom: 16px; display: block; }
-        .hero-title { font-family: 'Playfair Display', serif; font-size: 56px; font-weight: 600; line-height: 1.1; margin: 0 0 24px; }
-        .hero-desc { font-size: 16px; line-height: 1.6; opacity: 0.9; margin-bottom: 32px; max-width: 600px; }
-        .hero-pills { display: flex; gap: 12px; flex-wrap: wrap; }
-        .hero-pill { background: rgba(255,255,255,0.15); backdrop-filter: blur(4px); padding: 10px 20px; border-radius: 99px; font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
-
-        .outra-data-btn {
-          background: transparent;
-          border: none;
-          padding: 6px 0;
-          text-align: left;
-          font-size: 14px;
-          color: rgba(255, 255, 255, 0.85);
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          cursor: pointer;
-          font-family: inherit;
-          transition: color 0.2s ease;
-        }
-        .outra-data-btn strong { color: white; transition: color 0.2s ease; }
-        .outra-data-btn:hover { color: var(--brand-orange); }
-        .outra-data-btn:hover strong { color: var(--brand-orange); }
-
-        .section-padding { padding: 80px 0; }
-        .section-title { font-family: 'Playfair Display', serif; font-size: 32px; color: var(--verde-escuro); margin: 0 0 12px; text-transform: uppercase; letter-spacing: 1px; }
-        .section-subtitle { font-size: 14px; color: var(--brand-orange); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 32px; font-weight: 600; }
-        
-        .desc-centered { max-width: 800px; margin: 0 auto; text-align: center; font-size: 18px; line-height: 1.8; color: var(--text-main); font-weight: 300; font-style: italic; }
-        
-        .carousel-container { position: relative; width: 100%; max-width: 1000px; margin: 0 auto; border-radius: 16px; overflow: hidden; aspect-ratio: 16/9; }
-        .carousel-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity 0.3s ease-in-out; }
-        .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; background: rgba(38, 51, 47, 0.5); color: white; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; backdrop-filter: blur(4px); transition: background 0.2s; }
-        .carousel-btn:hover { background: rgba(38, 51, 47, 0.8); }
-        .carousel-btn.prev { left: 16px; }
-        .carousel-btn.next { right: 16px; }
-        .carousel-counter { position: absolute; bottom: 16px; right: 16px; background: rgba(38, 51, 47, 0.7); color: white; padding: 6px 16px; border-radius: 99px; font-size: 13px; font-weight: 600; letter-spacing: 1px; backdrop-filter: blur(4px); }
-
-        /* CRONOGRAMA */
-        .cronograma-card {
-          background: white; border: 1px solid var(--cream); border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); max-width: 1000px; margin: 0 auto;
-        }
-        .cronograma-header {
-          display: flex; align-items: center; gap: 10px; margin-bottom: 24px; color: var(--verde-escuro); font-size: 24px; font-weight: 700;
-        }
-        .cronograma-tabs {
-          display: flex; gap: 10px; margin-bottom: 40px; overflow-x: auto; padding-bottom: 24px; border-bottom: 1px solid var(--cream);
-        }
-        .cronograma-tab {
-          background: var(--branco-gelo); color: var(--text-main); border: none; padding: 10px 24px; border-radius: 99px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; white-space: nowrap;
-        }
-        .cronograma-tab:hover { background: #e2e8f0; }
-        .cronograma-tab.active { background: var(--verde-vivo); color: white; }
-        
-        .cronograma-content { display: grid; gap: 40px; }
-        .cronograma-content.has-image { grid-template-columns: 1.2fr 1fr; }
-        .cronograma-text h3 { font-size: 24px; color: var(--verde-escuro); margin: 0 0 8px; }
-        .cronograma-text .subtitle { color: var(--verde-vivo); font-weight: 600; margin-bottom: 24px; font-size: 16px; }
-        .cronograma-text .desc { color: var(--text-main); line-height: 1.7; text-align: justify; font-size: 15px; }
-        .cronograma-text .desc p { margin-bottom: 16px; }
-        .cronograma-text .desc strong { color: var(--verde-escuro); }
-        .cronograma-img-wrapper { border-radius: 12px; overflow: hidden; height: 100%; min-height: 300px; position: relative; }
-        .cronograma-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-
-        /*O QUE ESTÁ INCLUSO*/
-        .serv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; max-width: 1000px; margin: 0 auto; text-align: justify; }
-        .inc-card { background: var(--branco-gelo); border: 1px solid var(--branco-gelo); border-radius: 16px; padding: 40px; height: 100%; }
-        .inc-card h3 { color: var(--verde-escuro); display: flex; align-items: center; gap: 10px; margin: 0 0 24px; font-size: 20px; }
-        .exc-card { background: var(--beje-gelo); border: 1px solid var(--beje-gelo); border-radius: 16px; padding: 40px; height: 100%; color: #2d3b37; }
-        .exc-card h3 { color: var(--verde-escuro); display: flex; align-items: center; gap: 10px; margin: 0 0 24px; font-size: 20px; }
-        .serv-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 16px; }
-        .serv-list li { position: relative; padding-left: 20px; font-size: 15px; color: var(--text-main); line-height: 1.5; }
-        .inc-card .serv-list li::before { content: '•'; position: absolute; left: 0; color: var(--verde-escuro); font-weight: bold; }
-        .exc-card .serv-list li::before { content: '•'; position: absolute; left: 0px; color: var(--verde-escuro); font-weight: bold; }
-
-        .obs-box { background: #eef7db; border-radius: 16px; padding: 40px; max-width: 800px; margin: 0 auto; }
-        .obs-box h3 { text-align: center; color: var(--verde-escuro); font-family: 'Playfair Display', serif; font-size: 24px; margin: 0 0 24px; }
-        .obs-box .serv-list li { text-align: justify; }
-
-        @media (max-width: 900px) {
-          .hero-grid { grid-template-columns: 1fr; gap: 40px; }
-          .hero-title { font-size: 40px; }
-          .cronograma-content.has-image { grid-template-columns: 1fr; }
-          .serv-grid { grid-template-columns: 1fr; }
-        }
-      `}</style>
-
       <section className="hero-banner" style={{ backgroundImage: `url(${imagemCapa})` }}>
         <div className="hero-overlay"></div>
         <div className="container hero-grid">
@@ -372,7 +239,6 @@ export function ExpedicaoPublica() {
         </div>
       </section>
 
-      {/* SEÇÃO ROTEIRO / CRONOGRAMA */}
       <section className="bg-beige">
         <div className="section-padding container">
           <div className="cronograma-card">

@@ -8,6 +8,8 @@ export function ExpedicoesList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [busca, setBusca] = useState("");
+  
+  // Guardado para o futuro: Estado de exclusão
   // const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -18,7 +20,7 @@ export function ExpedicoesList() {
     setLoading(true);
     setError("");
 
-    // OTIMIZAÇÃO: Busca apenas as colunas usadas no card (ignora descrições gigantes)
+    // OTIMIZAÇÃO: Busca apenas as colunas usadas no card
     const { data, error } = await supabase
       .from("expedicoes")
       .select("id, nome, pais, tipo_destino, categorias, fotos")
@@ -32,6 +34,7 @@ export function ExpedicoesList() {
     setLoading(false);
   }
 
+  // Guardado para o futuro: Função de exclusão
   // async function handleDelete(e: React.MouseEvent, expedicao: any) {
   //   e.preventDefault();
   //   e.stopPropagation();
@@ -89,69 +92,6 @@ export function ExpedicoesList() {
         .scroll-area::-webkit-scrollbar-track { background: transparent; }
         .scroll-area::-webkit-scrollbar-thumb { background: rgba(38, 51, 47, 0.15); border-radius: 10px; }
         .scroll-area::-webkit-scrollbar-thumb:hover { background: rgba(38, 51, 47, 0.3); }
-
-        .exp-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-          gap: 24px;
-        }
-        
-        .exp-card {
-          background: white;
-          border: 1px solid var(--beje-claro);
-          border-radius: 12px;
-          overflow: hidden;
-          transition: transform 0.2s, box-shadow 0.2s;
-          display: flex;
-          flex-direction: column;
-          text-decoration: none;
-        }
-        .exp-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 12px 24px rgba(0,0,0,0.06);
-        }
-        .exp-img {
-          width: 100%;
-          height: 180px;
-          object-fit: cover;
-          background: #e8dad1;
-        }
-        .exp-content {
-          padding: 20px;
-          flex: 1;
-        }
-        .exp-title {
-          font-family: 'Playfair Display', serif;
-          font-size: 18px;
-          font-weight: 600;
-          color: var(--forest-deep);
-          margin: 0 0 4px;
-        }
-        .exp-subtitle {
-          font-size: 13px;
-          color: var(--text-muted);
-          margin-bottom: 16px;
-        }
-        .ui-exp-card-chips {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 6px;
-        }
-        .ui-chip-sm {
-          background: var(--verde-claro);
-          color: var(--verde-escuro);
-          padding: 4px 10px;
-          border-radius: 99px;
-          font-size: 11px;
-          font-weight: 600;
-        }
-        .exp-actions {
-          border-top: 1px solid var(--beje-claro);
-          padding: 12px 20px;
-          display: flex;
-          justify-content: flex-end;
-          background: #fafaf9;
-        }
       `}</style>
 
       {/* ÁREA SUPERIOR FIXA (Cabeçalho e Filtros) */}
@@ -212,7 +152,7 @@ export function ExpedicoesList() {
           flex: 1,
           overflowY: "auto",
           paddingRight: "12px",
-          paddingBottom: "32px",
+          paddingBottom: "120px", /* MARGEM AUMENTADA PARA NÃO CORTAR A ROLAGEM NO CELULAR */
         }}
       >
         {loading && <div className="ui-state">Carregando expedições...</div>}
@@ -248,7 +188,7 @@ export function ExpedicoesList() {
           )}
 
         {!loading && !error && expedicoesFiltradas.length > 0 && (
-          <div className="exp-grid">
+          <div className="ui-card-grid">
             {expedicoesFiltradas.map((exp) => {
               const imagemCapa =
                 exp.fotos && exp.fotos.length > 0 ? exp.fotos[0] : "";
@@ -256,16 +196,20 @@ export function ExpedicoesList() {
               return (
                 <Link
                   to={`/admin/expedicoes/${exp.id}`}
-                  className="exp-card"
+                  className="ui-exp-card"
                   key={exp.id}
                 >
-                  <img src={imagemCapa} alt={exp.nome} className="exp-img" />
+                  <div className="ui-exp-card-photo">
+                    {imagemCapa && (
+                      <img src={imagemCapa} alt={exp.nome} />
+                    )}
+                  </div>
 
-                  <div className="exp-content">
-                    <h3 className="exp-title">{exp.nome}</h3>
-                    <div className="exp-subtitle">
+                  <div className="ui-exp-card-body">
+                    <h3 className="ui-exp-card-title">{exp.nome}</h3>
+                    <p className="ui-exp-card-meta">
                       {exp.pais} - {exp.tipo_destino}
-                    </div>
+                    </p>
 
                     {exp.categorias?.length > 0 && (
                       <div className="ui-exp-card-chips">
@@ -283,8 +227,8 @@ export function ExpedicoesList() {
                     )}
                   </div>
 
-                  {/* COMENTADO A PARTE DE EXCLUSÂO DA EXPEDIÇÂO POIS PODE TER PROBLEMAS */}
-                  {/* <div className="exp-actions">
+                  {/* Guardado para o futuro: Botão de exclusão da expedição */}
+                  {/* <div className="ui-exp-card-actions">
                     <button
                       type="button"
                       className="ui-icon-btn danger"

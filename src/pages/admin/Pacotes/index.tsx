@@ -21,7 +21,7 @@ export function PacotesList() {
   const [statusFiltro, setStatusFiltro] = useState("");
   const [dataFiltro, setDataFiltro] = useState("");
   const [vagasFiltro, setVagasFiltro] = useState("");
-  const [visibilidadeFiltro, setVisibilidadeFiltro] = useState("Visíveis"); // Padrão: Visíveis
+  const [visibilidadeFiltro, setVisibilidadeFiltro] = useState("Visíveis"); 
 
   const filterBarRef = useRef<HTMLDivElement>(null);
   const filterBtnRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -47,6 +47,7 @@ export function PacotesList() {
 
     const barRect = barEl.getBoundingClientRect();
     const btnRect = activeEl.getBoundingClientRect();
+
     setFilterPill({
       left: btnRect.left - barRect.left,
       width: btnRect.width,
@@ -88,6 +89,7 @@ export function PacotesList() {
     const confirmado = window.confirm(
       `Remover o pacote "${pacote.nome}"?\nAtenção: Você não poderá excluir se houver reservas vinculadas a ele.`,
     );
+
     if (!confirmado) return;
 
     setDeletingId(pacote.id);
@@ -95,6 +97,7 @@ export function PacotesList() {
       .from("pacotes")
       .delete()
       .eq("id", pacote.id);
+
     setDeletingId(null);
 
     if (error) {
@@ -124,7 +127,6 @@ export function PacotesList() {
     }).format(valor);
   }
 
-  // Lógica de filtragem avançada
   const pacotesFiltrados = useMemo(() => {
     return pacotes.filter((pacote) => {
       // 1. Filtro por texto
@@ -191,7 +193,7 @@ export function PacotesList() {
         /* Remove a rolagem da página inteira para garantir o efeito fixo */
         body { overflow: hidden !important; }
         
-        /* Estilização da barra de rolagem exclusiva da listagem */
+        /* Estiliza o da barra de rolagem exclusiva da listagem */
         .scroll-area::-webkit-scrollbar { width: 8px; }
         .scroll-area::-webkit-scrollbar-track { background: transparent; }
         .scroll-area::-webkit-scrollbar-thumb { background: rgba(38, 51, 47, 0.15); border-radius: 10px; }
@@ -269,7 +271,6 @@ export function PacotesList() {
             alignItems: "center",
           }}
         >
-
           {/* Busca por texto */}
           <div className="ui-search" style={{ margin: 0, flex: "1 1 200px" }}>
             <svg
@@ -385,7 +386,7 @@ export function PacotesList() {
                 }}
                 title="Limpar data"
               >
-                ✕
+                ✖
               </button>
             )}
           </div>
@@ -418,10 +419,11 @@ export function PacotesList() {
           flex: 1,
           overflowY: "auto",
           paddingRight: "12px",
-          paddingBottom: "32px",
+          paddingBottom: "120px",
         }}
       >
         {loading && <div className="ui-state">Carregando pacotes...</div>}
+
         {!loading && error && (
           <div className="ui-state" style={{ color: "var(--danger-text)" }}>
             {error}
@@ -460,50 +462,16 @@ export function PacotesList() {
           )}
 
         {!loading && !error && pacotesFiltrados.length > 0 && (
-          <div
-            style={{
-              backgroundColor: "var(--warm-white)",
-              border: "1px solid var(--beje-claro)",
-              borderRadius: 8,
-              overflow: "hidden",
-            }}
-          >
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                textAlign: "left",
-                fontSize: 14,
-              }}
-            >
+          <div className="admin-table-container">
+            <table className="admin-table">
               <thead>
-                <tr
-                  style={{
-                    borderBottom: "1px solid var(--beje-claro)",
-                    backgroundColor: "rgba(151, 183, 177, 0.08)",
-                    color: "var(--forest-deep)",
-                  }}
-                >
-                  <th style={{ padding: "14px 16px", fontWeight: 600 }}>
-                    Nome / Expedição
-                  </th>
-                  <th style={{ padding: "14px 16px", fontWeight: 600 }}>
-                    Período
-                  </th>
-                  <th style={{ padding: "14px 16px", fontWeight: 600 }}>
-                    Vagas
-                  </th>
-                  <th style={{ padding: "14px 16px", fontWeight: 600 }}>
-                    Valor (Individual)
-                  </th>
-                  <th style={{ padding: "14px 16px", fontWeight: 600 }}>
-                    Status
-                  </th>
-                  <th
-                    style={{ padding: "14px 16px", fontWeight: 600, width: 90 }}
-                  >
-                    Ações
-                  </th>
+                <tr>
+                  <th>Nome / Expedição</th>
+                  <th>Período</th>
+                  <th>Vagas</th>
+                  <th>Valor (Individual)</th>
+                  <th>Status</th>
+                  <th style={{ width: 90 }}>Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -534,12 +502,11 @@ export function PacotesList() {
                     <tr
                       key={pacote.id}
                       style={{
-                        borderBottom: "1px solid var(--beje-claro)",
                         transition: "background-color 0.15s ease",
                         opacity: isOculto ? 0.75 : 1,
                       }}
                     >
-                      <td style={{ padding: "14px 16px" }}>
+                      <td>
                         <div
                           style={{
                             fontWeight: 600,
@@ -551,7 +518,6 @@ export function PacotesList() {
                           }}
                         >
                           {pacote.nome}
-
                           {/* SINALIZADOR VISUAL DE PACOTE OCULTO */}
                           {isOculto && (
                             <span
@@ -596,16 +562,16 @@ export function PacotesList() {
                           }}
                         >
                           {pacote.expedicoes?.nome ||
-                            "Expedição não encontrada"}
+                            "Expedição encontrada"}
                         </div>
                       </td>
-                      <td style={{ padding: "14px 16px", color: "var(--ink)" }}>
+                      <td style={{ color: "var(--ink)" }}>
                         {formatarData(pacote.data_inicio)} <br />
                         <span style={{ fontSize: 12, opacity: 0.6 }}>
                           até {formatarData(pacote.data_fim)}
                         </span>
                       </td>
-                      <td style={{ padding: "14px 16px" }}>
+                      <td>
                         <span
                           style={{
                             fontWeight: esgotado ? 600 : 400,
@@ -617,14 +583,13 @@ export function PacotesList() {
                       </td>
                       <td
                         style={{
-                          padding: "14px 16px",
                           color: "var(--forest-deep)",
                           fontWeight: 500,
                         }}
                       >
                         {formatarMoeda(pacote.preco_single)}
                       </td>
-                      <td style={{ padding: "14px 16px" }}>
+                      <td>
                         <span
                           style={{
                             padding: "4px 8px",
@@ -638,7 +603,7 @@ export function PacotesList() {
                           {esgotado ? "Esgotado" : pacote.status}
                         </span>
                       </td>
-                      <td style={{ padding: "14px 16px" }}>
+                      <td>
                         <div style={{ display: "flex", gap: 6 }}>
                           <Link
                             to={`/admin/pacotes/${pacote.id}`}
