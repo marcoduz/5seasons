@@ -12,6 +12,9 @@ body {
   background-color: var(--branco-gelo);
   color: var(--text-main);
   -webkit-font-smoothing: antialiased;
+  /* Estas duas linhas abaixo vão forçar o site público a rolar, ignorando o bloqueio do Admin */
+  overflow-x: hidden;
+  overflow-y: auto !important; 
 }
 
 /* ================= Containers & Header ================= */
@@ -307,6 +310,36 @@ body {
   font-weight: 600;
 }
 
+/* Estilo Global do Botão Ver Expedição (Computador e Base) */
+.btn-ver-expedicao {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 99px !important; /* Mantém redondo estilo pílula */
+  transition: all 0.2s ease;
+  text-align: center;
+  color: white !important; /* Força o texto a ficar branco */
+  text-decoration: none;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.btn-ver-expedicao:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important; /* Efeito de brilho ao passar o mouse */
+  transform: translateY(-2px);
+}
+
+.moedas-estrangeiras {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  opacity: 0.8;
+  font-weight: 500;
+  color: var(--beje-escuro);
+  white-space: nowrap; /* IMPEDE A QUEBRA DE LINHA */
+  margin-top: 4px;
+}
+
 /* ================= Footer Atualizado ================= */
 .public-footer {
   background-color: var(--verde-escuro); 
@@ -567,13 +600,12 @@ body {
     font-size: 11px;
   }
 
-  /* Diminui e arredonda o botão "Ver Expedição" no mobile */
+  /* Diminui o botão "Ver Expedição" no mobile */
   .btn-ver-expedicao {
     padding: 10px 14px;
     font-size: 11px;
     text-align: center;
     line-height: 1.2;
-    border-radius: 20px; /* Formato de "pílula" como na sua imagem */
     white-space: nowrap; /* Impede o botão de quebrar linha internamente */
   }
 }

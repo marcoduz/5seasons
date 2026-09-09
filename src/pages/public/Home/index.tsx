@@ -268,7 +268,7 @@ export function HomePublica() {
                       )}
                     </div>
                     <div className="btn-ver-expedicao" style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.3)', fontWeight: 'bold' }}>
-                      VER EXPEDIÇÃO <br /> &rarr;
+                      VER EXPEDIÇÃO &rarr;
                     </div>
                   </div>
                 </div>
