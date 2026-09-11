@@ -19,7 +19,9 @@
 
 .admin-shell {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
   background-color: var(--warm-white);
   position: relative;
 }
@@ -139,6 +141,8 @@
   display: flex;
   flex-direction: column;
   min-width: 0; 
+  height: 100vh;
+  overflow: hidden;
 }
 
 .admin-mobile-topbar {
@@ -168,9 +172,11 @@
 }
 
 .admin-main {
-  padding: 40px 44px;
+  padding: 32px 40px 0;
   flex: 1;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden !important;
 }
 
 .admin-overlay {
@@ -190,6 +196,54 @@
   font-family: 'Inter', -apple-system, sans-serif;
   color: var(--ink);
   color-scheme: light; 
+
+  /* A Mágica do Layout Fixo com Scroll Interno */
+  height: 100% !important; 
+  max-height: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden !important;
+  padding-bottom: 0 !important;
+}
+
+/* Garante que cabeçalhos, botões de voltar e abas fiquem grudados no topo */
+.ui-page > .ui-back,
+.ui-page > .ui-page-header,
+.ui-page > .ui-tabs,
+.ui-page > .ui-form-error,
+.ui-page > .ui-form-success,
+.ui-page > div:not(.scroll-area) {
+   flex-shrink: 0;
+}
+
+/* Faz apenas os formulários ou as tabelas rolarem suavemente */
+.scroll-area, 
+.ui-page > form {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 16px;
+  padding-bottom: 80px;
+  margin-right: -8px;
+}
+
+/* Estilização universal da barra de rolagem no Admin */
+.scroll-area::-webkit-scrollbar,
+.ui-page > form::-webkit-scrollbar { 
+  width: 8px; 
+}
+.scroll-area::-webkit-scrollbar-track,
+.ui-page > form::-webkit-scrollbar-track { 
+  background: transparent; 
+}
+.scroll-area::-webkit-scrollbar-thumb,
+.ui-page > form::-webkit-scrollbar-thumb { 
+  background: rgba(38, 51, 47, 0.15); 
+  border-radius: 10px; 
+}
+.scroll-area::-webkit-scrollbar-thumb:hover,
+.ui-page > form::-webkit-scrollbar-thumb:hover { 
+  background: rgba(38, 51, 47, 0.3); 
 }
 
 .ui-back {
@@ -953,7 +1007,7 @@
   }
   
   .admin-main {
-    padding: 24px 16px; 
+    padding: 24px 16px 0; 
   }
   
   .admin-sidebar {
