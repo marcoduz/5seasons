@@ -4,6 +4,8 @@ import { supabase } from '@/services/supabase';
 import type { Expedicao } from '@/types';
 import '../admin-theme.css';
 
+import imageCompression from 'browser-image-compression';
+
 type Tab = 'geral' | 'fotos' | 'inclusoes' | 'roteiro';
 
 type FormState = {
@@ -169,19 +171,43 @@ export function ExpedicaoForm() {
     if (next) setTab(next);
   }
 
-  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     setPhotoError('');
 
     const novas: { file: File; previewUrl: string }[] = [];
-    for (const file of Array.from(files)) {
-      if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+    
+    // Configuração da compressão (Transforma em WebP e limita a ~300kb)
+    const options = {
+      maxSizeMB: 0.3,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+      fileType: "image/webp"
+    };
+
+    for (const originalFile of Array.from(files)) {
+      if (!['image/png', 'image/jpeg', 'image/webp'].includes(originalFile.type)) {
         setPhotoError('Envie apenas imagens PNG, JPG ou WEBP.');
         continue;
       }
-      novas.push({ file, previewUrl: URL.createObjectURL(file) });
+      
+      try {
+        const compressedBlob = await imageCompression(originalFile, options);
+        
+        // Renomeia o arquivo para forçar a extensão .webp
+        const nomeSemExtensao = originalFile.name.replace(/\.[^/.]+$/, "");
+        const webpFile = new File([compressedBlob], `${nomeSemExtensao}.webp`, {
+          type: "image/webp",
+        });
+        
+        novas.push({ file: webpFile, previewUrl: URL.createObjectURL(webpFile) });
+      } catch (err) {
+        console.error("Erro na compressão", err);
+        setPhotoError('Erro ao processar uma das imagens.');
+      }
     }
+    
     setPendingFiles((prev) => [...prev, ...novas]);
     e.target.value = '';
   }
@@ -829,18 +855,36 @@ function RoteiroEditor({
     setModalOpen(false);
   }
 
-  function handleImageSelection(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  async function handleImageSelection(e: React.ChangeEvent<HTMLInputElement>) {
+    const originalFile = e.target.files?.[0];
+    if (!originalFile) return;
     setModalError('');
 
-    const previewUrl = URL.createObjectURL(file);
-    
-    setDayForm(prev => ({ 
-      ...prev, 
-      imagens: [previewUrl],
-      pendingImageFile: file
-    }));
+    const options = {
+      maxSizeMB: 0.3,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+      fileType: "image/webp"
+    };
+
+    try {
+      const compressedBlob = await imageCompression(originalFile, options);
+      const nomeSemExtensao = originalFile.name.replace(/\.[^/.]+$/, "");
+      const webpFile = new File([compressedBlob], `${nomeSemExtensao}.webp`, {
+        type: "image/webp",
+      });
+
+      const previewUrl = URL.createObjectURL(webpFile);
+      
+      setDayForm(prev => ({ 
+        ...prev, 
+        imagens: [previewUrl],
+        pendingImageFile: webpFile
+      }));
+    } catch (err) {
+      console.error("Erro na compressão", err);
+      setModalError('Erro ao comprimir imagem do roteiro.');
+    }
   }
 
   function submitModal(e: React.MouseEvent | React.FormEvent) {

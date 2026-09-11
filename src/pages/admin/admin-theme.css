@@ -668,7 +668,6 @@
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 20px;
 }
-
 .ui-exp-card {
   background: var(--warm-white);
   border: 1px solid var(--beje-claro);
@@ -678,6 +677,7 @@
   color: inherit;
   display: flex;
   flex-direction: column;
+  height: 100%; 
   transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 
@@ -687,16 +687,18 @@
 }
 
 .ui-exp-card-photo {
+  position: relative;
   width: 100%;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  flex-shrink: 0;
   background: var(--beje-claro);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--nude);
 }
 
 .ui-exp-card-photo img {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
