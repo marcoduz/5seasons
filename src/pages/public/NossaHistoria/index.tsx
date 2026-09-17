@@ -125,7 +125,7 @@ export function NossaHistoria() {
         className="sobre-hero"
         style={{
           backgroundImage:
-            "url(https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&q=80&w=2021)",
+            "url(/images/sobreNos/Sobre_ViajarTransforma.png)",
         }}
       >
         <div className="sobre-hero-overlay"></div>
@@ -211,7 +211,7 @@ export function NossaHistoria() {
           </div>
           <div className="sobre-img-wrapper" style={{ height: "400px" }}>
             <img
-              src="https://images.unsplash.com/photo-1527631746610-bca00a040d60?auto=format&fit=crop&q=80&w=800"
+              src="/images/sobreNos/Sobre_MaisQueViagens.jpg"
               alt="Viajante olhando a paisagem"
             />
           </div>
@@ -315,7 +315,7 @@ export function NossaHistoria() {
         className="sobre-banner-middle"
         style={{
           backgroundImage:
-            "url(https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&q=80&w=2000)",
+            "url(/images/sobreNos/Sobre_ViagensEmHistorias.jpeg)",
         }}
       >
         <div className="sobre-banner-overlay"></div>
@@ -357,7 +357,7 @@ export function NossaHistoria() {
         <div className="sobre-grid-2">
           <div className="sobre-img-wrapper" style={{ height: "600px" }}>
             <img
-              src="https://images.unsplash.com/photo-1527631746610-bca00a040d60?auto=format&fit=crop&q=80&w=800"
+              src="/images/sobreNos/Sobre_HostEFundadora.jpg"
               alt="Viajante olhando a paisagem"
             />
           </div>
@@ -517,7 +517,7 @@ export function NossaHistoria() {
           </div>
           <div className="sobre-img-wrapper" style={{ height: "500px" }}>
             <img
-              src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80&w=800"
+              src="/images/sobreNos/Sobre_MundoEspera_Light.jpg"
               alt="Paisagem deslumbrante na natureza"
             />
           </div>
