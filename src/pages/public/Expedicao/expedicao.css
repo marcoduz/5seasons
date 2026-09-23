@@ -182,3 +182,64 @@
   .carousel-btn { width: 36px; height: 36px; }
   .carousel-counter { font-size: 11px; padding: 4px 10px; }
 }
+.payment-section {
+  background-color: #ffffff;
+  padding: 48px 0;
+}
+ 
+.payment-subtitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px;
+  font-style: italic;
+  color: #8a6440; /* mais escuro: ~4.7:1 de contraste sobre branco, passa AA */
+  margin: 0 auto 32px;
+  max-width: 640px;
+  line-height: 1.5;
+  text-align: center;
+  padding: 0 24px; /* evita colar nas bordas em telas estreitas */
+}
+ 
+.payment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 40px;
+  text-align: center;
+}
+ 
+.payment-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 16px;
+  border-radius: 12px;
+  background: #faf7f3; /* leve fundo pra cada card virar um "grupo" visual */
+}
+ 
+.payment-icon {
+  color: #a17c4f; /* mais escuro: ~4.9:1, ícone visível mesmo com stroke fino */
+}
+ 
+.payment-item h4 {
+  color: var(--verde-escuro);
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+}
+ 
+.payment-item p {
+  color: var(--text-main);
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 0;
+  opacity: 0.75;
+}
+ 
+/* No mobile, quando empilha em 1 coluna, reduz um pouco o respiro vertical
+   já que agora cada item tem seu próprio "cartão" com fundo */
+@media (max-width: 640px) {
+  .payment-grid {
+    gap: 16px;
+  }
+}

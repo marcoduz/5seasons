@@ -126,6 +126,7 @@ export function ExpedicaoPublica() {
 
   return (
     <div>
+    {/* ---  SEÇÃO INFOS PRINCIPAIS --- */}
       <section className="hero-banner" style={{ backgroundImage: `url(${imagemCapa})` }}>
         <div className="hero-overlay"></div>
         <div className="container hero-grid">
@@ -195,6 +196,40 @@ export function ExpedicaoPublica() {
               </div>
             )}
           </div>
+        </div>
+      </section>
+
+  {/* ---  SEÇÃO DE MÉTODOS DE PAGAMENTO --- */}
+      <section className="payment-section">
+        <div className="payment-subtitle" style={{ textAlign: 'center' }}>Para que você possa viver essa experiência da forma que fizer mais sentido para você.</div>
+        <div className="container payment-grid">
+          <div className="payment-item">
+            <svg className="payment-icon" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="M9 9h.01"></path><path d="M15 15h.01"></path></svg>
+            <h4>5% off no Pix</h4>
+            <p>Pagamento à vista.</p>
+          </div>
+
+          {/* SÓ APARECE SE FOR INTERNACIONAL */}
+          {expedicao.tipo_destino === 'Internacional' && (
+            <div className="payment-item">
+              <svg className="payment-icon" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path><path d="M2 12h20"></path></svg>
+              <h4>7% OFF no Wise</h4>
+              <p>Pagamento em euros.</p>
+            </div>
+          )}
+
+          <div className="payment-item">
+            <svg className="payment-icon" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+            <h4>Até 12x no cartão</h4>
+            <p>Consulte condições e juros.</p>
+          </div>
+
+          <div className="payment-item">
+            <svg className="payment-icon" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <h4>Parcelamento via Pix</h4>
+            <p>Consulte as condições.</p>
+          </div>
+
         </div>
       </section>
 
