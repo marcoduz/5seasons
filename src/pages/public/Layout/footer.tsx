@@ -15,7 +15,7 @@ export function Footer() {
               </Link>
               
               <div className="footer-company-info">
-                <p>5 SEASONS - 00.000.000/0000-00</p>
+                <p>5 SEASONS - 69.210.315/0001-60</p>
                 <Link 
                   to="/politica" 
                   title="Política de privacidade" 
