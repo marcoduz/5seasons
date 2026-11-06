@@ -1,12 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/services/supabase';
-import type { Expedicao } from '@/types';
+import type { Expedicao, PaletaTema, ConteudoExperiencia, BlocoZigueZague } from '@/types';
 import '../admin-theme.css';
 
 import imageCompression from 'browser-image-compression';
 
-type Tab = 'geral' | 'fotos' | 'inclusoes' | 'roteiro';
+type Tab = 'geral' | 'visual' | 'conteudo_extra' | 'fotos' | 'inclusoes' | 'roteiro';
+
+export type ZigueZagueDraftItem = BlocoZigueZague & {
+  pendingFile?: File | null;
+};
+
+export type ConteudoExperienciaState = Required<ConteudoExperiencia>;
 
 type FormState = {
   nome: string;
@@ -18,6 +24,17 @@ type FormState = {
   incluso: string[];
   nao_incluso: string[];
   observacoes: string[];
+  // Identidade Visual
+  cor_primaria: string;
+  cor_secundaria: string;
+  cor_fundo: string;
+  cor_texto: string;
+  // Novos conteúdos da Landing Page
+  frase_destaque: string;
+  motivo_epoca_titulo: string;
+  motivo_epoca_texto: string;
+  blocos_ziguezague: ZigueZagueDraftItem[];
+  conteudo_experiencia: ConteudoExperienciaState;
 };
 
 type RoteiroDraftItem = {
@@ -30,6 +47,65 @@ type RoteiroDraftItem = {
   pendingImageFile?: File | null;
 };
 
+const DEFAULT_CONTEUDO_EXPERIENCIA: ConteudoExperienciaState = {
+  pilares_titulo: 'Uma viagem para viver, não para administrar',
+  pilares: [
+    {
+      titulo: 'CURADORIA',
+      descricao:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Roteiros testados presencialmente e escolhas pensadas nos mínimos detalhes.',
+    },
+    {
+      titulo: 'PRESENÇA',
+      descricao:
+        'Lorem ipsum dolor sit amet. Acompanhamento integral de host brasileira durante toda a expedição para você viajar com total tranquilidade.',
+    },
+    {
+      titulo: 'LIBERDADE',
+      descricao:
+        'Lorem ipsum dolor sit amet. Equilíbrio ideal entre programação em grupo e tempo livre garantido no roteiro para curtir no seu ritmo.',
+    },
+  ],
+  jornada_titulo: 'Tudo pensado para você aproveitar a viagem',
+  jornada: [
+    {
+      etapa: 'Antes do embarque',
+      descricao:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Orientação completa sobre preparação, documentação e encontro pré-viagem.',
+    },
+    {
+      etapa: 'Durante a viagem',
+      descricao:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Logística fluida, suporte diário presencial e experiências autênticas.',
+    },
+    {
+      etapa: 'Uma viagem que continua depois',
+      descricao:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Memórias compartilhadas e conexões reais que permanecem após o retorno.',
+    },
+  ],
+  perfil_titulo: 'Essa viagem é pra mim?',
+  perfis: [
+    {
+      titulo: 'Para quem viaja sozinho(a)',
+      descricao:
+        'Lorem ipsum dolor sit amet. Você embarca sozinho, mas encontra um grupo acolhedor e alinhado com a mesma vontade de explorar.',
+    },
+    {
+      titulo: 'Para grupos de amigos',
+      descricao:
+        'Lorem ipsum dolor sit amet. A alegria de viajar entre amigos sem o desgaste de alguém precisar organizar ou cobrar a logística.',
+    },
+    {
+      titulo: 'Para casais',
+      descricao:
+        'Lorem ipsum dolor sit amet. Momentos a dois com total segurança, conforto e a liberdade de aproveitar cada cenário sem preocupações.',
+    },
+  ],
+  perfil_fechamento:
+    'No fim, o mais importante não é a companhia com que você embarca, mas o desejo de viver essa experiência intensamente.',
+};
+
 const EMPTY_FORM: FormState = {
   nome: '',
   pais: '',
@@ -40,6 +116,15 @@ const EMPTY_FORM: FormState = {
   incluso: [],
   nao_incluso: [],
   observacoes: [],
+  cor_primaria: '#2f4842',
+  cor_secundaria: '#fdb17f',
+  cor_fundo: '#fffaf8',
+  cor_texto: '#26332f',
+  frase_destaque: '',
+  motivo_epoca_titulo: '',
+  motivo_epoca_texto: '',
+  blocos_ziguezague: [],
+  conteudo_experiencia: DEFAULT_CONTEUDO_EXPERIENCIA,
 };
 
 function uid() {
@@ -78,16 +163,87 @@ export function ExpedicaoForm() {
   const [photoError, setPhotoError] = useState('');
   const [deletedFotos, setDeletedFotos] = useState<string[]>([]);
 
+  const [paletasSalvas, setPaletasSalvas] = useState<PaletaTema[]>([]);
+  const [selectedPaletaId, setSelectedPaletaId] = useState<string>('');
+  const [paletteModalOpen, setPaletteModalOpen] = useState(false);
+  const [newPaletteName, setNewPaletteName] = useState('');
+  const [savingPalette, setSavingPalette] = useState(false);
+  const [paletteModalError, setPaletteModalError] = useState('');
+
   const [roteiroItems, setRoteiroItems] = useState<RoteiroDraftItem[]>([]);
   const [deletedRoteiroIds, setDeletedRoteiroIds] = useState<string[]>([]);
 
   const AVAILABLE_TABS: Tab[] = isNew
-    ? ['geral', 'fotos', 'inclusoes']
-    : ['geral', 'fotos', 'inclusoes', 'roteiro'];
+    ? ['geral', 'visual', 'conteudo_extra', 'fotos', 'inclusoes']
+    : ['geral', 'visual', 'conteudo_extra', 'fotos', 'inclusoes', 'roteiro'];
 
   useEffect(() => {
+    fetchPaletas();
     if (!isNew && id) fetchExpedicao(id);
   }, [id]);
+
+  async function fetchPaletas() {
+    const { data } = await supabase.from('paletas_temas').select('*').order('nome');
+    if (data) setPaletasSalvas(data as PaletaTema[]);
+  }
+
+  function openPaletteModal() {
+    setNewPaletteName('');
+    setPaletteModalError('');
+    setPaletteModalOpen(true);
+  }
+
+  function closePaletteModal() {
+    if (savingPalette) return;
+    setPaletteModalOpen(false);
+    setPaletteModalError('');
+  }
+
+  async function handleSaveNewPalette(e: React.FormEvent | React.MouseEvent) {
+    e.preventDefault();
+    setPaletteModalError('');
+
+    const nomeLimpo = newPaletteName.trim();
+    if (!nomeLimpo) {
+      setPaletteModalError('Informe um nome para identificar a paleta.');
+      return;
+    }
+
+    setSavingPalette(true);
+    const payload = {
+      nome: nomeLimpo,
+      cor_primaria: form.cor_primaria,
+      cor_secundaria: form.cor_secundaria,
+      cor_fundo: form.cor_fundo,
+      cor_texto: form.cor_texto,
+    };
+
+    const { data, error: insertErr } = await supabase
+      .from('paletas_temas')
+      .insert([payload])
+      .select()
+      .single();
+
+    setSavingPalette(false);
+
+    if (insertErr || !data) {
+      if (insertErr?.code === '23505') {
+        setPaletteModalError('Já existe uma paleta cadastrada com este nome.');
+      } else {
+        setPaletteModalError('Não foi possível salvar a paleta. Tente novamente.');
+      }
+      return;
+    }
+
+    const novaPaleta = data as PaletaTema;
+    const listaAtualizada = [...paletasSalvas, novaPaleta].sort((a, b) =>
+      a.nome.localeCompare(b.nome)
+    );
+    setPaletasSalvas(listaAtualizada);
+    setSelectedPaletaId(novaPaleta.id);
+    setPaletteModalOpen(false);
+    setSuccess(`Paleta "${novaPaleta.nome}" salva com sucesso!`);
+  }
 
   async function fetchExpedicao(expId: string) {
     setLoading(true);
@@ -109,17 +265,53 @@ export function ExpedicaoForm() {
       return;
     }
 
-    const exp = expResult.data as Expedicao;
+    const exp = expResult.data as Expedicao & Record<string, any>;
+    const rawExpContent = exp.conteudo_experiencia || {};
+
     setForm({
-      nome: exp.nome,
-      pais: exp.pais,
-      tipo_destino: exp.tipo_destino,
-      descricao: exp.descricao,
+      nome: exp.nome || '',
+      pais: exp.pais || '',
+      tipo_destino: exp.tipo_destino || '',
+      descricao: exp.descricao || '',
       categorias: exp.categorias ?? [],
       fotos: exp.fotos ?? [],
       incluso: exp.incluso ?? [],
       nao_incluso: exp.nao_incluso ?? [],
       observacoes: exp.observacoes ?? [],
+      cor_primaria: exp.cor_primaria || '#2f4842',
+      cor_secundaria: exp.cor_secundaria || '#fdb17f',
+      cor_fundo: exp.cor_fundo || '#fffaf8',
+      cor_texto: exp.cor_texto || '#26332f',
+      frase_destaque: exp.frase_destaque || '',
+      motivo_epoca_titulo: exp.motivo_epoca_titulo || '',
+      motivo_epoca_texto: exp.motivo_epoca_texto || '',
+      blocos_ziguezague: Array.isArray(exp.blocos_ziguezague)
+        ? exp.blocos_ziguezague.map((b: any) => ({
+            id: b.id || uid(),
+            titulo: b.titulo || '',
+            texto: b.texto || '',
+            imagem: b.imagem || '',
+            pendingFile: null,
+          }))
+        : [],
+      conteudo_experiencia: {
+        pilares_titulo: rawExpContent.pilares_titulo ?? DEFAULT_CONTEUDO_EXPERIENCIA.pilares_titulo,
+        pilares:
+          Array.isArray(rawExpContent.pilares) && rawExpContent.pilares.length > 0
+            ? rawExpContent.pilares
+            : DEFAULT_CONTEUDO_EXPERIENCIA.pilares,
+        jornada_titulo: rawExpContent.jornada_titulo ?? DEFAULT_CONTEUDO_EXPERIENCIA.jornada_titulo,
+        jornada:
+          Array.isArray(rawExpContent.jornada) && rawExpContent.jornada.length > 0
+            ? rawExpContent.jornada
+            : DEFAULT_CONTEUDO_EXPERIENCIA.jornada,
+        perfil_titulo: rawExpContent.perfil_titulo ?? DEFAULT_CONTEUDO_EXPERIENCIA.perfil_titulo,
+        perfis:
+          Array.isArray(rawExpContent.perfis) && rawExpContent.perfis.length > 0
+            ? rawExpContent.perfis
+            : DEFAULT_CONTEUDO_EXPERIENCIA.perfis,
+        perfil_fechamento: rawExpContent.perfil_fechamento ?? DEFAULT_CONTEUDO_EXPERIENCIA.perfil_fechamento,
+      },
     });
 
     const roteiros = (roteiroResult.data ?? []) as any[];
@@ -178,7 +370,6 @@ export function ExpedicaoForm() {
 
     const novas: { file: File; previewUrl: string }[] = [];
     
-    // Configuração da compressão (Transforma em WebP e limita a ~300kb)
     const options = {
       maxSizeMB: 0.3,
       maxWidthOrHeight: 1920,
@@ -194,8 +385,6 @@ export function ExpedicaoForm() {
       
       try {
         const compressedBlob = await imageCompression(originalFile, options);
-        
-        // Renomeia o arquivo para forçar a extensão .webp
         const nomeSemExtensao = originalFile.name.replace(/\.[^/.]+$/, "");
         const webpFile = new File([compressedBlob], `${nomeSemExtensao}.webp`, {
           type: "image/webp",
@@ -242,6 +431,34 @@ export function ExpedicaoForm() {
       uploadedUrls.push(data.publicUrl);
     }
     return uploadedUrls;
+  }
+
+  async function uploadZigueZaguePhotos(currentId: string): Promise<ZigueZagueDraftItem[]> {
+    const processados = await Promise.all(
+      form.blocos_ziguezague.map(async (bloco) => {
+        if (bloco.pendingFile) {
+          const ext = bloco.pendingFile.name.split('.').pop();
+          const path = `${currentId}/ziguezague-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+          const { error } = await supabase.storage.from('expedicoes').upload(path, bloco.pendingFile);
+          if (!error) {
+            const { data } = supabase.storage.from('expedicoes').getPublicUrl(path);
+            return {
+              id: bloco.id,
+              titulo: bloco.titulo.trim(),
+              texto: bloco.texto.trim(),
+              imagem: data.publicUrl,
+            };
+          }
+        }
+        return {
+          id: bloco.id,
+          titulo: bloco.titulo.trim(),
+          texto: bloco.texto.trim(),
+          imagem: bloco.imagem,
+        };
+      })
+    );
+    return processados;
   }
 
   async function refetchRoteiro(currentId: string) {
@@ -293,6 +510,14 @@ export function ExpedicaoForm() {
           incluso: form.incluso,
           nao_incluso: form.nao_incluso,
           observacoes: form.observacoes,
+          cor_primaria: form.cor_primaria,
+          cor_secundaria: form.cor_secundaria,
+          cor_fundo: form.cor_fundo,
+          cor_texto: form.cor_texto,
+          frase_destaque: form.frase_destaque.trim() || null,
+          motivo_epoca_titulo: form.motivo_epoca_titulo.trim() || null,
+          motivo_epoca_texto: form.motivo_epoca_texto.trim() || null,
+          conteudo_experiencia: form.conteudo_experiencia,
         })
         .select()
         .single();
@@ -306,7 +531,10 @@ export function ExpedicaoForm() {
       setExpedicaoId(currentId);
     }
 
-    const novasUrls = await uploadPendingPhotos(currentId!);
+    const [novasUrls, blocosZigueZagueFinal] = await Promise.all([
+      uploadPendingPhotos(currentId!),
+      uploadZigueZaguePhotos(currentId!),
+    ]);
     const fotosFinal = [...form.fotos, ...novasUrls];
 
     const { error: updateError } = await supabase
@@ -321,6 +549,15 @@ export function ExpedicaoForm() {
         incluso: form.incluso,
         nao_incluso: form.nao_incluso,
         observacoes: form.observacoes,
+        cor_primaria: form.cor_primaria,
+        cor_secundaria: form.cor_secundaria,
+        cor_fundo: form.cor_fundo,
+        cor_texto: form.cor_texto,
+        frase_destaque: form.frase_destaque.trim() || null,
+        motivo_epoca_titulo: form.motivo_epoca_titulo.trim() || null,
+        motivo_epoca_texto: form.motivo_epoca_texto.trim() || null,
+        blocos_ziguezague: blocosZigueZagueFinal,
+        conteudo_experiencia: form.conteudo_experiencia,
       })
       .eq('id', currentId);
 
@@ -406,6 +643,7 @@ export function ExpedicaoForm() {
     setDeletedFotos([]);
 
     updateField('fotos', fotosFinal);
+    updateField('blocos_ziguezague', blocosZigueZagueFinal);
     await refetchRoteiro(currentId!);
 
     setSaving(false);
@@ -419,6 +657,8 @@ export function ExpedicaoForm() {
 
   const tabs: { key: Tab; label: string; disabled?: boolean; hint?: string }[] = [
     { key: 'geral', label: 'Dados Gerais' },
+    { key: 'visual', label: 'Identidade Visual' },
+    { key: 'conteudo_extra', label: 'Landing Page' },
     { key: 'fotos', label: 'Fotos' },
     { key: 'inclusoes', label: 'Inclusões & Observações' },
     { key: 'roteiro', label: 'Roteiro', disabled: isNew, hint: isNew ? 'Salve a expedição para liberar o roteiro' : '' },
@@ -448,6 +688,164 @@ export function ExpedicaoForm() {
           text-decoration: line-through !important;
           opacity: 0.7;
         }
+
+        .ui-section-box {
+          border: 1px solid var(--beje-claro);
+          border-radius: 10px;
+          padding: 20px;
+          margin-bottom: 24px;
+          background: rgba(255, 255, 255, 0.5);
+        }
+
+        .ui-section-box-title {
+          font-family: 'Playfair Display', serif;
+          font-size: 18px;
+          font-weight: 600;
+          color: var(--forest-deep);
+          margin: 0 0 6px 0;
+        }
+
+        .ui-color-picker-wrap {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .ui-color-picker-wrap input[type="color"] {
+          width: 42px;
+          height: 40px;
+          padding: 2px;
+          border: 1px solid var(--beje-claro);
+          border-radius: 6px;
+          background: white;
+          cursor: pointer;
+        }
+
+        .ui-palette-readonly-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 12px;
+          margin: 16px 0 20px;
+        }
+
+        .ui-palette-readonly-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 10px 12px;
+          border: 1px solid var(--beje-claro);
+          border-radius: 8px;
+          background: #ffffff;
+        }
+
+        .ui-palette-swatch {
+          width: 28px;
+          height: 28px;
+          border-radius: 6px;
+          border: 1px solid rgba(0, 0, 0, 0.12);
+          flex-shrink: 0;
+        }
+
+        /* Searchable Select de Paletas */
+        .ui-search-select-container {
+          position: relative;
+          max-width: 440px;
+        }
+
+        .ui-search-select-trigger {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px 14px;
+          background: #ffffff;
+          border: 1px solid var(--beje-claro);
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 14px;
+          color: var(--forest-deep);
+          text-align: left;
+          transition: border-color 0.2s;
+        }
+
+        .ui-search-select-trigger:hover {
+          border-color: #cbd5e1;
+        }
+
+        .ui-search-select-dropdown {
+          position: absolute;
+          top: calc(100% + 4px);
+          left: 0;
+          right: 0;
+          background: #ffffff;
+          border: 1px solid var(--beje-claro);
+          border-radius: 8px;
+          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+          z-index: 50;
+          padding: 8px;
+        }
+
+        .ui-search-select-input-wrap {
+          position: relative;
+          margin-bottom: 6px;
+        }
+
+        .ui-search-select-input {
+          width: 100%;
+          padding: 8px 10px 8px 30px;
+          font-size: 13.5px;
+          border: 1px solid var(--beje-claro);
+          border-radius: 6px;
+          outline: none;
+          box-sizing: border-box;
+        }
+
+        .ui-search-select-input:focus {
+          border-color: var(--forest-deep);
+        }
+
+        .ui-search-select-list {
+          max-height: 220px;
+          overflow-y: auto;
+          margin: 0;
+          padding: 0;
+          list-style: none;
+        }
+
+        .ui-search-select-option {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 8px 10px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 13.5px;
+          color: var(--forest-deep);
+          transition: background 0.15s;
+        }
+
+        .ui-search-select-option:hover {
+          background: #f8fafc;
+        }
+
+        .ui-search-select-option.selected {
+          background: #f1f5f9;
+          font-weight: 600;
+        }
+
+        .ui-mini-swatches {
+          display: inline-flex;
+          align-items: center;
+          gap: 3px;
+        }
+
+        .ui-mini-swatch {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          border: 1px solid rgba(0, 0, 0, 0.15);
+          display: inline-block;
+        }
       `}</style>
       
       <Link to="/admin/expedicoes" className="ui-back">
@@ -463,7 +861,7 @@ export function ExpedicaoForm() {
           <p className="ui-page-subtitle">
             {isNew
               ? 'Preencha os dados e guarde para libertar o registo do roteiro.'
-              : 'Atualize as informações da expedição.'}
+              : 'Atualize as informações, cores e seções da expedição.'}
           </p>
         </div>
       </div>
@@ -510,7 +908,7 @@ export function ExpedicaoForm() {
                 <input
                   id="nome"
                   type="text"
-                  placeholder="Ex: Travessia Patagónia"
+                  placeholder="Ex: Expedição Adriático Privé | Croácia"
                   value={form.nome}
                   onChange={(e) => {
                     updateField('nome', e.target.value);
@@ -527,7 +925,7 @@ export function ExpedicaoForm() {
                 <input
                   id="pais"
                   type="text"
-                  placeholder="Ex: Argentina"
+                  placeholder="Ex: Croácia"
                   value={form.pais}
                   onChange={(e) => {
                     updateField('pais', e.target.value);
@@ -556,13 +954,27 @@ export function ExpedicaoForm() {
 
             <TagListEditor
               label="Categorias"
-              placeholder="Ex: Trekking, Aventura... (Enter para adicionar)"
+              placeholder="Ex: Verão, Turismo de Luxo... (Enter para adicionar)"
               values={form.categorias}
               onChange={(v) => updateField('categorias', v)}
             />
 
             <div className="ui-field">
-              <label htmlFor="descricao">Descrição</label>
+              <label htmlFor="frase_destaque">Frase de Destaque (Abaixo do Banner Principal)</label>
+              <span className="ui-hint">
+                Aparece com tipografia grande e elegante antes do texto explicativo da expedição.
+              </span>
+              <input
+                id="frase_destaque"
+                type="text"
+                placeholder="Ex: Antes de convidar você para viver a Croácia, nós fomos vivê-la primeiro."
+                value={form.frase_destaque}
+                onChange={(e) => updateField('frase_destaque', e.target.value)}
+              />
+            </div>
+
+            <div className="ui-field">
+              <label htmlFor="descricao">Descrição Principal</label>
               <textarea
                 id="descricao"
                 placeholder="Conte a experiência que essa expedição oferece..."
@@ -574,11 +986,406 @@ export function ExpedicaoForm() {
           </>
         )}
 
+        {tab === 'visual' && (
+          <>
+            <div className="ui-section-box">
+              <h3 className="ui-section-box-title">Paletas Salvas (Temas do Sistema)</h3>
+              <p className="ui-hint" style={{ marginBottom: 14 }}>
+                Busque pelo nome e selecione uma paleta cadastrada para preencher as cores automaticamente.
+              </p>
+              
+              <SearchablePaletteSelect
+                paletas={paletasSalvas}
+                selectedId={selectedPaletaId}
+                onSelect={(paleta) => {
+                  setSelectedPaletaId(paleta.id);
+                  updateField('cor_primaria', paleta.cor_primaria);
+                  updateField('cor_secundaria', paleta.cor_secundaria);
+                  updateField('cor_fundo', paleta.cor_fundo);
+                  updateField('cor_texto', paleta.cor_texto);
+                }}
+              />
+            </div>
+
+            <div className="ui-section-box">
+              <h3 className="ui-section-box-title">Personalização de Cores (Hexadecimal)</h3>
+              <p className="ui-hint" style={{ marginBottom: 18 }}>
+                Escolha as cores nos seletores abaixo. Caso goste da combinação, você pode salvá-la como uma nova paleta para usar em outras expedições.
+              </p>
+
+              <div className="ui-form-row">
+                <div className="ui-field">
+                  <label>Cor Primária (Títulos, Botões Ativos, Destaques)</label>
+                  <div className="ui-color-picker-wrap">
+                    <input
+                      type="color"
+                      value={form.cor_primaria}
+                      onChange={(e) => {
+                        setSelectedPaletaId('');
+                        updateField('cor_primaria', e.target.value);
+                      }}
+                    />
+                    <input
+                      type="text"
+                      value={form.cor_primaria}
+                      onChange={(e) => {
+                        setSelectedPaletaId('');
+                        updateField('cor_primaria', e.target.value);
+                      }}
+                      style={{ flex: 1 }}
+                    />
+                  </div>
+                </div>
+
+                <div className="ui-field">
+                  <label>Cor Secundária (Botão CTA, Subtítulos, Ícones)</label>
+                  <div className="ui-color-picker-wrap">
+                    <input
+                      type="color"
+                      value={form.cor_secundaria}
+                      onChange={(e) => {
+                        setSelectedPaletaId('');
+                        updateField('cor_secundaria', e.target.value);
+                      }}
+                    />
+                    <input
+                      type="text"
+                      value={form.cor_secundaria}
+                      onChange={(e) => {
+                        setSelectedPaletaId('');
+                        updateField('cor_secundaria', e.target.value);
+                      }}
+                      style={{ flex: 1 }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="ui-form-row">
+                <div className="ui-field">
+                  <label>Cor de Fundo Suave (Seções Alternadas)</label>
+                  <div className="ui-color-picker-wrap">
+                    <input
+                      type="color"
+                      value={form.cor_fundo}
+                      onChange={(e) => {
+                        setSelectedPaletaId('');
+                        updateField('cor_fundo', e.target.value);
+                      }}
+                    />
+                    <input
+                      type="text"
+                      value={form.cor_fundo}
+                      onChange={(e) => {
+                        setSelectedPaletaId('');
+                        updateField('cor_fundo', e.target.value);
+                      }}
+                      style={{ flex: 1 }}
+                    />
+                  </div>
+                </div>
+
+                <div className="ui-field">
+                  <label>Cor do Texto Principal</label>
+                  <div className="ui-color-picker-wrap">
+                    <input
+                      type="color"
+                      value={form.cor_texto}
+                      onChange={(e) => {
+                        setSelectedPaletaId('');
+                        updateField('cor_texto', e.target.value);
+                      }}
+                    />
+                    <input
+                      type="text"
+                      value={form.cor_texto}
+                      onChange={(e) => {
+                        setSelectedPaletaId('');
+                        updateField('cor_texto', e.target.value);
+                      }}
+                      style={{ flex: 1 }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Botão para abrir o Modal de Salvar Paleta */}
+              <div style={{ marginTop: 4, marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
+                <button
+                  type="button"
+                  className="ui-btn-ghost"
+                  onClick={openPaletteModal}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                  Salvar cores atuais como nova paleta
+                </button>
+              </div>
+
+              {/* Prévia Ao Vivo */}
+              <div
+                style={{
+                  padding: 24,
+                  borderRadius: 12,
+                  backgroundColor: form.cor_fundo,
+                  color: form.cor_texto,
+                  border: '1px solid rgba(0,0,0,0.08)',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: 2,
+                    textTransform: 'uppercase',
+                    color: form.cor_secundaria,
+                    marginBottom: 6,
+                  }}
+                >
+                  PRÉVIA DA IDENTIDADE VISUAL
+                </div>
+                <h4
+                  style={{
+                    fontFamily: 'Playfair Display, serif',
+                    fontSize: 24,
+                    color: form.cor_primaria,
+                    margin: '0 0 10px 0',
+                  }}
+                >
+                  {form.nome || 'Expedição Exemplo'}
+                </h4>
+                <p style={{ fontSize: 14, margin: '0 0 16px 0', opacity: 0.85 }}>
+                  {form.frase_destaque ||
+                    'Antes de convidar você para viver este destino, nós fomos vivê-lo primeiro.'}
+                </p>
+                <span
+                  style={{
+                    display: 'inline-block',
+                    padding: '10px 20px',
+                    borderRadius: 8,
+                    backgroundColor: form.cor_secundaria,
+                    color: '#151e1b',
+                    fontWeight: 700,
+                    fontSize: 13,
+                  }}
+                >
+                  QUERO ME INSCREVER →
+                </span>
+              </div>
+            </div>
+          </>
+        )}
+
+        {tab === 'conteudo_extra' && (
+          <>
+            {/* 1. Motivo da Época (Ex: Por que junho?) */}
+            <div className="ui-section-box">
+              <h3 className="ui-section-box-title">Seção: Defesa da Época / Mês (Ex: "Por que junho?")</h3>
+              <p className="ui-hint" style={{ marginBottom: 16 }}>
+                Aparece junto à área do roteiro explicando por que a data foi escolhida estrategicamente.
+              </p>
+              <div className="ui-field">
+                <label>Título da Seção</label>
+                <input
+                  type="text"
+                  placeholder="Ex: Por que junho?"
+                  value={form.motivo_epoca_titulo}
+                  onChange={(e) => updateField('motivo_epoca_titulo', e.target.value)}
+                />
+              </div>
+              <div className="ui-field" style={{ marginBottom: 0 }}>
+                <label>Texto Explicativo</label>
+                <textarea
+                  placeholder="Ex: Junho marca o início do verão europeu, oferecendo dias longos e clima perfeito..."
+                  value={form.motivo_epoca_texto}
+                  onChange={(e) => updateField('motivo_epoca_texto', e.target.value)}
+                  style={{ minHeight: 110 }}
+                />
+              </div>
+            </div>
+
+            {/* 2. Blocos Zigue-Zague */}
+            <ZigueZagueEditor
+              items={form.blocos_ziguezague}
+              onChange={(novos) => updateField('blocos_ziguezague', novos)}
+            />
+
+            {/* 3. Pilares & Jornada */}
+            <div className="ui-section-box">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+                <div>
+                  <h3 className="ui-section-box-title">Pilares & Jornada da Experiência</h3>
+                  <p className="ui-hint" style={{ margin: 0 }}>
+                    Combina a Proposta 2 (Pilares) e a Proposta 1 (Jornada).
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="ui-btn-ghost"
+                  onClick={() => updateField('conteudo_experiencia', DEFAULT_CONTEUDO_EXPERIENCIA)}
+                >
+                  Restaurar Textos Padrão
+                </button>
+              </div>
+
+              <div className="ui-field">
+                <label>Título dos Pilares</label>
+                <input
+                  type="text"
+                  value={form.conteudo_experiencia.pilares_titulo}
+                  onChange={(e) =>
+                    updateField('conteudo_experiencia', {
+                      ...form.conteudo_experiencia,
+                      pilares_titulo: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              {form.conteudo_experiencia.pilares.map((pilar, idx) => (
+                <div className="ui-form-row" key={`pilar-${idx}`}>
+                  <div className="ui-field" style={{ flex: 1 }}>
+                    <label>Pilar {idx + 1}</label>
+                    <input
+                      type="text"
+                      value={pilar.titulo}
+                      onChange={(e) => {
+                        const novos = [...form.conteudo_experiencia.pilares];
+                        novos[idx] = { ...novos[idx], titulo: e.target.value };
+                        updateField('conteudo_experiencia', { ...form.conteudo_experiencia, pilares: novos });
+                      }}
+                    />
+                  </div>
+                  <div className="ui-field" style={{ flex: 2 }}>
+                    <label>Descrição do Pilar {idx + 1}</label>
+                    <input
+                      type="text"
+                      value={pilar.descricao}
+                      onChange={(e) => {
+                        const novos = [...form.conteudo_experiencia.pilares];
+                        novos[idx] = { ...novos[idx], descricao: e.target.value };
+                        updateField('conteudo_experiencia', { ...form.conteudo_experiencia, pilares: novos });
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+
+              <hr style={{ border: 'none', borderTop: '1px solid var(--beje-claro)', margin: '16px 0' }} />
+
+              <div className="ui-field">
+                <label>Título da Jornada</label>
+                <input
+                  type="text"
+                  value={form.conteudo_experiencia.jornada_titulo}
+                  onChange={(e) =>
+                    updateField('conteudo_experiencia', {
+                      ...form.conteudo_experiencia,
+                      jornada_titulo: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              {form.conteudo_experiencia.jornada.map((item, idx) => (
+                <div className="ui-form-row" key={`jornada-${idx}`}>
+                  <div className="ui-field" style={{ flex: 1 }}>
+                    <label>Etapa {idx + 1}</label>
+                    <input
+                      type="text"
+                      value={item.etapa}
+                      onChange={(e) => {
+                        const novos = [...form.conteudo_experiencia.jornada];
+                        novos[idx] = { ...novos[idx], etapa: e.target.value };
+                        updateField('conteudo_experiencia', { ...form.conteudo_experiencia, jornada: novos });
+                      }}
+                    />
+                  </div>
+                  <div className="ui-field" style={{ flex: 2 }}>
+                    <label>Descrição da Etapa {idx + 1}</label>
+                    <input
+                      type="text"
+                      value={item.descricao}
+                      onChange={(e) => {
+                        const novos = [...form.conteudo_experiencia.jornada];
+                        novos[idx] = { ...novos[idx], descricao: e.target.value };
+                        updateField('conteudo_experiencia', { ...form.conteudo_experiencia, jornada: novos });
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* 4. Essa viagem é pra mim? */}
+            <div className="ui-section-box">
+              <h3 className="ui-section-box-title">Seção: "Essa viagem é pra mim?" (Quebra de Objeções)</h3>
+              <div className="ui-field">
+                <label>Título da Seção</label>
+                <input
+                  type="text"
+                  value={form.conteudo_experiencia.perfil_titulo}
+                  onChange={(e) =>
+                    updateField('conteudo_experiencia', {
+                      ...form.conteudo_experiencia,
+                      perfil_titulo: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              {form.conteudo_experiencia.perfis.map((perf, idx) => (
+                <div className="ui-form-row" key={`perfil-${idx}`}>
+                  <div className="ui-field" style={{ flex: 1 }}>
+                    <label>Perfil {idx + 1}</label>
+                    <input
+                      type="text"
+                      value={perf.titulo}
+                      onChange={(e) => {
+                        const novos = [...form.conteudo_experiencia.perfis];
+                        novos[idx] = { ...novos[idx], titulo: e.target.value };
+                        updateField('conteudo_experiencia', { ...form.conteudo_experiencia, perfis: novos });
+                      }}
+                    />
+                  </div>
+                  <div className="ui-field" style={{ flex: 2 }}>
+                    <label>Texto do Perfil {idx + 1}</label>
+                    <input
+                      type="text"
+                      value={perf.descricao}
+                      onChange={(e) => {
+                        const novos = [...form.conteudo_experiencia.perfis];
+                        novos[idx] = { ...novos[idx], descricao: e.target.value };
+                        updateField('conteudo_experiencia', { ...form.conteudo_experiencia, perfis: novos });
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+
+              <div className="ui-field" style={{ marginBottom: 0 }}>
+                <label>Frase de Fechamento da Seção</label>
+                <input
+                  type="text"
+                  value={form.conteudo_experiencia.perfil_fechamento}
+                  onChange={(e) =>
+                    updateField('conteudo_experiencia', {
+                      ...form.conteudo_experiencia,
+                      perfil_fechamento: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+          </>
+        )}
+
         {tab === 'fotos' && (
           <div className="ui-field">
             <label>Fotos</label>
             <p className="ui-hint">
-              Envie imagens do computador (PNG ou JPG). Elas são enviadas de facto quando clicar em Salvar.
+              Envie imagens do computador (PNG, JPG ou WEBP). Elas são comprimidas automaticamente em WebP e enviadas ao clicar em Salvar.
             </p>
             {photoError && <div className="ui-form-error">{photoError}</div>}
             <label className={`ui-file-upload${saving ? ' disabled' : ''}`}>
@@ -590,7 +1397,7 @@ export function ExpedicaoForm() {
               Selecionar fotos
               <input
                 type="file"
-                accept="image/png,image/jpeg"
+                accept="image/png,image/jpeg,image/webp"
                 multiple
                 disabled={saving}
                 onChange={handleFileSelect}
@@ -677,17 +1484,429 @@ export function ExpedicaoForm() {
             <span />
           )}
 
-          {isLastDataTab ? (
-            <button type="button" className="ui-btn-solid" disabled={saving} onClick={handleSave}>
-              {saving ? 'A salvar...' : 'Salvar Expedição'}
-            </button>
-          ) : (
-            <button type="button" className="ui-btn-solid" onClick={goToNextTab}>
-              Próximo
-            </button>
-          )}
+          <div style={{ display: 'flex', gap: '10px' }}>
+            {!isNew && !isLastDataTab && (
+              <button type="button" className="ui-btn-ghost" disabled={saving} onClick={handleSave}>
+                {saving ? 'A salvar...' : 'Salvar Agora'}
+              </button>
+            )}
+
+            {isLastDataTab ? (
+              <button type="button" className="ui-btn-solid" disabled={saving} onClick={handleSave}>
+                {saving ? 'A salvar...' : 'Salvar Expedição'}
+              </button>
+            ) : (
+              <button type="button" className="ui-btn-solid" onClick={goToNextTab}>
+                Próximo
+              </button>
+            )}
+          </div>
         </div>
       </form>
+
+      {/* ==========================================
+          MODAL: SALVAR NOVA PALETA DE CORES
+          ========================================== */}
+      {paletteModalOpen && (
+        <div className="ui-modal-overlay" onClick={closePaletteModal}>
+          <div className="ui-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 480 }}>
+            <div className="ui-modal-header">
+              <h2 className="ui-modal-title">Salvar Nova Paleta</h2>
+              <button type="button" className="ui-modal-close" onClick={closePaletteModal}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {paletteModalError && <div className="ui-form-error">{paletteModalError}</div>}
+
+            <p className="ui-hint" style={{ marginTop: 0, marginBottom: 12 }}>
+              Confira abaixo as cores selecionadas (somente leitura) e dê um nome para cadastrar esta paleta no sistema:
+            </p>
+
+            {/* Exibição das cores bloqueadas (somente leitura) */}
+            <div className="ui-palette-readonly-grid">
+              <div className="ui-palette-readonly-item">
+                <span className="ui-palette-swatch" style={{ backgroundColor: form.cor_primaria }} />
+                <div>
+                  <div style={{ fontSize: 11, opacity: 0.65, fontWeight: 600 }}>Primária</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--forest-deep)' }}>
+                    {form.cor_primaria.toUpperCase()}
+                  </div>
+                </div>
+              </div>
+
+              <div className="ui-palette-readonly-item">
+                <span className="ui-palette-swatch" style={{ backgroundColor: form.cor_secundaria }} />
+                <div>
+                  <div style={{ fontSize: 11, opacity: 0.65, fontWeight: 600 }}>Secundária</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--forest-deep)' }}>
+                    {form.cor_secundaria.toUpperCase()}
+                  </div>
+                </div>
+              </div>
+
+              <div className="ui-palette-readonly-item">
+                <span className="ui-palette-swatch" style={{ backgroundColor: form.cor_fundo }} />
+                <div>
+                  <div style={{ fontSize: 11, opacity: 0.65, fontWeight: 600 }}>Fundo</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--forest-deep)' }}>
+                    {form.cor_fundo.toUpperCase()}
+                  </div>
+                </div>
+              </div>
+
+              <div className="ui-palette-readonly-item">
+                <span className="ui-palette-swatch" style={{ backgroundColor: form.cor_texto }} />
+                <div>
+                  <div style={{ fontSize: 11, opacity: 0.65, fontWeight: 600 }}>Texto</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--forest-deep)' }}>
+                    {form.cor_texto.toUpperCase()}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="ui-field">
+              <label htmlFor="paletteName">
+                Nome da Paleta <span className="ui-required">*</span>
+              </label>
+              <input
+                id="paletteName"
+                type="text"
+                placeholder="Ex: Costa Amalfitana (Azul & Limão)"
+                value={newPaletteName}
+                onChange={(e) => setNewPaletteName(e.target.value)}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleSaveNewPalette(e);
+                  }
+                }}
+              />
+            </div>
+
+            <div className="ui-modal-footer" style={{ marginTop: 24 }}>
+              <button
+                type="button"
+                className="ui-btn-ghost"
+                onClick={closePaletteModal}
+                disabled={savingPalette}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="ui-btn-solid"
+                onClick={handleSaveNewPalette}
+                disabled={savingPalette}
+              >
+                {savingPalette ? 'Salvando...' : 'Salvar Paleta'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Componente Searchable Select para Paletas de Cores
+function SearchablePaletteSelect({
+  paletas,
+  selectedId,
+  onSelect,
+}: {
+  paletas: PaletaTema[];
+  selectedId: string;
+  onSelect: (paleta: PaletaTema) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const containerRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const selectedPalette = useMemo(
+    () => paletas.find((p) => p.id === selectedId),
+    [paletas, selectedId]
+  );
+
+  const filtered = useMemo(() => {
+    const term = search.toLowerCase().trim();
+    if (!term) return paletas;
+    return paletas.filter((p) => p.nome.toLowerCase().includes(term));
+  }, [paletas, search]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+      setTimeout(() => searchInputRef.current?.focus(), 50);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [open]);
+
+  return (
+    <div className="ui-search-select-container" ref={containerRef}>
+      <button
+        type="button"
+        className="ui-search-select-trigger"
+        onClick={() => setOpen((prev) => !prev)}
+      >
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+          {selectedPalette ? (
+            <>
+              <span className="ui-mini-swatches">
+                <span className="ui-mini-swatch" style={{ backgroundColor: selectedPalette.cor_primaria }} />
+                <span className="ui-mini-swatch" style={{ backgroundColor: selectedPalette.cor_secundaria }} />
+                <span className="ui-mini-swatch" style={{ backgroundColor: selectedPalette.cor_fundo }} />
+              </span>
+              <span>{selectedPalette.nome}</span>
+            </>
+          ) : (
+            <span style={{ opacity: 0.6 }}>Buscar ou selecionar uma paleta...</span>
+          )}
+        </span>
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          style={{
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.2s',
+          }}
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="ui-search-select-dropdown">
+          <div className="ui-search-select-input-wrap">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              style={{
+                position: 'absolute',
+                left: 10,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                opacity: 0.45,
+              }}
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <input
+              ref={searchInputRef}
+              type="text"
+              className="ui-search-select-input"
+              placeholder="Digite o nome da paleta..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
+          <ul className="ui-search-select-list">
+            {filtered.length === 0 ? (
+              <li style={{ padding: '12px 10px', fontSize: 13, opacity: 0.6, textAlign: 'center' }}>
+                Nenhuma paleta encontrada.
+              </li>
+            ) : (
+              filtered.map((paleta) => {
+                const isSelected = paleta.id === selectedId;
+                return (
+                  <li
+                    key={paleta.id}
+                    className={`ui-search-select-option${isSelected ? ' selected' : ''}`}
+                    onClick={() => {
+                      onSelect(paleta);
+                      setOpen(false);
+                      setSearch('');
+                    }}
+                  >
+                    <span>{paleta.nome}</span>
+                    <span className="ui-mini-swatches">
+                      <span className="ui-mini-swatch" style={{ backgroundColor: paleta.cor_primaria }} />
+                      <span className="ui-mini-swatch" style={{ backgroundColor: paleta.cor_secundaria }} />
+                      <span className="ui-mini-swatch" style={{ backgroundColor: paleta.cor_fundo }} />
+                      <span className="ui-mini-swatch" style={{ backgroundColor: paleta.cor_texto }} />
+                    </span>
+                  </li>
+                );
+              })
+            )}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ZigueZagueEditor({
+  items,
+  onChange,
+}: {
+  items: ZigueZagueDraftItem[];
+  onChange: (items: ZigueZagueDraftItem[]) => void;
+}) {
+  function addBloco() {
+    onChange([
+      ...items,
+      {
+        id: uid(),
+        titulo: 'Experiência Exclusiva no Destino',
+        texto:
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivencie momentos únicos planejados com curadoria presencial e atenção a cada detalhe.',
+        imagem: '',
+        pendingFile: null,
+      },
+    ]);
+  }
+
+  function updateBloco(index: number, partial: Partial<ZigueZagueDraftItem>) {
+    const next = [...items];
+    next[index] = { ...next[index], ...partial };
+    onChange(next);
+  }
+
+  function removeBloco(index: number) {
+    onChange(items.filter((_, idx) => idx !== index));
+  }
+
+  async function handleBlocoImage(index: number, e: React.ChangeEvent<HTMLInputElement>) {
+    const originalFile = e.target.files?.[0];
+    if (!originalFile) return;
+
+    const options = {
+      maxSizeMB: 0.3,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+      fileType: 'image/webp',
+    };
+
+    try {
+      const compressedBlob = await imageCompression(originalFile, options);
+      const nomeSemExtensao = originalFile.name.replace(/\.[^/.]+$/, '');
+      const webpFile = new File([compressedBlob], `${nomeSemExtensao}.webp`, {
+        type: 'image/webp',
+      });
+      const previewUrl = URL.createObjectURL(webpFile);
+      updateBloco(index, { imagem: previewUrl, pendingFile: webpFile });
+    } catch (err) {
+      console.error('Erro ao comprimir imagem do bloco', err);
+    }
+  }
+
+  return (
+    <div className="ui-section-box">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+        <div>
+          <h3 className="ui-section-box-title">Layout Alternado (Blocos Zigue-Zague)</h3>
+          <p className="ui-hint" style={{ margin: 0 }}>
+            Intercala automaticamente Foto à Esquerda + Texto à Direita, seguido de Texto à Esquerda + Foto à Direita.
+          </p>
+        </div>
+        <button type="button" className="ui-btn-ghost" onClick={addBloco}>
+          + Adicionar Bloco Zigue-Zague
+        </button>
+      </div>
+
+      {items.length === 0 && (
+        <p style={{ fontSize: 13.5, opacity: 0.6, margin: '8px 0 0' }}>
+          Nenhum bloco cadastrado ainda. Clique em "+ Adicionar Bloco Zigue-Zague" para testar.
+        </p>
+      )}
+
+      {items.map((bloco, i) => (
+        <div
+          key={bloco.id}
+          style={{
+            border: '1px dashed var(--beje-claro)',
+            borderRadius: 8,
+            padding: 16,
+            marginTop: 14,
+            background: 'var(--warm-white)',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <strong style={{ fontSize: 13.5, color: 'var(--forest-deep)' }}>
+              Bloco {i + 1} ({i % 2 === 0 ? 'Foto na Esquerda / Texto na Direita' : 'Texto na Esquerda / Foto na Direita'})
+            </strong>
+            <button
+              type="button"
+              className="ui-icon-btn danger"
+              onClick={() => removeBloco(i)}
+              title="Remover Bloco"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M3 6h18" />
+                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="ui-field">
+            <label>Título do Bloco</label>
+            <input
+              type="text"
+              placeholder="Ex: Navegação privativa pelas ilhas"
+              value={bloco.titulo}
+              onChange={(e) => updateBloco(i, { titulo: e.target.value })}
+            />
+          </div>
+
+          <div className="ui-field">
+            <label>Texto do Bloco</label>
+            <textarea
+              placeholder="Descreva este destaque da expedição..."
+              value={bloco.texto}
+              onChange={(e) => updateBloco(i, { texto: e.target.value })}
+              style={{ minHeight: 80 }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <label className="ui-file-upload">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M12 16V4" />
+                <path d="m7 9 5-5 5 5" />
+                <path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
+              </svg>
+              Enviar Foto do Bloco
+              <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => handleBlocoImage(i, e)} />
+            </label>
+
+            {bloco.imagem && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <img
+                  src={bloco.imagem}
+                  alt={`Bloco ${i + 1}`}
+                  style={{ width: 90, height: 64, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--beje-claro)' }}
+                />
+                {bloco.pendingFile && <span className="ui-photo-pending-badge" style={{ position: 'static' }}>Nova WebP</span>}
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -1018,7 +2237,6 @@ function RoteiroEditor({
                   <em style={{ opacity: 0.5 }}>Nenhuma descrição informada.</em>
                 )}
                 
-                {/* Exibição simples da foto no resumo do accordion caso ela exista */}
                 {item.imagens && item.imagens.length > 0 && (
                   <div style={{ marginTop: '16px' }}>
                     <img 
@@ -1071,7 +2289,7 @@ function RoteiroEditor({
                   <input
                     id="dayTitle"
                     type="text"
-                    placeholder="Ex: Chegada em San Pedro de Atacama"
+                    placeholder="Ex: Chegada em Split e embarque"
                     value={dayForm.titulo}
                     onChange={(e) => setDayForm(f => ({...f, titulo: e.target.value}))}
                     required

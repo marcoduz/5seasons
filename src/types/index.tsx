@@ -1,3 +1,30 @@
+export interface BlocoZigueZague {
+  id: string;
+  titulo: string;
+  texto: string;
+  imagem: string;
+}
+
+export interface ConteudoExperiencia {
+  pilares_titulo?: string;
+  pilares?: { titulo: string; descricao: string }[];
+  jornada_titulo?: string;
+  jornada?: { etapa: string; descricao: string }[];
+  perfil_titulo?: string;
+  perfis?: { titulo: string; descricao: string }[];
+  perfil_fechamento?: string;
+}
+
+export interface PaletaTema {
+  id: string;
+  nome: string;
+  cor_primaria: string;
+  cor_secundaria: string;
+  cor_fundo: string;
+  cor_texto: string;
+  created_at?: string;
+}
+
 export interface Expedicao {
   id: string;
   nome: string;
@@ -9,7 +36,16 @@ export interface Expedicao {
   incluso: string[];
   nao_incluso: string[];
   observacoes: string[];
-  created_at: string;
+  created_at?: string;
+  cor_primaria?: string;
+  cor_secundaria?: string;
+  cor_fundo?: string;
+  cor_texto?: string;
+  frase_destaque?: string;
+  motivo_epoca_titulo?: string;
+  motivo_epoca_texto?: string;
+  blocos_ziguezague?: BlocoZigueZague[];
+  conteudo_experiencia?: ConteudoExperiencia;
 }
 
 export interface Pacote {
