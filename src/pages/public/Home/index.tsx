@@ -38,7 +38,6 @@ const FILTROS = [
   { id: 'Todos', label: 'Todos os Roteiros' },
   { id: 'Nacional', label: 'Destinos Nacionais' },
   { id: 'Internacional', label: 'Destinos Internacionais' },
-  { id: '2026', label: 'Temporada 2026' },
   { id: '2027', label: 'Temporada 2027' },
 ];
 

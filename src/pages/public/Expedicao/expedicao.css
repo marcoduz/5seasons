@@ -2,7 +2,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Variáveis de fallback caso o banco não retorne cores */
   --home-green: #2f4842;
   --laranja-suave: #fdb17f;
   --bege-claro: #e8dad1;
@@ -16,16 +15,25 @@
   color: var(--text-main, #26332f);
   background-color: #ffffff;
   line-height: 1.6;
+  width: 100%;
+  overflow-x: hidden; /* Corta a rolagem no telemóvel */
 }
 
-.expedicao-page h1, 
-.expedicao-page h2, 
-.expedicao-page h3, 
+.expedicao-page *,
+.expedicao-page *::before,
+.expedicao-page *::after {
+  box-sizing: border-box;
+}
+
+.expedicao-page h1,
+.expedicao-page h2,
+.expedicao-page h3,
 .expedicao-page .serif-font {
   font-family: 'Playfair Display', serif;
 }
 
-.container {
+.expedicao-page .container {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
@@ -41,7 +49,9 @@
   background-position: center;
   display: flex;
   align-items: center;
-  padding: 110px 0 80px 0;
+  padding: 96px 0 80px 0;
+  width: 100%;
+  overflow: hidden;
 }
 
 .hero-overlay {
@@ -49,9 +59,9 @@
   inset: 0;
   background: linear-gradient(
     to right,
-    rgba(15, 23, 20, 0.85) 0%,
-    rgba(15, 23, 20, 0.55) 55%,
-    rgba(15, 23, 20, 0.35) 100%
+    rgba(15, 23, 20, 0.88) 0%,
+    rgba(15, 23, 20, 0.6) 55%,
+    rgba(15, 23, 20, 0.4) 100%
   );
 }
 
@@ -59,7 +69,7 @@
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
   gap: 48px;
   align-items: center;
   width: 100%;
@@ -67,38 +77,41 @@
 
 .hero-content {
   color: #fffaf8 !important;
+  min-width: 0;
 }
 
 .hero-badges {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 20px;
   flex-wrap: wrap;
 }
 
 .badge-outline {
   border: 1px solid rgba(255, 250, 248, 0.45);
-  background: rgba(15, 23, 20, 0.45);
+  background: rgba(15, 23, 20, 0.5);
   backdrop-filter: blur(4px);
   color: #fffaf8 !important;
-  padding: 6px 16px;
+  padding: 6px 14px;
   border-radius: 50px;
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 
 .expedicao-page .hero-title {
-  font-size: clamp(36px, 4.8vw, 60px);
+  font-size: clamp(32px, 4.8vw, 58px);
   line-height: 1.08;
   margin: 0 0 16px 0;
   font-weight: 600;
   color: var(--theme-secondary, #fdb17f) !important;
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  overflow-wrap: break-word;
 }
 
 .hero-location {
-  font-size: 20px;
+  font-size: 19px;
   color: var(--theme-secondary, #fdb17f) !important;
   margin: 0;
   font-weight: 500;
@@ -107,14 +120,18 @@
   gap: 8px;
 }
 
+/* Card Flutuante da Direita */
 .summary-card {
-  background: rgba(21, 30, 27, 0.9) !important;
+  background: rgba(21, 30, 27, 0.92) !important;
   backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 16px;
   padding: 32px;
   color: #fffaf8 !important;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
+  width: 100%;
+  min-width: 0;
 }
 
 .summary-price-box {
@@ -124,11 +141,12 @@
 }
 
 .summary-price-label {
-  font-size: 13px;
+  font-size: 12.5px;
   text-transform: uppercase;
   letter-spacing: 1px;
   color: #cbd5e1 !important;
   display: block;
+  margin-bottom: 4px;
 }
 
 .summary-price-value {
@@ -136,6 +154,7 @@
   font-weight: 700;
   color: var(--theme-secondary, #fdb17f) !important;
   font-family: 'Playfair Display', serif;
+  line-height: 1.15;
 }
 
 .summary-list {
@@ -145,7 +164,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  font-size: 14.5px;
+  font-size: 14px;
 }
 
 .summary-list li {
@@ -153,6 +172,7 @@
   align-items: flex-start;
   gap: 10px;
   color: #f1f5f9 !important;
+  line-height: 1.5;
 }
 
 .summary-list li svg {
@@ -170,7 +190,7 @@
   background-color: var(--theme-secondary, #fdb17f) !important;
   color: #151e1b !important;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14.5px;
   padding: 16px 24px;
   border-radius: 8px;
   border: none;
@@ -179,7 +199,6 @@
   text-decoration: none !important;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-sizing: border-box;
 }
 
 .btn-cta:hover {
@@ -206,7 +225,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 13.5px;
+  gap: 8px;
+  font-size: 13px;
 }
 
 .pacote-btn:hover {
@@ -223,16 +243,17 @@
    2. SEÇÕES GERAIS, FUNDOS & PAGAMENTOS
    ========================================= */
 .bg-beige {
-  padding: 80px 0;
+  padding: 72px 0;
   background-color: var(--bege-fundo, #f5ebe6) !important;
 }
 
 .bg-white {
+  padding: 72px 0;
   background-color: #ffffff !important;
 }
 
 .section-padding {
-  padding: 80px 0;
+  padding: 72px 0;
 }
 
 .section-subtitle {
@@ -247,11 +268,21 @@
 
 .section-title {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(28px, 3.8vw, 38px);
+  font-size: clamp(26px, 3.8vw, 38px);
   color: var(--theme-primary, #2f4842);
   margin: 0 0 24px 0;
   line-height: 1.2;
   font-weight: 600;
+}
+
+.desc-centered {
+  font-size: 17px;
+  color: var(--text-main, #26332f);
+  max-width: 800px;
+  margin: 20px auto 0 auto;
+  text-align: center;
+  line-height: 1.8;
+  white-space: pre-line;
 }
 
 .payment-section {
@@ -262,16 +293,17 @@
 
 .payment-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
   gap: 36px;
   text-align: center;
+  margin-top: 32px;
 }
 
 .payment-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .payment-icon {
@@ -294,7 +326,7 @@
 
 .payment-chic-text {
   font-family: 'Playfair Display', serif;
-  font-size: 20px;
+  font-size: 19px;
   font-style: italic;
   color: var(--text-main, #26332f);
   margin: 12px auto 0;
@@ -308,7 +340,7 @@
    ========================================= */
 .highlight-quote-box {
   max-width: 800px;
-  margin: 0 auto;
+  margin: 0 auto 24px auto;
   padding: 24px 32px;
   border-left: 4px solid var(--theme-secondary, #fdb17f);
   background: #ffffff;
@@ -341,12 +373,11 @@
   display: flex;
   flex-direction: column;
   gap: 64px;
-  padding: 80px 0;
 }
 
 .zigzag-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 48px;
   align-items: center;
 }
@@ -392,7 +423,7 @@
    ========================================= */
 .pillars-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
   gap: 28px;
   margin-top: 36px;
 }
@@ -424,8 +455,8 @@
 
 .journey-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 28px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 24px;
   margin-top: 36px;
 }
 
@@ -467,13 +498,13 @@
 
 .profile-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
   gap: 24px;
   margin-top: 36px;
 }
 
 .profile-card {
-  background: var(--bege-fundo, #f5ebe6);
+  background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 14px;
   padding: 28px 24px;
@@ -588,7 +619,6 @@
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 1px;
-  z-index: 5;
 }
 
 /* =========================================
@@ -628,7 +658,7 @@
   border: 1px solid var(--bege-claro, #e8dad1);
   color: var(--text-main, #26332f);
   padding: 10px 20px;
-  border-radius: 50px;
+  border-radius: 50px; /* Bordas arredondadas clássicas */
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
@@ -654,7 +684,7 @@
 }
 
 .cronograma-content.has-image {
-  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
 }
 
 .cronograma-text h3 {
@@ -692,17 +722,19 @@
   object-fit: cover;
   display: block;
 }
+
 /* =========================================
    8. INCLUSÕES & OBSERVAÇÕES
    ========================================= */
 .serv-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
   gap: 32px;
-  padding: 80px 0;
 }
 
-.inc-card, .exc-card, .obs-box {
+.inc-card,
+.exc-card,
+.obs-box {
   background: #ffffff;
   padding: 36px;
   border-radius: 16px;
@@ -734,31 +766,29 @@
   margin: 0 0 24px 0;
   font-family: 'Playfair Display', serif;
 }
+
 .serv-list {
   list-style: none;
   padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px; 
+  gap: 14px;
 }
 
-/* NOVA FORMATAÇÃO: Inline em vez de flex column para evitar a quebra de linha */
 .serv-list li {
   font-size: 15px;
   color: var(--text-main, #26332f);
   line-height: 1.6;
-  display: block; /* Alterado de flex para block para permitir texto contínuo */
+  display: block;
 }
 
-/* Se for um item de Inclusão/Não Inclusão com SVG (na mesma linha) */
 .serv-list li svg {
   display: inline-block;
   vertical-align: text-bottom;
   margin-right: 10px;
 }
 
-/* O "bullet" point estilizado apenas para as Observações (sem SVG) */
 .obs-box .serv-list li::before {
   content: '•';
   color: var(--theme-secondary, #d98248);
@@ -768,4 +798,158 @@
   display: inline-block;
   margin-right: 10px;
   vertical-align: middle;
+}
+
+/* =========================================
+   ESTILIZAÇÃO WHATSAPP & MODAL
+   ========================================= */
+.roteiro-formatted strong {
+  font-weight: 700;
+  color: var(--theme-primary, #2f4842);
+}
+.roteiro-formatted i,
+.roteiro-formatted em {
+  font-style: italic;
+}
+.roteiro-formatted del {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 20, 0.92);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.lightbox-img {
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 24px;
+  right: 32px;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: white;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* =========================================
+   HEADER EXCLUSIVO DA EXPEDIÇÃO (TRANSPARENTE NO TOPO)
+   (Atua na classe .is-transparent-top gerada pelo React)
+   ========================================= */
+.public-header.is-transparent-top {
+  position: fixed !important; /* Descola do fundo para flutuar sobre a foto */
+  width: 100%;
+}
+
+.public-header.is-transparent-top:not(.is-scrolled) {
+  background-color: transparent !important;
+  border-bottom-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* =========================================
+   RESPONSIVIDADE (MOBILE)
+   ========================================= */
+@media (max-width: 900px) {
+  .expedicao-page .container {
+    padding: 0 16px;
+  }
+
+  .hero-banner {
+    padding: 60px 0 60px 0;
+    min-height: auto;
+  }
+
+  /* FORÇA A GRELHA A TER APENAS 1 COLUNA NO MOBILE */
+  .hero-grid {
+    grid-template-columns: 1fr !important;
+    gap: 40px;
+    width: 100%;
+  }
+
+  /* Garante que o texto fique centralizado em cima */
+  .hero-content {
+    order: 1 !important; /* Coloca o título e as tags em cima */
+    text-align: center;
+    width: 100%;
+  }
+
+  .hero-location, .hero-badges, .hero-pills {
+    justify-content: center;
+  }
+  
+  .expedicao-page .hero-title {
+    font-size: clamp(32px, 8vw, 42px);
+  }
+
+  /* Garante que o card de preços fique em baixo, centrado e com a largura certa */
+  .summary-card {
+    order: 2 !important; /* Coloca o card de preço em baixo */
+    width: 100% !important;
+    max-width: 450px;
+    margin: 0 auto;
+    padding: 24px 20px;
+  }
+
+  /* Correção do container verde da Jornada no Mobile */
+  .bg-beige .container > div > div[style*="background: var(--theme-primary"] {
+    padding: 32px 16px !important;
+    border-radius: 12px !important;
+    margin: 0 4px;
+  }
+
+  /* Restantes ajustes de mobile */
+  .carousel-container {
+    height: 300px;
+  }
+
+  .cronograma-card {
+    padding: 24px 16px;
+  }
+
+  .cronograma-content.has-image {
+    grid-template-columns: 1fr;
+  }
+
+  .cronograma-img-wrapper {
+    height: 220px;
+  }
+
+  .zigzag-row,
+  .zigzag-row.reverse {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .zigzag-row.reverse .zigzag-media {
+    order: 1;
+  }
+
+  .zigzag-row.reverse .zigzag-content {
+    order: 2;
+  }
+
+  .inc-card,
+  .exc-card,
+  .obs-box,
+  .why-season-box {
+    padding: 24px 16px;
+  }
 }

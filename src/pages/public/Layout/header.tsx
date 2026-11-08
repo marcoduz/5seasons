@@ -1,4 +1,3 @@
-// src/pages/public/Layout/header.tsx
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -14,6 +13,9 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
 
   const activeIndex = NAV_ITEMS.findIndex((item) => item.match(location.pathname));
+  
+  // Verifica se a rota atual é a página de detalhes de uma expedição
+  const isExpedicaoPage = location.pathname.startsWith('/expedicao/');
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -28,7 +30,7 @@ export function Header() {
   }, []);
 
   return (
-    <header className={`public-header ${scrolled ? 'is-scrolled' : ''}`}>
+    <header className={`public-header ${scrolled ? 'is-scrolled' : ''} ${isExpedicaoPage ? 'is-transparent-top' : ''}`}>
       <div className="container public-header-inner">
         <Link to="/" className="public-brand">
           <img src="/5seasonsLogo_semEscrita.svg" alt="5 Seasons" className="public-brand-logo" />
