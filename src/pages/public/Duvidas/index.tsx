@@ -101,14 +101,14 @@ export function Duvidas() {
       <div style={{ marginBottom: '40px' }}>
         <Link 
           to="/" 
-          style={{ color: 'var(--verde-escuro)', textDecoration: 'none', fontSize: '14px', fontWeight: 'bold' }}
+          style={{ color: 'var(--home-green)', textDecoration: 'none', fontSize: '14px', fontWeight: 'bold' }}
         >
           &larr; VOLTAR PARA O INÍCIO
         </Link>
       </div>
 
       {/* Título */}
-      <h1 style={{ fontSize: '2.5rem', marginBottom: '10px', fontFamily: 'Playfair Display, serif', color: 'var(--verde-escuro)', textTransform: 'uppercase' }}>
+      <h1 style={{ fontSize: '2.5rem', marginBottom: '10px', fontFamily: 'Playfair Display, serif', color: 'var(--home-green)', textTransform: 'uppercase' }}>
         Perguntas Frequentes
       </h1>
       <p style={{ fontSize: '14px', opacity: 0.8, marginBottom: '40px' }}>
@@ -139,7 +139,7 @@ export function Duvidas() {
                   alignItems: 'center',
                   cursor: 'pointer',
                   textAlign: 'left',
-                  color: 'var(--verde-escuro)',
+                  color: 'var(--home-green)',
                   fontFamily: 'Playfair Display, serif'
                 }}
               >
@@ -156,7 +156,7 @@ export function Duvidas() {
                   style={{
                     transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                     transition: 'transform 0.3s ease',
-                    color: 'var(--verde-escuro)',
+                    color: 'var(--home-green)',
                     flexShrink: 0,
                     marginLeft: '16px'
                   }}
@@ -198,7 +198,7 @@ export function Duvidas() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            background: 'var(--verde-escuro)',
+            background: 'var(--home-green)',
             color: 'var(--branco-gelo)',
             padding: '12px 24px',
             borderRadius: '99px',

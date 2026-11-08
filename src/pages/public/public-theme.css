@@ -1,289 +1,412 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap');
+/* =====================================================================
+   HOME PÚBLICA — catálogo editorial
+   Paleta (identidade): verde #486d66 · verde profundo #2f4842 · areia #d1b39d
+   · areia suave #e8dad1 · papel #fffaf8 · tinta #26332f
+   Tipos: Playfair Display (títulos) + Inter (texto, preços)
+   ===================================================================== */
 
-:root {
-  --brand-dark: #2f4842;
-  --text-main: #26332f;
-  --text-muted: rgba(38, 51, 47, 0.65);
-}
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap');
 
 body {
   margin: 0;
   font-family: 'Inter', -apple-system, sans-serif;
-  background-color: var(--branco-gelo);
-  color: var(--text-main);
+  background-color: var(--home-paper);
+  color: var(--home-ink);
   -webkit-font-smoothing: antialiased;
-  /* Estas duas linhas abaixo vão forçar o site público a rolar, ignorando o bloqueio do Admin */
   overflow-x: hidden;
   overflow-y: auto !important; 
 }
 
-/* ================= Containers & Header ================= */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
 }
 
+/* ================= HEADER EDITORIAL (GLASSMORPHISM) ================= */
 .public-header {
-  background-color: var(--verde-escuro);
+  background-color: rgba(47, 72, 66, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: white;
-  padding: 16px 0;
+  padding: 18px 0;
   position: sticky;
   top: 0;
   z-index: 100;
+  border-bottom: 1px solid rgba(232, 218, 209, 0.12);
+  transition: padding 0.25s ease, box-shadow 0.25s ease;
+}
+
+.public-header.is-scrolled {
+  padding: 12px 0;
+  box-shadow: 0 10px 30px rgba(21, 30, 27, 0.18);
 }
 
 .public-header-inner {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   align-items: center;
-  min-height: 56px;
+  justify-content: space-between;
+  gap: 24px;
 }
 
 .public-brand {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   text-decoration: none;
   flex-shrink: 0;
-  justify-self: start;
-  grid-column: 1;
 }
 
 .public-brand-logo {
-  height: 42px;
-  width: 42px;
+  height: 40px;
+  width: 40px;
   object-fit: contain;
   display: block;
 }
 
+.public-brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
 .public-brand-name {
   font-family: 'Playfair Display', serif;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 600;
-  letter-spacing: 0.5px;
-  color: var(--beje-escuro);
+  letter-spacing: 0.4px;
+  color: var(--home-paper);
   line-height: 1;
-  display: block;
+}
+
+.public-brand-tagline {
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  color: var(--home-sand);
+  font-weight: 600;
+  margin-top: 3px;
 }
 
 .public-nav {
-  position: relative;
   display: flex;
   align-items: center;
-  gap: 2px;
-  height: 100%;
-  grid-column: 2;
-  justify-self: center;
-}
-
-.public-nav-pill {
-  position: absolute;
-  top: 4px;
-  bottom: 4px;
-  border-radius: 999px;
-  background-color: var(--beje-escuro);
-  transition: left 0.35s cubic-bezier(0.65, 0, 0.35, 1), width 0.35s cubic-bezier(0.65, 0, 0.35, 1),
-    opacity 0.2s ease;
-  z-index: 1;
+  gap: 36px;
 }
 
 .public-nav-link {
   position: relative;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  padding: 10px 18px;
-  border-radius: 999px;
-  color: white;
+  padding: 8px 0;
+  color: rgba(255, 250, 248, 0.78);
   text-decoration: none;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  line-height: 1;
-  transition: color 0.3s ease, opacity 0.2s ease;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  transition: color 0.25s ease;
   white-space: nowrap;
+}
+
+.public-nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--home-sand);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .public-nav-link:hover {
-  opacity: 0.8;
+  color: #ffffff;
 }
 
 .public-nav-link.active {
-  color: var(--verde-escuro);
-}
-.public-nav-link.active:hover {
-  opacity: 1;
+  color: #ffffff;
+  font-weight: 600;
 }
 
-/* ================= Seção Hero & Filtros ================= */
+.public-nav-link.active::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.public-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 1px solid rgba(232, 218, 209, 0.35);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--home-paper);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.header-cta-btn:hover {
+  background: var(--home-sand);
+  border-color: var(--home-sand);
+  color: var(--home-green);
+  transform: translateY(-1px);
+}
+
+.header-cta-mobile {
+  display: none;
+}
+
+.mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* ================= HERO EDITORIAL & FILTROS (CENTRADOS) ================= */
 .hero-section {
   text-align: center;
-  padding: 80px 0 40px;
+  padding: 80px 0 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hero-header-split {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .eyebrow {
-  color: var(--beje-escuro);
+  color: var(--home-sand-dark);
   text-transform: uppercase;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 2px;
-  margin-bottom: 12px;
+  margin-bottom: 0;
+  display: block;
 }
 
 .hero-title {
-  color: var(--verde-escuro);
+  margin: 0;
   font-family: 'Playfair Display', serif;
-  font-size: 42px;
+  font-size: clamp(36px, 5vw, 64px);
   font-weight: 600;
-  margin: 0 0 16px;
+  line-height: 1.15;
+  color: var(--home-green);
+  text-shadow: none; 
 }
 
 .hero-subtitle {
-  color: var(--text-muted);
-  font-size: 16px;
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--home-muted);
+  max-width: 600px;
 }
 
-.filter-bar {
+.filter-tabs {
+  display: flex;
+  justify-content: center;
+  gap: clamp(16px, 2.5vw, 32px);
+  margin-top: 56px;
+  padding: 0 4px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--home-line);
+  width: 100%;
+}
+
+.filter-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-tab-item {
   position: relative;
-  display: inline-flex;
-  background: white;
-  padding: 8px;
-  border-radius: 99px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-  margin-top: 40px;
-  align-items: center;
-  gap: 8px;
-}
-
-.filter-pill {
-  position: absolute;
-  top: 8px;
-  bottom: 8px;
-  border-radius: 99px;
-  background-color: var(--brand-dark, #2f4842);
-  transition: left 0.35s cubic-bezier(0.65, 0, 0.35, 1), width 0.35s cubic-bezier(0.65, 0, 0.35, 1),
-    opacity 0.2s ease;
-  z-index: 1;
-}
-
-.filter-btn {
-  position: relative;
-  z-index: 2;
-  background: transparent;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 99px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: color 0.3s ease;
-  font-family: 'Inter', sans-serif;
+  flex: 0 0 auto;
+  padding: 0 0 16px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font: 500 15px/1.2 'Inter', sans-serif;
+  color: var(--home-muted);
   white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.25s ease;
 }
 
-.filter-btn.active {
-  color: white;
+.filter-tab-item::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--home-green);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s var(--home-ease);
 }
 
-.filter-divider {
-  position: relative;
-  z-index: 2;
-  width: 1px;
-  height: 24px;
-  background-color: var(--beje-claro);
-  margin: 0 8px;
+.filter-tab-item:hover {
+  color: var(--home-ink);
 }
 
-/* ================= Cards de Expedição ================= */
+.filter-tab-item.active {
+  color: var(--home-green);
+}
+.filter-tab-item.active::after {
+  transform: scaleX(1);
+}
+
+.filter-tab-item:focus-visible {
+  outline: 2px solid var(--home-green);
+  outline-offset: 2px;
+}
+
+/* ================= CARDS DE EXPEDIÇÃO (ESTILO EDITORIAL) ================= */
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 24px;
-  padding: 40px 0 80px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: 32px;
+  padding: 24px 0 88px;
 }
 
 .exp-card {
-  position: relative;
-  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(47, 72, 66, 0.1);
+  border-radius: 14px;
   overflow: hidden;
-  aspect-ratio: 3/4;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
   text-decoration: none;
-  color: white;
-  transition: transform 0.3s ease;
+  color: var(--text-main);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 20px rgba(38, 51, 47, 0.04);
 }
 
 .exp-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 32px rgba(47, 72, 66, 0.2);
+  transform: translateY(-6px);
+  box-shadow: 0 18px 36px rgba(47, 72, 66, 0.12);
 }
 
-.exp-card-bg {
-  position: absolute;
-  inset: 0;
+.exp-card-media {
+  position: relative;
+  height: 250px;
+  overflow: hidden;
+  background-color: var(--beje-claro);
+}
+
+.exp-card-img {
+  width: 100%;
+  height: 100%;
   background-size: cover;
   background-position: center;
-  z-index: 1;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-.exp-card-overlay {
+.exp-card:hover .exp-card-img {
+  transform: scale(1.06);
+}
+
+.exp-card-media::after {
+  content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(38, 51, 47, 0.95) 0%, rgba(38, 51, 47, 0.4) 50%, transparent 100%);
-  z-index: 2;
+  background: linear-gradient(to bottom, rgba(23, 33, 30, 0.38), transparent 30%);
+  pointer-events: none;
 }
 
 .exp-card-badges {
   position: absolute;
-  top: 20px;
-  left: 20px;
-  right: 20px;
+  top: 14px;
+  left: 14px;
+  right: 14px;
   display: flex;
   justify-content: space-between;
-  z-index: 3;
+  align-items: center;
+  gap: 8px;
+  z-index: 2;
 }
 
-.badge {
-  background: rgba(255,255,255,0.25);
-  backdrop-filter: blur(4px);
-  padding: 6px 12px;
-  border-radius: 99px;
+.badge-tag {
+  background: rgba(255, 250, 248, 0.92);
+  backdrop-filter: blur(6px);
+  color: var(--home-green);
+  padding: 5px 12px;
+  border-radius: 6px;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
 }
 
-.exp-card-content {
-  position: relative;
-  z-index: 3;
+.badge-status {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.badge-status.status-ativo {
+  background-color: var(--home-green);
+}
+.badge-status.status-breve {
+  background-color: #b45309;
+}
+.badge-status.status-esgotado {
+  background-color: #881337;
+}
+
+.exp-card-body {
   padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .exp-card-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   color: var(--beje-escuro);
   font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 1px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .exp-card-title {
   font-family: 'Playfair Display', serif;
-  font-size: 26px;
+  font-size: 23px;
   font-weight: 600;
-  margin: 0 0 12px;
-  line-height: 1.2;
+  color: var(--home-green);
+  margin: 0 0 10px;
+  line-height: 1.25;
 }
 
 .exp-card-desc {
   font-size: 14px;
-  opacity: 0.85;
+  color: var(--text-muted);
+  line-height: 1.6;
   margin: 0 0 24px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -292,57 +415,70 @@ body {
 }
 
 .exp-card-footer {
+  margin-top: auto;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  border-top: 1px solid rgba(255,255,255,0.2);
+  align-items: flex-end;
+  border-top: 1px solid var(--beje-claro);
   padding-top: 16px;
+  gap: 12px;
 }
 
 .exp-card-price small {
   display: block;
-  font-size: 10px;
-  opacity: 0.7;
-  letter-spacing: 1px;
-}
-.exp-card-price strong {
-  font-size: 18px;
+  font-size: 10.5px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
   font-weight: 600;
+  margin-bottom: 2px;
 }
 
-/* Estilo Global do Botão Ver Expedição (Computador e Base) */
-.btn-ver-expedicao {
-  display: inline-block;
-  padding: 8px 16px;
-  border-radius: 99px !important; /* Mantém redondo estilo pílula */
-  transition: all 0.2s ease;
-  text-align: center;
-  color: white !important; /* Força o texto a ficar branco */
-  text-decoration: none;
-  font-size: 11px;
-  line-height: 1.4;
-}
-
-.btn-ver-expedicao:hover {
-  background-color: rgba(255, 255, 255, 0.2) !important; /* Efeito de brilho ao passar o mouse */
-  transform: translateY(-2px);
+.exp-card-price strong {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--home-green);
+  display: block;
+  line-height: 1.2;
 }
 
 .moedas-estrangeiras {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-top: 6px;
   font-size: 11px;
-  opacity: 0.8;
   font-weight: 500;
-  color: var(--beje-escuro);
-  white-space: nowrap; /* IMPEDE A QUEBRA DE LINHA */
-  margin-top: 4px;
+  color: var(--text-muted);
+  white-space: nowrap;
 }
 
-/* ================= Footer Atualizado ================= */
+.btn-ver-expedicao {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background-color: var(--branco-gelo);
+  border: 1px solid var(--beje-claro);
+  color: var(--home-green);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.exp-card:hover .btn-ver-expedicao {
+  background-color: var(--home-green);
+  border-color: var(--home-green);
+  color: #ffffff;
+}
+
+/* ================= FOOTER ================= */
 .public-footer {
-  background-color: var(--verde-escuro); 
+  background-color: var(--home-green); 
   color: var(--branco-gelo);
   padding: 60px 0;
 }
@@ -350,7 +486,7 @@ body {
 .footer-flex {
   display: flex;
   justify-content: space-between;
-  align-items: center; 
+  align-items: flex-start; 
   flex-wrap: wrap;
   gap: 40px;
 }
@@ -428,10 +564,10 @@ body {
 .social-icon:hover { 
   transform: scale(1.1); 
   background-color: var(--beje-escuro); 
-  color: var(--verde-escuro);
+  color: var(--home-green);
 }
 
-/* ================= WhatsApp Flutuante ================= */
+/* ================= WHATSAPP FLUTUANTE ================= */
 .whatsapp-float {
   position: fixed;
   bottom: 24px;
@@ -450,22 +586,18 @@ body {
 }
 .whatsapp-float:hover { transform: scale(1.1); }
 
-/* ================= Botão Menu Mobile ================= */
-.mobile-menu-btn {
-  display: none;
-  background: transparent;
-  border: none;
-  color: white;
-  cursor: pointer;
-  grid-column: 3;
-  justify-self: end;
-  padding: 4px;
+/* ================= RESPONSIVIDADE (MOBILE) ================= */
+@media (max-width: 860px) {
+  .hero-header-split {
+    gap: 16px;
+  }
 }
 
-/* ================= Responsividade (Mobile) ================= */
 @media (max-width: 768px) {
-  
-  /* --- HEADER & NAVEGAÇÃO --- */
+  .header-cta-btn {
+    display: none;
+  }
+
   .mobile-menu-btn {
     display: flex;
     align-items: center;
@@ -474,45 +606,56 @@ body {
 
   .public-nav {
     position: fixed;
-    top: 74px; /* Altura do header */
+    top: 72px;
     left: 0;
     width: 100%;
-    height: calc(100vh - 74px);
-    background-color: var(--verde-escuro);
+    height: calc(100vh - 72px);
+    background-color: var(--home-green);
     flex-direction: column;
     align-items: flex-start;
     padding: 32px 24px;
-    gap: 16px;
-    transform: translateX(100%); /* Esconde a gaveta para a direita */
+    gap: 12px;
+    transform: translateX(100%);
     transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1);
     z-index: 99;
+    box-sizing: border-box;
   }
 
-  /* Classe ativada pelo React quando clica no hambúrguer */
   .public-nav.mobile-open {
-    transform: translateX(0); /* Desliza a gaveta para dentro */
-  }
-
-  .public-nav-pill {
-    display: none !important; /* Esconde a pílula no celular */
+    transform: translateX(0);
   }
 
   .public-nav-link {
     font-size: 20px;
-    padding: 12px 0;
+    padding: 14px 0;
     width: 100%;
     display: block;
-    text-transform: none; /* Deixa o texto mais natural no menu lateral */
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    border-radius: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  .public-nav-link.active {
-    color: var(--brand-orange, #fdb17f); /* Muda a cor de destaque no celular */
-    border-bottom-color: var(--brand-orange, #fdb17f);
+  .public-nav-link::after {
+    display: none;
   }
 
-  /* --- FOOTER --- */
+  .header-cta-mobile {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 14px 24px;
+    border-radius: 8px;
+    background-color: var(--beje-escuro);
+    color: var(--home-green);
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 14px;
+  }
+  
+  .filter-tabs {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+    padding-right: 32px;
+    justify-content: flex-start; /* No mobile permite scroll horizontal natural */
+  }
+
   .footer-flex {
     flex-direction: column;
     align-items: flex-start;
@@ -520,92 +663,25 @@ body {
   }
 
   .public-footer {
-    padding: 40px 0 100px; /* Mais espaço embaixo para o botão do WhatsApp flutuante */
+    padding: 40px 0 100px;
   }
+}
 
-  /* --- HOME: HERO & FILTROS --- */
+@media (max-width: 560px) {
   .hero-section {
-    padding: 60px 0 20px;
+    padding-top: 40px;
   }
-
   .hero-title {
     font-size: 32px;
   }
-
-  /* Filtro Flexível (Adapta-se ao tamanho do texto do cliente) */
-  .filter-bar {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap; /* Permite que os botões quebrem de linha naturalmente */
-    justify-content: center; /* Centraliza tudo */
-    gap: 8px;
-    padding: 12px;
-    border-radius: 16px;
-    background: white;
-  }
-  
-  .filter-btn {
-    flex: 1 1 auto; /* Faz o botão esticar para preencher os buracos vazios */
-    padding: 10px 14px; 
-    font-size: 13px;  
-    width: auto;
-    text-align: center;
-    white-space: nowrap; /* Proíbe o texto do cliente de quebrar em duas linhas dentro do botão */
-  }
-
-  .filter-btn.active {
-    background-color: var(--brand-dark, #2f4842);
-    color: white;
-  }
-
-  .filter-divider {
-    display: none;
-  }
-
-  /* --- HOME: CARDS DE EXPEDIÇÃO --- */
   .cards-grid {
-    grid-template-columns: 1fr; 
-    gap: 20px;
-    padding: 20px 0 60px;
+    gap: 44px;
+    padding-top: 32px;
   }
-
-  .exp-card {
-    aspect-ratio: auto; /* Tira a proporção fixa para o card crescer de acordo com o conteúdo */
-    min-height: 480px; /* Garante uma altura mínima bonita */
+  .exp-card-media {
+    aspect-ratio: 1 / 1.08;
   }
-
   .exp-card-title {
-    font-size: 22px;
-  }
-
-  /* Ajuste do rodapé do card para mobile */
-  .exp-card-footer {
-    display: grid;
-    grid-template-columns: 1fr auto; /* Preços na esquerda, botão na direita */
-    gap: 12px;
-    align-items: end; /* Alinha pelo botão */
-  }
-
-  .exp-card-price strong {
-    font-size: 16px; /* Diminui a fonte do preço principal */
-  }
-  
-  .exp-card-price small {
-    font-size: 9px;
-  }
-
-  .exp-card-price .moedas-estrangeiras {
-    flex-wrap: wrap; /* Permite que Euro e Dólar quebrem linha se necessário */
-    gap: 4px;
-    font-size: 11px;
-  }
-
-  /* Diminui o botão "Ver Expedição" no mobile */
-  .btn-ver-expedicao {
-    padding: 10px 14px;
-    font-size: 11px;
-    text-align: center;
-    line-height: 1.2;
-    white-space: nowrap; /* Impede o botão de quebrar linha internamente */
+    font-size: 25px;
   }
 }

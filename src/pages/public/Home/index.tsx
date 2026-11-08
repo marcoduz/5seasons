@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/services/supabase';
 
@@ -7,19 +7,19 @@ function formatarDataCard(inicio: string, fim: string) {
   const dInicio = new Date(inicio + 'T00:00:00');
   const dFim = new Date(fim + 'T00:00:00');
 
+  const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
   const diaI = String(dInicio.getDate()).padStart(2, '0');
-  const mesI = String(dInicio.getMonth() + 1).padStart(2, '0');
+  const mesI = meses[dInicio.getMonth()];
   const anoI = dInicio.getFullYear();
 
   const diaF = String(dFim.getDate()).padStart(2, '0');
-  const mesF = String(dFim.getMonth() + 1).padStart(2, '0');
+  const mesF = meses[dFim.getMonth()];
   const anoF = dFim.getFullYear();
 
   if (anoI === anoF) {
-    return `${diaI}/${mesI} A ${diaF}/${mesF} (${anoI})`;
-  } else {
-    return `${diaI}/${mesI}/${anoI} A ${diaF}/${mesF}/${anoF}`;
+    return `${diaI} ${mesI} — ${diaF} ${mesF}, ${anoI}`;
   }
+  return `${diaI} ${mesI} ${anoI} — ${diaF} ${mesF} ${anoF}`;
 }
 
 function formatarMoedaBRL(valor: number) {
@@ -34,7 +34,13 @@ function formatarMoedaEUR(valor: number) {
   return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(valor);
 }
 
-const FILTROS = ['Todos', 'Descubra o Brasil', 'Explore o Mundo', '2026', '2027'];
+const FILTROS = [
+  { id: 'Todos', label: 'Todos os Roteiros' },
+  { id: 'Nacional', label: 'Destinos Nacionais' },
+  { id: 'Internacional', label: 'Destinos Internacionais' },
+  { id: '2026', label: 'Temporada 2026' },
+  { id: '2027', label: 'Temporada 2027' },
+];
 
 export function HomePublica() {
   const [filtroAtivo, setFiltroAtivo] = useState('Todos');
@@ -43,48 +49,9 @@ export function HomePublica() {
   const [cotacaoEuro, setCotacaoEuro] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const filterBarRef = useRef<HTMLDivElement>(null);
-  const filterBtnRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const [filterPill, setFilterPill] = useState({ left: 0, width: 0, opacity: 0 });
-
   useEffect(() => {
     fetchDadosIniciais();
   }, []);
-
-  function updateFilterPill() {
-    if (window.innerWidth <= 768) {
-      setFilterPill((p) => ({ ...p, opacity: 0 }));
-      return;
-    }
-
-    const activeIndex = FILTROS.indexOf(filtroAtivo);
-    const activeEl = filterBtnRefs.current[activeIndex];
-    const barEl = filterBarRef.current;
-
-    if (!activeEl || !barEl) {
-      setFilterPill((p) => ({ ...p, opacity: 0 }));
-      return;
-    }
-
-    const barRect = barEl.getBoundingClientRect();
-    const btnRect = activeEl.getBoundingClientRect();
-    setFilterPill({
-      left: btnRect.left - barRect.left,
-      width: btnRect.width,
-      opacity: 1,
-    });
-  }
-
-  useLayoutEffect(() => {
-    updateFilterPill();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtroAtivo]);
-
-  useEffect(() => {
-    window.addEventListener('resize', updateFilterPill);
-    return () => window.removeEventListener('resize', updateFilterPill);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtroAtivo]);
 
   async function fetchDadosIniciais() {
     setLoading(true);
@@ -105,6 +72,7 @@ export function HomePublica() {
           expedicoes (
             descricao, 
             tipo_destino, 
+            pais,
             fotos
           ),
           pacote_lotes (
@@ -142,51 +110,38 @@ export function HomePublica() {
     if (!exp) return false;
 
     if (filtroAtivo === 'Todos') return true;
-    if (filtroAtivo === 'Descubra o Brasil') return exp.tipo_destino === 'Nacional';
-    if (filtroAtivo === 'Explore o Mundo') return exp.tipo_destino === 'Internacional';
-    if (filtroAtivo === '2026') return pacote.data_inicio.startsWith('2026');
-    if (filtroAtivo === '2027') return pacote.data_inicio.startsWith('2027');
+    if (filtroAtivo === 'Nacional') return exp.tipo_destino === 'Nacional';
+    if (filtroAtivo === 'Internacional') return exp.tipo_destino === 'Internacional';
+    if (filtroAtivo === '2026') return pacote.data_inicio?.startsWith('2026');
+    if (filtroAtivo === '2027') return pacote.data_inicio?.startsWith('2027');
     
     return true;
   });
 
   return (
     <div className="container">
+      {/* Cabeçalho Editorial da Home */}
       <section className="hero-section">
-        <div className="eyebrow">Próximas Expedições</div>
-        <h1 className="hero-title">Qual será sua próxima experiência?</h1>
+        <div className="hero-header-split">
+          <div>
+            <span className="eyebrow">Curadoria 5 Seasons</span>
+            <h1 className="hero-title">Expedições com alma e propósito.</h1>
+          </div>
+          <p className="hero-subtitle">
+            Roteiros autorais em grupos reduzidos, planejados nos mínimos detalhes para você viver o destino sem preocupações.
+          </p>
+        </div>
 
-        <div className="filter-bar" ref={filterBarRef}>
-          <div
-            className="filter-pill"
-            style={{ left: filterPill.left, width: filterPill.width, opacity: filterPill.opacity }}
-          />
-
-          {FILTROS.slice(0, 3).map((filtro, i) => (
+        {/* Barra de Filtros Minimalista */}
+        <div className="filter-tabs" role="tablist">
+          {FILTROS.map((f) => (
             <button
-              key={filtro}
-              ref={(el) => {
-                filterBtnRefs.current[i] = el;
-              }}
-              className={`filter-btn ${filtroAtivo === filtro ? 'active' : ''}`}
-              onClick={() => setFiltroAtivo(filtro)}
+              key={f.id}
+              type="button"
+              className={`filter-tab-item ${filtroAtivo === f.id ? 'active' : ''}`}
+              onClick={() => setFiltroAtivo(f.id)}
             >
-              {filtro}
-            </button>
-          ))}
-
-          <div className="filter-divider"></div>
-
-          {FILTROS.slice(3).map((filtro, i) => (
-            <button
-              key={filtro}
-              ref={(el) => {
-                filterBtnRefs.current[i + 3] = el;
-              }}
-              className={`filter-btn ${filtroAtivo === filtro ? 'active' : ''}`}
-              onClick={() => setFiltroAtivo(filtro)}
-            >
-              {filtro}
+              {f.label}
             </button>
           ))}
         </div>
@@ -194,11 +149,11 @@ export function HomePublica() {
 
       {loading ? (
         <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>
-          Carregando expedições...
+          Preparando nosso catálogo de destinos...
         </div>
       ) : pacotesFiltrados.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>
-          Nenhuma expedição encontrada para este filtro.
+          Nenhum roteiro programado para esta categoria no momento.
         </div>
       ) : (
         <section className="cards-grid">
@@ -206,15 +161,15 @@ export function HomePublica() {
             const exp = pacote.expedicoes;
             const imagemCapa = exp?.fotos && exp.fotos.length > 0 ? exp.fotos[0] : '';
             
-            let statusLabel = 'ESGOTADO';
-            let statusColor = '#9a3b2f';
+            let statusLabel = 'Lista de Espera';
+            let statusClass = 'status-esgotado';
 
             if (pacote.status === 'Ativo') {
-              statusLabel = 'VAGAS ABERTAS';
-              statusColor = 'var(--verde-escuro)';
+              statusLabel = 'Inscrições Abertas';
+              statusClass = 'status-ativo';
             } else if (pacote.status === 'Em breve') {
-              statusLabel = 'EM BREVE';
-              statusColor = '#d97706';
+              statusLabel = 'Pré-Lançamento';
+              statusClass = 'status-breve';
             }
 
             const loteAtualInfo = pacote.pacote_lotes?.find((l: any) => l.lote_numero === pacote.lote_atual) || pacote.pacote_lotes?.[0];
@@ -224,52 +179,56 @@ export function HomePublica() {
 
             return (
               <Link to={`/expedicao/${pacote.expedicao_id}`} className="exp-card" key={pacote.id}>
-                <div 
-                  className="exp-card-bg" 
-                  style={{ backgroundImage: imagemCapa ? `url(${imagemCapa})` : 'none', backgroundColor: '#e8dad1' }}
-                ></div>
-                <div className="exp-card-overlay"></div>
-                
-                <div className="exp-card-badges">
-                  <span className="badge">{exp?.tipo_destino?.toUpperCase()}</span>
-                  <span className="badge" style={{ backgroundColor: statusColor }}>{statusLabel}</span>
+                {/* Metade Superior: Mídia Limpa */}
+                <div className="exp-card-media">
+                  <div 
+                    className="exp-card-img" 
+                    style={{ backgroundImage: imagemCapa ? `url(${imagemCapa})` : 'none' }}
+                  />
+                  <div className="exp-card-badges">
+                    <span className="badge-tag">{exp?.pais || exp?.tipo_destino}</span>
+                    <span className={`badge-status ${statusClass}`}>{statusLabel}</span>
+                  </div>
                 </div>
 
-                <div className="exp-card-content">
-                  <div className="exp-card-date">{formatarDataCard(pacote.data_inicio, pacote.data_fim)}</div>
+                {/* Metade Inferior: Corpo Editorial Claro */}
+                <div className="exp-card-body">
+                  <div className="exp-card-date">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    {formatarDataCard(pacote.data_inicio, pacote.data_fim)}
+                  </div>
+
                   <h3 className="exp-card-title">{pacote.nome}</h3>
                   <p className="exp-card-desc">{exp?.descricao}</p>
                   
                   <div className="exp-card-footer">
                     <div className="exp-card-price">
                       {precoFinal ? (
-                       <>
-                        <small>LOTE {pacote.lote_atual || 1}</small>
-                        <strong style={{ display: 'block' }}>{formatarMoedaBRL(precoFinal)}</strong>
-                        
-                        {/* Container para manter as moedas na mesma linha */}
-                       <div className="moedas-estrangeiras" style={{ display: 'flex', gap: '8px', alignItems: 'center', opacity: 0.8, fontWeight: 500, color: 'var(--beje-escuro)' }}>
-                          {valorEmEuro !== null && (
-                            <span>≈ {formatarMoedaEUR(valorEmEuro)}</span>
-                          )}
-
-                          {/* Mostra o separador apenas se ambas as cotações existirem */}
-                          {valorEmEuro !== null && valorEmDolar !== null && (
-                            <span style={{ opacity: 0.5 }}>|</span>
-                          )}
-
-                          {valorEmDolar !== null && (
-                            <span>≈ {formatarMoedaUSD(valorEmDolar)}</span>
-                          )}
-                        </div>
-                      </>
+                        <>
+                          <small>{pacote.lote_atual ? `${pacote.lote_atual}º Lote` : 'Investimento'}</small>
+                          <strong>{formatarMoedaBRL(precoFinal)}</strong>
+                          <div className="moedas-estrangeiras">
+                            {valorEmEuro !== null && <span>≈ {formatarMoedaEUR(valorEmEuro)}</span>}
+                            {valorEmEuro !== null && valorEmDolar !== null && <span>•</span>}
+                            {valorEmDolar !== null && <span>≈ {formatarMoedaUSD(valorEmDolar)}</span>}
+                          </div>
+                        </>
                       ) : (
-                        <strong></strong>
+                        <strong style={{ fontSize: 15 }}>Sob Consulta</strong>
                       )}
                     </div>
-                    <div className="btn-ver-expedicao" style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.3)', fontWeight: 'bold' }}>
-                      VER EXPEDIÇÃO &rarr;
-                    </div>
+
+                    <span className="btn-ver-expedicao">
+                      Explorar
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                      </svg>
+                    </span>
                   </div>
                 </div>
               </Link>

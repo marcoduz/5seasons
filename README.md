@@ -1,75 +1,63 @@
-# React + TypeScript + Vite
+# 5 Seasons Experience - Plataforma Web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este repositório contém o código-fonte do site público e do painel administrativo da agência **5 Seasons Experience**. O projeto é construído com **React** (Vite) no frontend e **Supabase** como backend (BaaS).
 
-Currently, two official plugins are available:
+## 🚀 Como rodar o projeto localmente
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### 1. Pré-requisitos
+Certifique-se de ter instalado em sua máquina:
+* **Node.js** (versão 18 ou superior)
+* **npm** (o projeto possui um `package-lock.json`)
+* **Supabase CLI** (para gerenciar o banco de dados via terminal)
 
-## React Compiler
+### 2. Instalação das Dependências
+Abra o terminal na pasta raiz do projeto (`5seasons-dev`) e execute o comando para baixar todos os pacotes necessários:
+\`\`\`bash
+npm install
+\`\`\`
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 3. Configuração das Variáveis de Ambiente
+O projeto precisa das credenciais do Supabase para conseguir ler e gravar dados.
+1. Localize o arquivo `.env.example` na raiz do projeto.
+2. Crie uma cópia exata desse arquivo e renomeie-a para `.env`.
+3. Abra o arquivo `.env` e preencha com as credenciais reais de produção/desenvolvimento do seu projeto no Supabase:
+\`\`\`env
+VITE_SUPABASE_URL=https://seu-projeto.supabase.co
+VITE_SUPABASE_ANON_KEY=sua_chave_anon_aqui
+\`\`\`
 
-## Expanding the ESLint configuration
+### 4. Executando o Servidor de Desenvolvimento
+Para iniciar a aplicação localmente e visualizar suas alterações em tempo real, rode:
+\`\`\`bash
+npm run dev
+\`\`\`
+O terminal exibirá a URL local (geralmente `http://localhost:5173`). 
+* **Site Público:** Acesse a raiz (`/`).
+* **Painel Administrativo:** Acesse a rota `/admin`.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🗄️ Banco de Dados e Migrations (Supabase)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Toda a estrutura do banco de dados (tabelas, colunas, políticas) é versionada em código através da pasta `supabase/migrations/`.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+**Para aplicar as migrations locais no banco de dados remoto:**
+\`\`\`bash
+npx supabase db push
+\`\`\`
 
-```
+**Para criar uma nova migration (quando precisar alterar a estrutura de uma tabela):**
+\`\`\`bash
+npx supabase migration new nome_da_sua_alteracao
+\`\`\`
+*Isso criará um arquivo `.sql` em branco na pasta de migrations para você escrever os comandos `ALTER TABLE`.*
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 📁 Estrutura Principal do Projeto
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+* `src/pages/public/` - Interface, páginas e componentes visíveis para os clientes finais.
+* `src/pages/admin/` - Sistema interno (CMS) para gestão de expedições, pacotes, clientes e reservas.
+* `src/services/` - Configurações de conexão com APIs e o cliente do Supabase.
+* `public/` - Arquivos estáticos gerais (Logos da 5 Seasons, QR Code do Cadastur, ícones).
+* `supabase/migrations/` - Arquivos `.sql` que contêm o histórico de evolução do banco de dados.

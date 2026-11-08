@@ -64,7 +64,7 @@ export function NossaHistoria() {
           margin-bottom: 16px;
         }
         .feature-title {
-          color: var(--verde-escuro);
+          color: var(--home-green);
           font-weight: 600;
           font-size: 16px;
           margin-bottom: 12px;
@@ -174,7 +174,7 @@ export function NossaHistoria() {
               style={{
                 fontFamily: "Playfair Display, serif",
                 fontSize: "2.5rem",
-                color: "var(--verde-escuro)",
+                color: "var(--home-green)",
                 margin: "0 0",
                 lineHeight: 1.2,
               }}
@@ -185,7 +185,7 @@ export function NossaHistoria() {
               style={{
                 fontFamily: "Playfair Display, serif",
                 fontSize: "2.5rem",
-                color: "var(--verde-escuro)",
+                color: "var(--home-green)",
                 margin: "0 0 24px",
                 lineHeight: 1.2,
               }}
@@ -372,7 +372,7 @@ export function NossaHistoria() {
               style={{
                 fontFamily: "Playfair Display, serif",
                 fontSize: "2.5rem",
-                color: "var(--verde-escuro)",
+                color: "var(--home-green)",
                 margin: "0 0",
                 lineHeight: 1.2,
               }}
@@ -383,7 +383,7 @@ export function NossaHistoria() {
               style={{
                 fontFamily: "Playfair Display, serif",
                 fontSize: "2.5rem",
-                color: "var(--verde-escuro)",
+                color: "var(--home-green)",
                 margin: "0 0 24px",
                 lineHeight: 1.2,
               }}
@@ -446,7 +446,7 @@ export function NossaHistoria() {
               style={{
                 fontFamily: "'Playfair Display', serif",
                 fontSize: "1.25rem",
-                color: "var(--verde-escuro)",
+                color: "var(--home-green)",
                 marginTop: "28px",
               }}
             >
@@ -464,7 +464,7 @@ export function NossaHistoria() {
               style={{
                 fontFamily: "Playfair Display, serif",
                 fontSize: "2.5rem",
-                color: "var(--verde-escuro)",
+                color: "var(--home-green)",
                 margin: "0 0 24px",
               }}
             >
@@ -493,7 +493,7 @@ export function NossaHistoria() {
                 style={{
                   fontFamily: "Playfair Display, serif",
                   fontSize: "1.8rem",
-                  color: "var(--verde-escuro)",
+                  color: "var(--home-green)",
                   margin: "0 0 24px",
                 }}
               >

@@ -1,104 +1,102 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+// src/pages/public/Layout/header.tsx
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 const NAV_ITEMS = [
-  { label: 'Nossa História', to: '/nossa/historia', match: (path: string) => path === '/nossa/historia' },
   { label: 'Expedições', to: '/', match: (path: string) => path === '/' || path.startsWith('/expedicao/') },
-  { label: 'Duvidas', to: '/duvidas', match: (path: string) => path === '/duvidas' },
+  { label: 'Nossa História', to: '/nossa/historia', match: (path: string) => path === '/nossa/historia' },
+  { label: 'Dúvidas Frequentes', to: '/duvidas', match: (path: string) => path === '/duvidas' },
 ];
 
 export function Header() {
   const location = useLocation();
-  const navRef = useRef<HTMLElement>(null);
-  const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-  
-  const [pill, setPill] = useState({ left: 0, width: 0, opacity: 0 });
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Novo estado para o menu mobile
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const activeIndex = NAV_ITEMS.findIndex((item) => item.match(location.pathname));
 
-  function updatePill() {
-    // Evita calcular a pílula horizontal no layout de celular
-    if (window.innerWidth <= 768) return; 
-
-    const activeEl = itemRefs.current[activeIndex];
-    const navEl = navRef.current;
-    
-    if (!activeEl || !navEl) {
-      setPill((p) => ({ ...p, opacity: 0 }));
-      return;
-    }
-    
-    const navRect = navEl.getBoundingClientRect();
-    const itemRect = activeEl.getBoundingClientRect();
-    
-    setPill({
-      left: itemRect.left - navRect.left,
-      width: itemRect.width,
-      opacity: 1,
-    });
-  }
-
-  useLayoutEffect(() => {
-    updatePill();
-    setIsMobileMenuOpen(false); // Fecha o menu ao mudar de página
-  }, [activeIndex, location.pathname]);
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
-    window.addEventListener('resize', updatePill);
-    return () => window.removeEventListener('resize', updatePill);
-  }, [activeIndex]);
+    function handleScroll() {
+      setScrolled(window.scrollY > 20);
+    }
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <header className="public-header">
+    <header className={`public-header ${scrolled ? 'is-scrolled' : ''}`}>
       <div className="container public-header-inner">
         <Link to="/" className="public-brand">
           <img src="/5seasonsLogo_semEscrita.svg" alt="5 Seasons" className="public-brand-logo" />
-          <span className="public-brand-name">5 Seasons</span>
+          <div className="public-brand-text">
+            <span className="public-brand-name">5 Seasons</span>
+            <span className="public-brand-tagline">EXPERIENCE</span>
+          </div>
         </Link>
 
-        {/* Botão Hambúrguer (Visível apenas no mobile) */}
-        <button
-          className="mobile-menu-btn"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-label="Menu"
-        >
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            {isMobileMenuOpen ? (
-              <>
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </>
-            ) : (
-              <>
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-              </>
-            )}
-          </svg>
-        </button>
-
-        {/* Navegação (Gaveta no mobile, barra no desktop) */}
-        <nav className={`public-nav ${isMobileMenuOpen ? 'mobile-open' : ''}`} ref={navRef}>
-          <div
-            className="public-nav-pill"
-            style={{ left: pill.left, width: pill.width, opacity: pill.opacity }}
-          />
+        {/* Navegação Central Minimalista */}
+        <nav className={`public-nav ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
           {NAV_ITEMS.map((item, i) => (
             <Link
               key={item.to}
               to={item.to}
-              ref={(el) => {
-                itemRefs.current[i] = el;
-              }}
               className={`public-nav-link${i === activeIndex ? ' active' : ''}`}
-              onClick={() => setIsMobileMenuOpen(false)} // Fecha o menu ao clicar
+              onClick={() => setIsMobileMenuOpen(false)}
             >
               {item.label}
             </Link>
           ))}
+
+          {/* CTA visível apenas dentro da gaveta mobile */}
+          <a
+            href="https://wa.me/5554996468737"
+            target="_blank"
+            rel="noreferrer"
+            className="header-cta-mobile"
+          >
+            Atendimento Exclusivo &rarr;
+          </a>
         </nav>
+
+        {/* Ação Direita (Desktop) e Botão Hamburger (Mobile) */}
+        <div className="public-header-actions">
+          <a
+            href="https://wa.me/5554996468737?text=Ol%C3%A1!%20Gostaria%20de%20conhecer%20as%20pr%C3%B3ximas%20expedi%C3%A7%C3%B5es%20da%205%20Seasons."
+            target="_blank"
+            rel="noreferrer"
+            className="header-cta-btn"
+          >
+            <span>Consultoria</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M7 17L17 7M17 7H7M17 7V17" />
+            </svg>
+          </a>
+
+          <button
+            className="mobile-menu-btn"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Menu"
+          >
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              {isMobileMenuOpen ? (
+                <>
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </>
+              ) : (
+                <>
+                  <line x1="4" y1="7" x2="20" y2="7" />
+                  <line x1="4" y1="12" x2="16" y2="12" />
+                  <line x1="4" y1="17" x2="20" y2="17" />
+                </>
+              )}
+            </svg>
+          </button>
+        </div>
       </div>
     </header>
   );

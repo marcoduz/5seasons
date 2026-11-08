@@ -1,245 +1,771 @@
-/* ================= PADRÕES GERAIS ================= */
-.bg-beige { background-color: var(--branco-gelo); }
-.bg-white { background-color: #ffffff; }
+/* src/pages/public/Expedicao/expedicao.css */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
-/* ================= HERO SECTION ================= */
+:root {
+  /* Variáveis de fallback caso o banco não retorne cores */
+  --home-green: #2f4842;
+  --laranja-suave: #fdb17f;
+  --bege-claro: #e8dad1;
+  --branco-gelo: #fffaf8;
+  --preto-suave: #151e1b;
+  --cinza-texto: #4a5552;
+}
+
+.expedicao-page {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--text-main, #26332f);
+  background-color: #ffffff;
+  line-height: 1.6;
+}
+
+.expedicao-page h1, 
+.expedicao-page h2, 
+.expedicao-page h3, 
+.expedicao-page .serif-font {
+  font-family: 'Playfair Display', serif;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* =========================================
+   1. HERO BANNER & CARD DE COMPRA
+   ========================================= */
 .hero-banner {
   position: relative;
-  min-height: 80vh;
-  display: flex;
-  align-items: center;
+  min-height: 85vh;
   background-size: cover;
   background-position: center;
-  padding: 80px 0;
+  display: flex;
+  align-items: center;
+  padding: 110px 0 80px 0;
 }
+
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(17, 26, 23, 0.65);
+  background: linear-gradient(
+    to right,
+    rgba(15, 23, 20, 0.85) 0%,
+    rgba(15, 23, 20, 0.55) 55%,
+    rgba(15, 23, 20, 0.35) 100%
+  );
 }
+
 .hero-grid {
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: 380px 1fr;
-  gap: 60px;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 48px;
   align-items: center;
+  width: 100%;
 }
 
-.hero-card {
-  background: #151e1b;
+.hero-content {
+  color: #fffaf8 !important;
+}
+
+.hero-badges {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.badge-outline {
+  border: 1px solid rgba(255, 250, 248, 0.45);
+  background: rgba(15, 23, 20, 0.45);
+  backdrop-filter: blur(4px);
+  color: #fffaf8 !important;
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.expedicao-page .hero-title {
+  font-size: clamp(36px, 4.8vw, 60px);
+  line-height: 1.08;
+  margin: 0 0 16px 0;
+  font-weight: 600;
+  color: var(--theme-secondary, #fdb17f) !important;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.hero-location {
+  font-size: 20px;
+  color: var(--theme-secondary, #fdb17f) !important;
+  margin: 0;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.summary-card {
+  background: rgba(21, 30, 27, 0.9) !important;
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 16px;
-  padding: 40px 32px;
-  color: white;
-  box-shadow: 0 24px 48px rgba(0,0,0,0.3);
+  padding: 32px;
+  color: #fffaf8 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
 }
-.hero-price-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #a1a1aa; margin-bottom: 8px; }
-.hero-price { font-size: 36px; font-weight: 700; margin: 0 0 24px; line-height: 1; transition: color 0.3s; }
-.hero-features { list-style: none; padding: 0; margin: 0 0 32px; }
-.hero-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; margin-bottom: 12px; color: #e4e4e7; }
-.hero-features li span { flex: 1; text-align: justify; }
-.hero-features svg { flex-shrink: 0; color: var(--verde-vivo); margin-top: 2px; }
-.btn-orange { display: block; text-align: center; background: #fdb17f; color: #151e1b; padding: 16px; border-radius: 8px; font-weight: 700; text-decoration: none; transition: transform 0.2s; }
-.btn-orange:hover { transform: translateY(-2px); }
 
-.hero-text-area { color: white; }
-.hero-tag { font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #fdb17f; margin-bottom: 16px; display: block; }
-.hero-title { font-family: 'Playfair Display', serif; font-size: 56px; font-weight: 600; line-height: 1.1; margin: 0 0 24px; }
-.hero-desc { font-size: 16px; line-height: 1.6; opacity: 0.9; margin-bottom: 32px; max-width: 600px; }
-.hero-pills { display: flex; gap: 12px; flex-wrap: wrap; }
-.hero-pill { background: rgba(255,255,255,0.15); backdrop-filter: blur(4px); padding: 10px 20px; border-radius: 99px; font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
-
-.outra-data-btn { background: transparent; border: none; padding: 6px 0; text-align: left; font-size: 14px; color: rgba(255, 255, 255, 0.85); display: flex; align-items: center; gap: 8px; cursor: pointer; font-family: inherit; transition: color 0.2s ease; }
-.outra-data-btn strong { color: white; transition: color 0.2s ease; }
-.outra-data-btn:hover { color: var(--brand-orange); }
-.outra-data-btn:hover strong { color: var(--brand-orange); }
-
-/* ================= CORPO DA PÁGINA ================= */
-.section-padding { padding: 80px 0; }
-.section-title { font-family: 'Playfair Display', serif; font-size: 32px; color: var(--verde-escuro); margin: 0 0 12px; text-transform: uppercase; letter-spacing: 1px; }
-.section-subtitle { font-size: 14px; color: var(--brand-orange); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 32px; font-weight: 600; }
-.desc-centered { max-width: 800px; margin: 0 auto; text-align: center; font-size: 18px; line-height: 1.8; color: var(--text-main); font-weight: 300; font-style: italic; }
-
-/* ================= CARROSSEL GALERIA ================= */
-.carousel-container { position: relative; width: 100%; max-width: 1000px; margin: 0 auto; border-radius: 16px; overflow: hidden; aspect-ratio: 16/9; }
-.carousel-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity 0.3s ease-in-out; }
-.carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; background: rgba(38, 51, 47, 0.5); color: white; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; backdrop-filter: blur(4px); transition: background 0.2s; }
-.carousel-btn:hover { background: rgba(38, 51, 47, 0.8); }
-.carousel-btn.prev { left: 16px; }
-.carousel-btn.next { right: 16px; }
-.carousel-counter { position: absolute; bottom: 16px; right: 16px; background: rgba(38, 51, 47, 0.7); color: white; padding: 6px 16px; border-radius: 99px; font-size: 13px; font-weight: 600; letter-spacing: 1px; backdrop-filter: blur(4px); }
-
-/* ================= CRONOGRAMA ================= */
-.cronograma-card {
-  background: white; border: 1px solid var(--beje-claro); border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); max-width: 1000px; margin: 0 auto;
+.summary-price-box {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  padding-bottom: 20px;
+  margin-bottom: 20px;
 }
-.cronograma-header {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 24px; color: var(--verde-escuro); font-size: 24px; font-weight: 700;
+
+.summary-price-label {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #cbd5e1 !important;
+  display: block;
 }
-.cronograma-tabs {
-  display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 40px; padding-bottom: 24px; border-bottom: 1px solid var(--beje-claro);
+
+.summary-price-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--theme-secondary, #fdb17f) !important;
+  font-family: 'Playfair Display', serif;
 }
-.cronograma-tab {
-  background: var(--branco-gelo); color: var(--text-main); border: none; padding: 10px 24px; border-radius: 99px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+
+.summary-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 28px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 14.5px;
 }
-.cronograma-tab:hover { background: #e2e8f0; }
-.cronograma-tab.active { background: var(--verde-escuro); color: white; }
 
-.cronograma-content { display: grid; gap: 40px; }
-.cronograma-content.has-image { grid-template-columns: 1.2fr 1fr; }
-.cronograma-text h3 { font-size: 24px; color: var(--verde-escuro); margin: 0 0 8px; }
-.cronograma-text .subtitle { color: var(--beje-escuro); font-weight: 600; margin-bottom: 24px; font-size: 16px; }
-.cronograma-text .desc { color: var(--text-main); line-height: 1.7; text-align: justify; font-size: 15px; }
-.cronograma-text .desc p { margin-bottom: 16px; }
-.cronograma-text .desc strong { color: var(--verde-escuro); }
-.cronograma-img-wrapper { border-radius: 12px; overflow: hidden; height: 100%; min-height: 300px; position: relative; }
-.cronograma-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-
-/* ================= O QUE ESTÁ INCLUSO ================= */
-.serv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; max-width: 1000px; margin: 0 auto; text-align: justify; }
-.inc-card { background: var(--branco-gelo); border: 1px solid var(--branco-gelo); border-radius: 16px; padding: 40px; height: 100%; }
-.inc-card h3 { color: var(--verde-escuro); display: flex; align-items: center; gap: 10px; margin: 0 0 24px; font-size: 20px; }
-.exc-card { background: var(--beje-gelo); border: 1px solid var(--beje-gelo); border-radius: 16px; padding: 40px; height: 100%; color: #2d3b37; }
-.exc-card h3 { color: var(--verde-escuro); display: flex; align-items: center; gap: 10px; margin: 0 0 24px; font-size: 20px; }
-.serv-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 16px; }
-.serv-list li { position: relative; padding-left: 20px; font-size: 15px; color: var(--text-main); line-height: 1.5; }
-.inc-card .serv-list li::before { content: '•'; position: absolute; left: 0; color: var(--verde-escuro); font-weight: bold; }
-.exc-card .serv-list li::before { content: '•'; position: absolute; left: 0px; color: var(--verde-escuro); font-weight: bold; }
-
-.obs-box { background: #eef7db; border-radius: 16px; padding: 40px; max-width: 800px; margin: 0 auto; }
-.obs-box h3 { text-align: center; color: var(--verde-escuro); font-family: 'Playfair Display', serif; font-size: 24px; margin: 0 0 24px; }
-.obs-box .serv-list li { text-align: justify; }
-
-/* ================= RESPONSIVIDADE (MOBILE) ================= */
-@media (max-width: 900px) {
-  /* Hero Section */
-  .hero-banner { padding: 40px 0; min-height: auto; }
-  .hero-grid { 
-    display: flex; 
-    flex-direction: column-reverse; 
-    gap: 32px; 
-  }
-  
-  /* MARGENS LATERAIS NOS CARDS PARA NÃO COLAR NA TELA */
-  .hero-card { padding: 24px 20px; margin: 0 16px; border-radius: 12px; }
-  
-  .hero-title { font-size: 32px; margin-bottom: 12px; line-height: 1.2; }
-  .hero-desc { font-size: 15px; margin-bottom: 24px; text-align: left; }
-  .hero-pills { gap: 8px; }
-  .hero-pill { font-size: 12px; padding: 6px 12px; }
-
-  /* Espaçamentos Globais */
-  .section-padding { padding: 40px 0; }
-  .section-title { font-size: 24px; margin-bottom: 16px; }
-  .section-subtitle { margin-bottom: 16px; }
-  .desc-centered { font-size: 15px; padding: 0 24px; text-align: left; }
-
-  /* Cronograma */
-  .cronograma-card { 
-    padding: 24px 20px; 
-    margin: 0 16px; /* MARGEM PARA DESCOLAR DA TELA */
-    border-radius: 12px; 
-  }
-  .cronograma-header { font-size: 20px; margin-bottom: 16px; }
-  .cronograma-tabs { 
-    margin-bottom: 24px; 
-    padding-bottom: 16px; 
-    gap: 8px; 
-    flex-wrap: wrap; /* QUEBRA DE LINHA PARA NÃO ROLAR (Igual a imagem de referência) */
-  }
-  .cronograma-tab { padding: 8px 16px; font-size: 13px; }
-  .cronograma-content.has-image { grid-template-columns: 1fr; gap: 20px; }
-  .cronograma-text h3 { font-size: 20px; }
-  .cronograma-text .subtitle { font-size: 14px; margin-bottom: 12px; }
-  .cronograma-text .desc { font-size: 14px; }
-  .cronograma-img-wrapper { min-height: 200px; border-radius: 8px; }
-
-  /* Inclusos e Exclusos */
-  .serv-grid { 
-    grid-template-columns: 1fr; 
-    gap: 16px; 
-    padding: 0 16px; /* MARGEM NAS LATERAIS */
-  }
-  .inc-card, .exc-card { padding: 24px 20px; border-radius: 12px; }
-  .inc-card h3, .exc-card h3 { font-size: 18px; margin-bottom: 16px; }
-  .serv-list li { font-size: 14px; }
-  
-  /* Observações */
-  .obs-box { 
-    padding: 24px 20px; 
-    margin: 0 16px; /* MARGEM NAS LATERAIS */
-    border-radius: 12px; 
-  }
-  .obs-box h3 { font-size: 20px; margin-bottom: 16px; }
-
-  /* Carrossel da Galeria */
-  .carousel-container { 
-    border-radius: 12px; 
-    width: calc(100% - 32px); /* Tira 32px para não colar */
-    margin: 0 auto; 
-    aspect-ratio: 4/3; 
-  }
-  .carousel-btn { width: 36px; height: 36px; }
-  .carousel-counter { font-size: 11px; padding: 4px 10px; }
+.summary-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #f1f5f9 !important;
 }
+
+.summary-list li svg {
+  color: var(--theme-secondary, #fdb17f) !important;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.btn-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  background-color: var(--theme-secondary, #fdb17f) !important;
+  color: #151e1b !important;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 16px 24px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-sizing: border-box;
+}
+
+.btn-cta:hover {
+  filter: brightness(0.93);
+  transform: translateY(-2px);
+}
+
+.pacote-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.pacote-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13.5px;
+}
+
+.pacote-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.pacote-btn.selected {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: var(--theme-secondary, #fdb17f);
+  font-weight: 600;
+}
+
+/* =========================================
+   2. SEÇÕES GERAIS, FUNDOS & PAGAMENTOS
+   ========================================= */
+.bg-beige {
+  padding: 80px 0;
+  background-color: var(--bege-fundo, #f5ebe6) !important;
+}
+
+.bg-white {
+  background-color: #ffffff !important;
+}
+
+.section-padding {
+  padding: 80px 0;
+}
+
+.section-subtitle {
+  color: var(--theme-secondary, #d98248);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 3.8vw, 38px);
+  color: var(--theme-primary, #2f4842);
+  margin: 0 0 24px 0;
+  line-height: 1.2;
+  font-weight: 600;
+}
+
 .payment-section {
   background-color: #ffffff;
-  padding: 48px 0;
+  padding: 56px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
- 
-.payment-subtitle {
-  font-family: 'Playfair Display', serif;
-  font-size: 15px;
-  font-style: italic;
-  color: #8a6440; /* mais escuro: ~4.7:1 de contraste sobre branco, passa AA */
-  margin: 0 auto 32px;
-  max-width: 640px;
-  line-height: 1.5;
-  text-align: center;
-  padding: 0 24px; /* evita colar nas bordas em telas estreitas */
-}
- 
+
 .payment-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 40px;
+  gap: 36px;
   text-align: center;
 }
- 
+
 .payment-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 20px 16px;
-  border-radius: 12px;
-  background: #faf7f3; /* leve fundo pra cada card virar um "grupo" visual */
+  gap: 14px;
 }
- 
+
 .payment-icon {
-  color: #a17c4f; /* mais escuro: ~4.9:1, ícone visível mesmo com stroke fino */
+  color: var(--theme-secondary, #c09d7a);
 }
- 
+
 .payment-item h4 {
-  color: var(--verde-escuro);
-  font-size: 15px;
+  color: var(--theme-primary, #2f4842);
+  font-size: 16px;
   font-weight: 600;
   margin: 0;
-  line-height: 1.3;
 }
- 
+
 .payment-item p {
-  color: var(--text-main);
-  font-size: 13px;
-  line-height: 1.4;
+  color: var(--text-main, #26332f);
+  font-size: 14px;
+  line-height: 1.5;
   margin: 0;
-  opacity: 0.75;
 }
- 
-/* No mobile, quando empilha em 1 coluna, reduz um pouco o respiro vertical
-   já que agora cada item tem seu próprio "cartão" com fundo */
-@media (max-width: 640px) {
-  .payment-grid {
-    gap: 16px;
-  }
+
+.payment-chic-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-style: italic;
+  color: var(--text-main, #26332f);
+  margin: 12px auto 0;
+  max-width: 600px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* =========================================
+   3. FRASE DE DESTAQUE & SOBRE
+   ========================================= */
+.highlight-quote-box {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px 32px;
+  border-left: 4px solid var(--theme-secondary, #fdb17f);
+  background: #ffffff;
+  border-radius: 0 12px 12px 0;
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.06);
+}
+
+.highlight-quote-text {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(20px, 2.5vw, 26px);
+  font-style: italic;
+  line-height: 1.4;
+  color: var(--theme-primary, #2f4842);
+  margin: 0;
+  text-align: center;
+}
+
+.about-text {
+  font-size: 16.5px;
+  color: var(--text-main, #26332f);
+  max-width: 800px;
+  margin: 20px auto 0 auto;
+  line-height: 1.8;
+}
+
+/* =========================================
+   4. BLOCOS EM ZIGUE-ZAGUE
+   ========================================= */
+.zigzag-list {
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+  padding: 80px 0;
+}
+
+.zigzag-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.zigzag-row.reverse .zigzag-media {
+  order: 2;
+}
+
+.zigzag-row.reverse .zigzag-content {
+  order: 1;
+}
+
+.zigzag-media {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.14);
+  aspect-ratio: 4 / 3;
+  background: var(--bege-fundo, #f5ebe6);
+}
+
+.zigzag-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s ease;
+}
+
+.zigzag-media:hover img {
+  transform: scale(1.03);
+}
+
+.zigzag-content h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(24px, 3vw, 32px);
+  color: var(--theme-primary, #2f4842);
+  margin: 0 0 16px 0;
+  line-height: 1.25;
+}
+
+/* =========================================
+   5. PILARES, JORNADA & PERFIL
+   ========================================= */
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 28px;
+  margin-top: 36px;
+}
+
+.pillar-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-top: 4px solid var(--theme-secondary, #fdb17f);
+  border-radius: 14px;
+  padding: 32px 26px;
+  box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.06);
+}
+
+.pillar-card h4 {
+  font-size: 15px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--theme-primary, #2f4842);
+  margin: 0 0 12px 0;
+  font-weight: 700;
+}
+
+.pillar-card p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-main, #26332f);
+  margin: 0;
+}
+
+.journey-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 28px;
+  margin-top: 36px;
+}
+
+.journey-step {
+  position: relative;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  padding: 28px 24px;
+}
+
+.journey-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--theme-secondary, #fdb17f);
+  color: #151e1b;
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+
+.journey-step h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 21px;
+  color: #ffffff;
+  margin: 0 0 10px 0;
+}
+
+.journey-step p {
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 24px;
+  margin-top: 36px;
+}
+
+.profile-card {
+  background: var(--bege-fundo, #f5ebe6);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
+  padding: 28px 24px;
+}
+
+.profile-card h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 21px;
+  color: var(--theme-primary, #2f4842);
+  margin: 0 0 12px 0;
+}
+
+.profile-card p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-main, #26332f);
+  margin: 0;
+}
+
+.profile-closing {
+  max-width: 720px;
+  margin: 40px auto 0 auto;
+  text-align: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-style: italic;
+  color: var(--theme-primary, #2f4842);
+  line-height: 1.5;
+}
+
+.why-season-box {
+  max-width: 850px;
+  margin: 0 auto 48px auto;
+  padding: 36px 40px;
+  border-radius: 16px;
+  background: var(--theme-primary, #2f4842);
+  color: #ffffff;
+  box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.15);
+}
+
+.why-season-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--theme-secondary, #fdb17f);
+  margin-bottom: 10px;
+}
+
+.why-season-box h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(24px, 3vw, 32px);
+  margin: 0 0 14px 0;
+  color: #ffffff;
+}
+
+/* =========================================
+   6. CARROSSEL DE FOTOS (GALERIA)
+   ========================================= */
+.carousel-container {
+  position: relative;
+  max-width: 900px;
+  height: 480px;
+  margin: 0 auto;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  cursor: pointer;
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(21, 30, 27, 0.6);
+  color: white;
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+  z-index: 5;
+}
+
+.carousel-btn:hover {
+  background: rgba(21, 30, 27, 0.9);
+}
+
+.carousel-btn.prev { left: 16px; }
+.carousel-btn.next { right: 16px; }
+
+.carousel-counter {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: rgba(21, 30, 27, 0.7);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  z-index: 5;
+}
+
+/* =========================================
+   7. CRONOGRAMA EM ABAS (MODELO ANTIGO)
+   ========================================= */
+.cronograma-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.cronograma-header {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  color: var(--theme-primary, #2f4842);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cronograma-tabs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--bege-claro, #e8dad1);
+  margin-bottom: 32px;
+}
+
+.cronograma-tab {
+  background: #f8fafc;
+  border: 1px solid var(--bege-claro, #e8dad1);
+  color: var(--text-main, #26332f);
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+  white-space: nowrap;
+}
+
+.cronograma-tab:hover {
+  background: #f1f5f9;
+}
+
+.cronograma-tab.active {
+  background: var(--theme-primary, #2f4842);
+  color: #ffffff;
+  border-color: var(--theme-primary, #2f4842);
+}
+
+.cronograma-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  align-items: center;
+}
+
+.cronograma-content.has-image {
+  grid-template-columns: 1.2fr 0.8fr;
+}
+
+.cronograma-text h3 {
+  font-size: 22px;
+  color: var(--theme-primary, #2f4842);
+  margin: 0 0 6px 0;
+}
+
+.cronograma-text .subtitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--theme-secondary, #d98248);
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cronograma-text .desc {
+  font-size: 15.5px;
+  line-height: 1.75;
+  color: var(--text-main, #26332f);
+}
+
+.cronograma-img-wrapper {
+  width: 100%;
+  height: 300px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.cronograma-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* =========================================
+   8. INCLUSÕES & OBSERVAÇÕES
+   ========================================= */
+.serv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 32px;
+  padding: 80px 0;
+}
+
+.inc-card, .exc-card, .obs-box {
+  background: #ffffff;
+  padding: 36px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.inc-card h3 {
+  color: #15803d;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 20px 0;
+}
+
+.exc-card h3 {
+  color: #b91c1c;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 20px 0;
+}
+
+.obs-box h3 {
+  color: var(--theme-primary, #2f4842);
+  font-size: 20px;
+  margin: 0 0 24px 0;
+  font-family: 'Playfair Display', serif;
+}
+.serv-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px; 
+}
+
+/* NOVA FORMATAÇÃO: Inline em vez de flex column para evitar a quebra de linha */
+.serv-list li {
+  font-size: 15px;
+  color: var(--text-main, #26332f);
+  line-height: 1.6;
+  display: block; /* Alterado de flex para block para permitir texto contínuo */
+}
+
+/* Se for um item de Inclusão/Não Inclusão com SVG (na mesma linha) */
+.serv-list li svg {
+  display: inline-block;
+  vertical-align: text-bottom;
+  margin-right: 10px;
+}
+
+/* O "bullet" point estilizado apenas para as Observações (sem SVG) */
+.obs-box .serv-list li::before {
+  content: '•';
+  color: var(--theme-secondary, #d98248);
+  font-weight: bold;
+  font-size: 20px;
+  line-height: 1;
+  display: inline-block;
+  margin-right: 10px;
+  vertical-align: middle;
 }
