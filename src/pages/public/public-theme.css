@@ -59,7 +59,7 @@ body {
 
 /* ================= HEADER DINÂMICO (GLOBAL) ================= */
 .public-header {
-  background-color: var(--home-green-deep); /* Fundo sólido e opaco padrão na Home */
+  background-color: var(--home-green-deep);
   color: #ffffff;
   padding: 16px 0;
   position: sticky; 
@@ -655,7 +655,7 @@ body {
     right: 0;
     width: 100%;
     height: calc(100vh - 70px);
-    background-color: rgba(47, 72, 66, 0.98); /* Fundo opaco para o menu mobile aberto */
+    background-color: rgba(47, 72, 66, 0.98);
     backdrop-filter: blur(16px);
     flex-direction: column;
     align-items: flex-start;

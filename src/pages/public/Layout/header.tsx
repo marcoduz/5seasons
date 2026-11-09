@@ -1,3 +1,4 @@
+// src/pages/public/Layout/header.tsx
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -30,7 +31,7 @@ export function Header() {
   }, []);
 
   return (
-    <header className={`public-header ${scrolled ? 'is-scrolled' : ''} ${isExpedicaoPage ? 'is-transparent-top' : ''}`}>
+    <header id="main-header" className={`public-header ${scrolled ? 'is-scrolled' : ''} ${isExpedicaoPage ? 'is-transparent-top' : ''}`}>
       <div className="container public-header-inner">
         <Link to="/" className="public-brand">
           <img src="/5seasonsLogo_semEscrita.svg" alt="5 Seasons" className="public-brand-logo" />

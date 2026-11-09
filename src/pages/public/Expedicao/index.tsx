@@ -39,6 +39,19 @@ export function ExpedicaoPublica() {
     setCurrentRoteiroFotoIndex(0);
   }, [diaAberto]);
 
+  // INJEÇÃO DAS CORES DINÂMICAS PARA O MENU (HEADER)
+  useEffect(() => {
+    if (expedicao) {
+      document.documentElement.style.setProperty('--header-bg-dinamico', expedicao.cor_primaria || '#2f4842');
+      document.documentElement.style.setProperty('--header-btn-dinamico', expedicao.cor_secundaria || '#fdb17f');
+    }
+    
+    return () => {
+      document.documentElement.style.removeProperty('--header-bg-dinamico');
+      document.documentElement.style.removeProperty('--header-btn-dinamico');
+    };
+  }, [expedicao]);
+
   async function carregarDadosCompletos(expId: string) {
     setLoading(true);
     const [expRes, rotRes, pacRes] = await Promise.all([
