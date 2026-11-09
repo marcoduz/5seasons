@@ -43,26 +43,29 @@
    HEADER EXCLUSIVO DA EXPEDIÇÃO
    ========================================= */
 
-/* Fica fixo no topo e perde a cor/sombra para a foto brilhar */
+/* Fica sempre fixo na expedição para não haver saltos na página */
 #main-header.is-transparent-top {
   position: fixed !important; 
   width: 100%;
 }
 
-#main-header.is-transparent-top:not(.is-scrolled) {
+/* É transparente APENAS se estiver no topo E o menu mobile estiver fechado */
+#main-header.is-transparent-top:not(.is-scrolled):not(.menu-open) {
   background-color: transparent !important;
   border-bottom-color: transparent !important;
   box-shadow: none !important;
 }
 
-/* Quando fazemos scroll, mistura a cor da Base de Dados com Transparência 85% */
-#main-header.is-transparent-top.is-scrolled {
-  background-color: color-mix(in srgb, var(--header-bg-dinamico, #2f4842) 85%, transparent) !important;
+/* Se rolar a página para baixo OU abrir o menu, aplica a cor da paleta dinamicamente */
+#main-header.is-transparent-top.is-scrolled,
+#main-header.is-transparent-top.menu-open {
+  background-color: color-mix(in srgb, var(--header-bg-dinamico, #2f4842) 95%, transparent) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom-color: transparent !important;
 }
 
-/* Botão "Consultoria" e sublinhado recebem a cor Secundária dinâmica */
+/* Botão "Consultoria" e sublinhados recebem a cor Secundária dinâmica */
 #main-header.is-transparent-top .header-cta-btn {
   background-color: var(--header-btn-dinamico, #fdb17f) !important;
   color: var(--header-bg-dinamico, #2f4842) !important;
@@ -72,10 +75,10 @@
   background-color: var(--header-btn-dinamico, #fdb17f) !important;
 }
 
-/* No Menu Mobile, aplica-se a cor primária a 95% para leitura perfeita */
+/* No Menu Mobile, aplica-se a cor primária a 98% para garantir uma leitura perfeita */
 @media (max-width: 900px) {
   #main-header.is-transparent-top .public-nav {
-    background-color: color-mix(in srgb, var(--header-bg-dinamico, #2f4842) 95%, transparent) !important;
+    background-color: color-mix(in srgb, var(--header-bg-dinamico, #2f4842) 98%, transparent) !important;
     backdrop-filter: blur(16px) !important;
     -webkit-backdrop-filter: blur(16px) !important;
   }
