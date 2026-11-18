@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 const NAV_ITEMS = [
+  { label: 'Dúvidas Frequentes', to: '/duvidas', match: (path: string) => path === '/duvidas' },
+  { label: 'Depoimentos', to: '/depoimentos', match: (path: string) => path === '/depoimentos' },
   { label: 'Expedições', to: '/', match: (path: string) => path === '/' || path.startsWith('/expedicoes/') },
   { label: 'Nossa História', to: '/nossa/historia', match: (path: string) => path === '/nossa/historia' },
-  { label: 'Dúvidas Frequentes', to: '/duvidas', match: (path: string) => path === '/duvidas' },
-  { label: 'Dúvidas Frequentes', to: '/duvidas', match: (path: string) => path === '/duvidas' },
 ];
 
 export function Header() {
