@@ -33,7 +33,7 @@ export function AppRoutes() {
         ========================================== */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<HomePublica />} />
-          <Route path="/expedicao/:id" element={<ExpedicaoPublica />} />
+          <Route path="/expedicoes/:id" element={<ExpedicaoPublica />} />
           <Route path="/nossa/historia" element={<NossaHistoria />} />
           <Route path="/duvidas" element={<Duvidas />} />
           <Route path="/politica" element={<PoliticaPrivacidade />} />

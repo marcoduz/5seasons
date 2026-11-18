@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 const NAV_ITEMS = [
-  { label: 'Expedições', to: '/', match: (path: string) => path === '/' || path.startsWith('/expedicao/') },
+  { label: 'Expedições', to: '/', match: (path: string) => path === '/' || path.startsWith('/expedicoes/') },
   { label: 'Nossa História', to: '/nossa/historia', match: (path: string) => path === '/nossa/historia' },
+  { label: 'Dúvidas Frequentes', to: '/duvidas', match: (path: string) => path === '/duvidas' },
   { label: 'Dúvidas Frequentes', to: '/duvidas', match: (path: string) => path === '/duvidas' },
 ];
 
@@ -13,7 +14,7 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
 
   const activeIndex = NAV_ITEMS.findIndex((item) => item.match(location.pathname));
-  const isExpedicaoPage = location.pathname.startsWith('/expedicao/');
+  const isExpedicaoPage = location.pathname.startsWith('/expedicoes/');
 
   useEffect(() => {
     if (isMobileMenuOpen) {

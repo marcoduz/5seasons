@@ -178,7 +178,7 @@ export function HomePublica() {
             const valorEmEuro = cotacaoEuro ? precoFinal / cotacaoEuro : null;
 
             return (
-              <Link to={`/expedicao/${pacote.expedicao_id}`} className="exp-card" key={pacote.id}>
+              <Link to={`/expedicoes/${pacote.expedicao_id}`} className="exp-card" key={pacote.id}>
                 {/* Metade Superior: Mídia Limpa */}
                 <div className="exp-card-media">
                   <div 
