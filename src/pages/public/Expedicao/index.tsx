@@ -57,7 +57,7 @@ export function ExpedicaoPublica() {
     const [expRes, rotRes, pacRes] = await Promise.all([
       supabase.from('expedicoes').select('*').eq('id', expId).single(),
       supabase.from('roteiros').select('*').eq('expedicao_id', expId).order('dia', { ascending: true }),
-      supabase.from('pacotes').select('*').eq('expedicao_id', expId).order('created_at', { ascending: true })
+      supabase.from('pacotes').select('*').eq('expedicao_id', expId).eq('oculto', false).order('created_at', { ascending: true })
     ]);
 
     if (expRes.data) setExpedicao(expRes.data as Expedicao);
@@ -315,30 +315,8 @@ export function ExpedicaoPublica() {
         </div>
       </section>
 
-     {/* --- 4. BLOCOS EM ZIGUE-ZAGUE --- */}
-      {blocosZigueZague.length > 0 && (
-        <section className="bg-white">
-          <div className="container">
-            <div className="zigzag-list">
-              {blocosZigueZague.map((bloco, index) => (
-                <div key={bloco.id || index} className={`zigzag-row ${index % 2 !== 0 ? 'reverse' : ''}`}>
-                  <div className="zigzag-media">
-                    <img src={bloco.imagem || imagemCapa} alt={bloco.titulo} onClick={() => setFotoModal(bloco.imagem || imagemCapa)} style={{ cursor: 'pointer' }} />
-                  </div>
-                  <div className="zigzag-content">
-                    <span className="section-subtitle">Destaque da Experiência</span>
-                    <h3>{bloco.titulo}</h3>
-                    <div className="roteiro-formatted" dangerouslySetInnerHTML={formatarEstiloWhatsApp(bloco.texto)} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* --- 5. GALERIA DE FOTOS --- */}
-      <section className="bg-beige">
+      <section className="bg-white">
         <div className="container">
           <div className="section-subtitle" style={{ textAlign: 'center' }}>Galeria de Fotos</div>
           <h2 className="section-title" style={{ textAlign: 'center' }}>Registros Visuais</h2>
@@ -365,7 +343,7 @@ export function ExpedicaoPublica() {
       </section>
 
       {/* --- 6. CRONOGRAMA EM ABAS (MODELO ANTIGO COM IMAGEM AO LADO) --- */}
-      <section className="bg-white">
+      <section className="bg-beige">
         <div className="container" style={{ padding: '60px 0' }}>
           
           {(expedicao.motivo_epoca_titulo || expedicao.motivo_epoca_texto) && (
@@ -445,7 +423,7 @@ export function ExpedicaoPublica() {
 
       {/* --- 7. PILARES & JORNADA --- */}
       {(pilares.length > 0 || jornada.length > 0) && (
-        <section className="bg-beige">
+        <section className="bg-white">
           <div className="container">
             {pilares.length > 0 && (
               <div>
@@ -499,7 +477,7 @@ export function ExpedicaoPublica() {
       )}
 
       {/* --- 8. INCLUSÕES E OBSERVAÇÕES --- */}
-      <section className="bg-white">
+      <section className="bg-beige">
         <div className="container">
           <div className="serv-grid">
             <div className="inc-card">
@@ -527,7 +505,7 @@ export function ExpedicaoPublica() {
 
       {/* --- 9. ESSA VIAGEM É PRA MIM? --- */}
       {perfis.length > 0 && (
-        <section className="bg-beige">
+        <section className="bg-white">
           <div className="container">
             <div style={{ textAlign: 'center', maxWidth: 680, margin: '0 auto' }}>
               <span className="section-subtitle">Para Quem É</span>
@@ -551,13 +529,35 @@ export function ExpedicaoPublica() {
       )}
 
       {expedicao.observacoes?.length > 0 && (
-        <section className="bg-white">
+        <section className="bg-beige">
           <div className="section-padding container">
             <div className="obs-box">
               <h3>Observações Importantes</h3>
               <ul className="serv-list" style={{ gap: '12px' }}>
                 {expedicao.observacoes.map((item: string, i: number) => <li key={i} dangerouslySetInnerHTML={formatarEstiloWhatsApp(item)} />)}
               </ul>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* --- 4. BLOCOS EM ZIGUE-ZAGUE --- */}
+      {blocosZigueZague.length > 0 && (
+        <section className="bg-white">
+          <div className="container">
+            <div className="zigzag-list">
+              {blocosZigueZague.map((bloco, index) => (
+                <div key={bloco.id || index} className={`zigzag-row ${index % 2 !== 0 ? 'reverse' : ''}`}>
+                  <div className="zigzag-media">
+                    <img src={bloco.imagem || imagemCapa} alt={bloco.titulo} onClick={() => setFotoModal(bloco.imagem || imagemCapa)} style={{ cursor: 'pointer' }} />
+                  </div>
+                  <div className="zigzag-content">
+                    <span className="section-subtitle">Destaque da Experiência</span>
+                    <h3>{bloco.titulo}</h3>
+                    <div className="roteiro-formatted" dangerouslySetInnerHTML={formatarEstiloWhatsApp(bloco.texto)} />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
