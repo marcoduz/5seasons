@@ -801,6 +801,8 @@
   border-radius: 8px;
   width: 100%;
   max-width: 460px;
+  max-height: 90vh;
+  overflow-y: auto;
   padding: 30px 28px 28px;
   box-shadow: 0 24px 48px rgba(20, 32, 28, 0.28);
 }
