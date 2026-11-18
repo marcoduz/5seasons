@@ -39,6 +39,7 @@ const FILTROS = [
   { id: 'Nacional', label: 'Destinos Nacionais' },
   { id: 'Internacional', label: 'Destinos Internacionais' },
   { id: '2027', label: 'Temporada 2027' },
+  { id: '2028', label: 'Temporada 2028' },
 ];
 
 export function HomePublica() {
@@ -111,8 +112,8 @@ export function HomePublica() {
     if (filtroAtivo === 'Todos') return true;
     if (filtroAtivo === 'Nacional') return exp.tipo_destino === 'Nacional';
     if (filtroAtivo === 'Internacional') return exp.tipo_destino === 'Internacional';
-    if (filtroAtivo === '2026') return pacote.data_inicio?.startsWith('2026');
     if (filtroAtivo === '2027') return pacote.data_inicio?.startsWith('2027');
+    if (filtroAtivo === '2028') return pacote.data_inicio?.startsWith('2028');
     
     return true;
   });
