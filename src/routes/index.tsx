@@ -24,6 +24,8 @@ import { ReservaForm } from '@/pages/admin/Reservas/reservasForm';
 import { NossaHistoria } from '@/pages/public/NossaHistoria';
 import { Duvidas } from '@/pages/public/Duvidas';
 import { Depoimentos } from '@/pages/public/Depoimentos';
+import { DepoimentosList } from '@/pages/admin/Depoimentos';
+import { DepoimentosForm } from '@/pages/admin/Depoimentos/depoimentosForm';
 
 export function AppRoutes() {
   return (
@@ -75,6 +77,12 @@ export function AppRoutes() {
               <Route index element={<ReservasList />} />
               <Route path="new" element={<ReservaForm/>} />
               <Route path=":id" element={<ReservaForm/>} />
+            </Route>
+
+            <Route path="depoimentos">
+              <Route index element={<DepoimentosList />} />
+              <Route path="new" element={<DepoimentosForm />} />
+              <Route path=":id" element={<DepoimentosForm />} />
             </Route>
           </Route>
         </Route>
