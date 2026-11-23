@@ -173,7 +173,9 @@ export function HomePublica() {
             }
 
             const loteAtualInfo = pacote.pacote_lotes?.find((l: any) => l.lote_numero === pacote.lote_atual) || pacote.pacote_lotes?.[0];
-            const precoFinal = loteAtualInfo ? loteAtualInfo.preco_duplo : pacote.preco_duplo;
+            const precoFinal = loteAtualInfo
+                  ? (loteAtualInfo.preco_duplo || loteAtualInfo.preco_single || pacote.preco_duplo || pacote.preco_single)
+                  : (pacote.preco_duplo || pacote.preco_single);
             const valorEmDolar = cotacaoDolar ? precoFinal / cotacaoDolar : null;
             const valorEmEuro = cotacaoEuro ? precoFinal / cotacaoEuro : null;
 
