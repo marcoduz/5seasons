@@ -7,6 +7,7 @@ export interface DepoimentoAdmin {
   id: string;
   nome_cliente: string;
   expedicao_id: string | null;
+  nome_expedicao: string | null;
   expedicoes?: { nome: string } | null;
   depoimento: string;
   foto_viagem_url: string | null;
@@ -112,8 +113,9 @@ export function DepoimentosList() {
         const termo = busca.toLowerCase();
         const matchNome = item.nome_cliente.toLowerCase().includes(termo);
         const matchTexto = item.depoimento.toLowerCase().includes(termo);
-        const matchExp = item.expedicoes?.nome?.toLowerCase().includes(termo);
-        return matchNome || matchTexto || Boolean(matchExp);
+        const matchNomeExp = item.nome_expedicao?.toLowerCase().includes(termo);
+        const matchExpVinculada = item.expedicoes?.nome?.toLowerCase().includes(termo);
+        return matchNome || matchTexto || Boolean(matchNomeExp) || Boolean(matchExpVinculada);
       }
       return true;
     });
@@ -253,6 +255,7 @@ export function DepoimentosList() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {depoimentosFiltrados.map((item) => {
             const ocupando = processandoId === item.id;
+            const labelExpedicao = item.nome_expedicao || item.expedicoes?.nome;
 
             return (
               <div
@@ -324,7 +327,7 @@ export function DepoimentosList() {
                         {item.ativo ? 'Publicado' : 'Pendente'}
                       </span>
 
-                      {item.expedicoes?.nome && (
+                      {labelExpedicao && (
                         <span
                           style={{
                             fontSize: 12,
@@ -334,7 +337,7 @@ export function DepoimentosList() {
                             borderRadius: 6,
                           }}
                         >
-                          {item.expedicoes.nome}
+                          {labelExpedicao}
                         </span>
                       )}
 

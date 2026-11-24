@@ -3,10 +3,13 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { supabase } from '@/services/supabase';
 import './depoimentos.css';
 
+const LIMITE_NOME_EXPEDICAO = 80;
+
 interface Depoimento {
   id: string;
   nome_cliente: string;
   expedicao_id?: string | null;
+  nome_expedicao?: string | null;
   expedicoes?: { nome: string } | null;
   depoimento: string;
   foto_viagem_url?: string | null;
@@ -14,16 +17,11 @@ interface Depoimento {
   ativo: boolean;
 }
 
-interface ExpedicaoOpcao {
-  id: string;
-  nome: string;
-}
-
 const EXEMPLOS_FALLBACK: Depoimento[] = [
   {
     id: 'exemplo-1',
     nome_cliente: 'Grupo da 5 Seasons',
-    expedicoes: { nome: 'Chapada das Mesas' },
+    nome_expedicao: 'Chapada das Mesas',
     depoimento: 'Uma expedição inesquecível! Cada parada foi especial e muito bem organizada.',
     foto_viagem_url: 'https://images.unsplash.com/photo-1527631746610-bca00a040d60?auto=format&fit=crop&w=900&q=80',
     foto_perfil_url: null,
@@ -96,7 +94,6 @@ async function uploadImagemPublica(file: File, pasta: string, maxWidth: number):
 
 export function Depoimentos() {
   const [depoimentos, setDepoimentos] = useState<Depoimento[]>([]);
-  const [expedicoes, setExpedicoes] = useState<ExpedicaoOpcao[]>([]);
   const [indiceAtual, setIndiceAtual] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -107,7 +104,7 @@ export function Depoimentos() {
 
   const [formRelato, setFormRelato] = useState({
     nome_cliente: '',
-    expedicao_id: '',
+    nome_expedicao: '',
     depoimento: '',
   });
 
@@ -124,24 +121,17 @@ export function Depoimentos() {
 
   async function carregarDados() {
     setLoading(true);
-    const [depRes, expRes] = await Promise.all([
-      supabase
-        .from('depoimentos')
-        .select('*, expedicoes(nome)')
-        .eq('ativo', true)
-        .order('ordem', { ascending: true })
-        .order('created_at', { ascending: false }),
-      supabase.from('expedicoes').select('id, nome').order('nome', { ascending: true }),
-    ]);
+    const { data, error } = await supabase
+      .from('depoimentos')
+      .select('*, expedicoes(nome)')
+      .eq('ativo', true)
+      .order('ordem', { ascending: true })
+      .order('created_at', { ascending: false });
 
-    if (!depRes.error && depRes.data && depRes.data.length > 0) {
-      setDepoimentos(depRes.data as Depoimento[]);
+    if (!error && data && data.length > 0) {
+      setDepoimentos(data as Depoimento[]);
     } else {
       setDepoimentos(EXEMPLOS_FALLBACK);
-    }
-
-    if (!expRes.error && expRes.data) {
-      setExpedicoes(expRes.data as ExpedicaoOpcao[]);
     }
 
     setLoading(false);
@@ -179,7 +169,7 @@ export function Depoimentos() {
   }
 
   function resetarFormulario() {
-    setFormRelato({ nome_cliente: '', expedicao_id: '', depoimento: '' });
+    setFormRelato({ nome_cliente: '', nome_expedicao: '', depoimento: '' });
     setFotoPerfilPreview('');
     setFotoPerfilFile(null);
     setFotoViagemPreview('');
@@ -206,10 +196,12 @@ export function Depoimentos() {
         urlViagemFinal = await uploadImagemPublica(fotoViagemFile, 'depoimentos-viagem', 1200);
       }
 
+      const nomeExpLimpo = formRelato.nome_expedicao.trim().slice(0, LIMITE_NOME_EXPEDICAO);
+
       const { error } = await supabase.from('depoimentos').insert([
         {
           nome_cliente: formRelato.nome_cliente.trim(),
-          expedicao_id: formRelato.expedicao_id || null,
+          nome_expedicao: nomeExpLimpo || null,
           depoimento: formRelato.depoimento.trim(),
           foto_perfil_url: urlPerfilFinal,
           foto_viagem_url: urlViagemFinal,
@@ -229,7 +221,7 @@ export function Depoimentos() {
   }
 
   const itemAtual = depoimentos[indiceAtual] || depoimentos[0];
-  const nomeExpedicaoAtual = itemAtual?.expedicoes?.nome;
+  const nomeExpedicaoAtual = itemAtual?.nome_expedicao || itemAtual?.expedicoes?.nome;
 
   return (
     <div className="depoimentos-page">
@@ -415,19 +407,22 @@ export function Depoimentos() {
                 </div>
 
                 <div className="relato-field">
-                  <label htmlFor="relatoDestino">Qual expedição você fez?</label>
-                  <select
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <label htmlFor="relatoDestino">Qual expedição você fez? (opcional)</label>
+                    <span style={{ fontSize: 11.5, color: 'var(--home-muted)' }}>
+                      {formRelato.nome_expedicao.length}/{LIMITE_NOME_EXPEDICAO}
+                    </span>
+                  </div>
+                  <input
                     id="relatoDestino"
-                    value={formRelato.expedicao_id}
-                    onChange={(e) => setFormRelato((f) => ({ ...f, expedicao_id: e.target.value }))}
-                  >
-                    <option value="">Selecione um destino (opcional)</option>
-                    {expedicoes.map((exp) => (
-                      <option key={exp.id} value={exp.id}>
-                        {exp.nome}
-                      </option>
-                    ))}
-                  </select>
+                    type="text"
+                    maxLength={LIMITE_NOME_EXPEDICAO}
+                    placeholder="Ex: Chapada das Mesas, Jalapão, Croácia..."
+                    value={formRelato.nome_expedicao}
+                    onChange={(e) =>
+                      setFormRelato((f) => ({ ...f, nome_expedicao: e.target.value }))
+                    }
+                  />
                 </div>
 
                 <div className="relato-field">
@@ -442,9 +437,7 @@ export function Depoimentos() {
                   />
                 </div>
 
-                {/* Uploads: Foto de Perfil e Foto da Viagem */}
                 <div className="relato-uploads-grid">
-                  {/* Foto de Perfil */}
                   <div className="relato-field" style={{ marginBottom: 0 }}>
                     <label>Sua foto de perfil (opcional)</label>
                     <label className="relato-upload-btn">
@@ -482,7 +475,6 @@ export function Depoimentos() {
                     )}
                   </div>
 
-                  {/* Foto da Viagem */}
                   <div className="relato-field" style={{ marginBottom: 0 }}>
                     <label>Foto da viagem (opcional)</label>
                     <label className="relato-upload-btn">

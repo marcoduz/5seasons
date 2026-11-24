@@ -3,6 +3,8 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/services/supabase';
 
+const LIMITE_NOME_EXPEDICAO = 80;
+
 interface ExpedicaoOpcao {
   id: string;
   nome: string;
@@ -83,6 +85,7 @@ export function DepoimentosForm() {
 
   const [nomeCliente, setNomeCliente] = useState('');
   const [expedicaoId, setExpedicaoId] = useState('');
+  const [nomeExpedicao, setNomeExpedicao] = useState('');
   const [depoimentoTexto, setDepoimentoTexto] = useState('');
   const [ordem, setOrdem] = useState<number>(0);
   const [ativo, setAtivo] = useState<boolean>(true);
@@ -120,6 +123,7 @@ export function DepoimentosForm() {
         const d = depRes.data;
         setNomeCliente(d.nome_cliente || '');
         setExpedicaoId(d.expedicao_id || '');
+        setNomeExpedicao(d.nome_expedicao || '');
         setDepoimentoTexto(d.depoimento || '');
         setOrdem(d.ordem ?? 0);
         setAtivo(Boolean(d.ativo));
@@ -130,6 +134,16 @@ export function DepoimentosForm() {
     } else {
       const expRes = await expPromise;
       if (expRes.data) setExpedicoes(expRes.data as ExpedicaoOpcao[]);
+    }
+  }
+
+  function handleChangeExpedicaoVinculada(novoId: string) {
+    setExpedicaoId(novoId);
+    if (novoId && !nomeExpedicao.trim()) {
+      const expEncontrada = expedicoes.find((e) => e.id === novoId);
+      if (expEncontrada) {
+        setNomeExpedicao(expEncontrada.nome.slice(0, LIMITE_NOME_EXPEDICAO));
+      }
     }
   }
 
@@ -169,9 +183,12 @@ export function DepoimentosForm() {
         urlPerfilFinal = await uploadImagemStorage(fotoPerfilFile, 'depoimentos-perfil', 400);
       }
 
+      const nomeExpLimpo = nomeExpedicao.trim().slice(0, LIMITE_NOME_EXPEDICAO);
+
       const payload = {
         nome_cliente: nomeCliente.trim(),
         expedicao_id: expedicaoId || null,
+        nome_expedicao: nomeExpLimpo || null,
         depoimento: depoimentoTexto.trim(),
         foto_viagem_url: urlViagemFinal,
         foto_perfil_url: urlPerfilFinal,
@@ -245,11 +262,11 @@ export function DepoimentosForm() {
 
           <div className="ui-form-row">
             <div className="ui-field" style={{ flex: 1 }}>
-              <label htmlFor="depNome">Nome do Cliente / Grupo *</label>
+              <label htmlFor="depNome">Nome do Cliente *</label>
               <input
                 id="depNome"
                 type="text"
-                placeholder="Ex: Grupo da 5 Seasons"
+                placeholder="Ex: Mariana Silva"
                 value={nomeCliente}
                 onChange={(e) => setNomeCliente(e.target.value)}
                 required
@@ -268,20 +285,39 @@ export function DepoimentosForm() {
             </div>
           </div>
 
-          <div className="ui-field">
-            <label htmlFor="depExpedicao">Expedição de Origem</label>
-            <select
-              id="depExpedicao"
-              value={expedicaoId}
-              onChange={(e) => setExpedicaoId(e.target.value)}
-            >
-              <option value="">Sem vínculo específico</option>
-              {expedicoes.map((exp) => (
-                <option key={exp.id} value={exp.id}>
-                  {exp.nome}
-                </option>
-              ))}
-            </select>
+          <div className="ui-form-row">
+            <div className="ui-field" style={{ flex: 1 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label htmlFor="depNomeExpedicao">Nome da Expedição (Exibido no site)</label>
+                <span style={{ fontSize: 11.5, color: '#64748b' }}>
+                  {nomeExpedicao.length}/{LIMITE_NOME_EXPEDICAO}
+                </span>
+              </div>
+              <input
+                id="depNomeExpedicao"
+                type="text"
+                maxLength={LIMITE_NOME_EXPEDICAO}
+                placeholder="Ex: Chapada das Mesas"
+                value={nomeExpedicao}
+                onChange={(e) => setNomeExpedicao(e.target.value)}
+              />
+            </div>
+
+            <div className="ui-field" style={{ flex: 1 }}>
+              <label htmlFor="depExpedicao">Vincular a uma Expedição (Opcional)</label>
+              <select
+                id="depExpedicao"
+                value={expedicaoId}
+                onChange={(e) => handleChangeExpedicaoVinculada(e.target.value)}
+              >
+                <option value="">Sem vínculo específico</option>
+                {expedicoes.map((exp) => (
+                  <option key={exp.id} value={exp.id}>
+                    {exp.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="ui-field">
