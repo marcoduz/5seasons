@@ -893,6 +893,74 @@
   font-size: 24px;
   cursor: pointer;
 }
+/* =========================================
+   Seletor de Acomodações em Pílulas 
+   ========================================= */
+.acomodacao-selector {
+  margin-bottom: 16px;
+}
+
+.acomodacao-selector-label {
+  display: block;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #cbd5e1;
+  margin-bottom: 8px;
+}
+
+.acomodacao-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.acomodacao-pill {
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.acomodacao-pill:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.acomodacao-pill.active {
+  background: var(--theme-secondary, #fdb17f);
+  border-color: var(--theme-secondary, #fdb17f);
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.acomodacao-desc-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 13px;
+  line-height: 1.45;
+  color: #e2e8f0;
+}
+
+.acomodacao-desc-box svg {
+  color: var(--theme-secondary, #fdb17f);
+}
+
+.acomodacao-desc-box strong {
+  color: #ffffff;
+}
 
 /* =========================================
    RESPONSIVIDADE (MOBILE)
