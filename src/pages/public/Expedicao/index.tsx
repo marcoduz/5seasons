@@ -1,41 +1,34 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+// src/pages/public/Expedicao/index.tsx
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/services/supabase';
 import type { Expedicao, Roteiro } from '@/types';
 import { formatarEstiloWhatsApp } from '@/pages/admin/Expedicoes/expedicaoForm';
+import {
+  formatarMoedaBRL,
+  formatarMoedaEUR,
+  formatarMoedaUSD,
+  obterOpcoesAcomodacao,
+  type CamposPreco,
+  type TipoAcomodacao,
+} from '@/utils/precos';
 import './expedicao.css';
 
-interface PacoteLote {
+interface PacoteLote extends CamposPreco {
   lote_numero: number;
-  preco_duplo?: number | null;
-  preco_single?: number | null;
 }
 
-interface Pacote {
+interface Pacote extends CamposPreco {
   id: string;
   nome?: string;
   titulo?: string;
   subtitulo?: string;
-  preco_duplo?: number | null;
-  preco_single?: number | null;
   lote_atual?: number | null;
   pacote_lotes?: PacoteLote[];
   data_inicio?: string;
   data_fim?: string;
   duracao: string;
   status: string;
-}
-
-function formatarMoedaBRL(valor: number) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
-}
-
-function formatarMoedaUSD(valor: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(valor);
-}
-
-function formatarMoedaEUR(valor: number) {
-  return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(valor);
 }
 
 export function ExpedicaoPublica() {
@@ -45,6 +38,7 @@ export function ExpedicaoPublica() {
   const [roteiros, setRoteiros] = useState<Roteiro[]>([]);
   const [pacotes, setPacotes] = useState<Pacote[]>([]);
   const [pacoteSelecionado, setPacoteSelecionado] = useState<Pacote | null>(null);
+  const [acomodacaoSelecionada, setAcomodacaoSelecionada] = useState<TipoAcomodacao | null>(null);
   const [cotacaoDolar, setCotacaoDolar] = useState<number | null>(null);
   const [cotacaoEuro, setCotacaoEuro] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -76,6 +70,20 @@ export function ExpedicaoPublica() {
     };
   }, [expedicao]);
 
+  const opcoesAcomodacao = useMemo(
+    () => obterOpcoesAcomodacao(pacoteSelecionado),
+    [pacoteSelecionado]
+  );
+
+  // Mantém pré-selecionada a acomodação de maior prioridade sempre que mudar o pacote
+  useEffect(() => {
+    if (opcoesAcomodacao.length > 0) {
+      setAcomodacaoSelecionada(opcoesAcomodacao[0].tipo);
+    } else {
+      setAcomodacaoSelecionada(null);
+    }
+  }, [opcoesAcomodacao]);
+
   async function carregarDadosCompletos(expId: string) {
     setLoading(true);
     const [expRes, rotRes, pacRes, dolarRes] = await Promise.all([
@@ -87,8 +95,10 @@ export function ExpedicaoPublica() {
           *,
           pacote_lotes (
             lote_numero,
+            preco_single,
             preco_duplo,
-            preco_single
+            preco_triplo,
+            preco_compartilhado
           )
         `)
         .eq('expedicao_id', expId)
@@ -110,6 +120,9 @@ export function ExpedicaoPublica() {
       setPacotes(pacRes.data as Pacote[]);
       const disponivel = pacRes.data.find((p: Pacote) => p.status !== 'Esgotado') || pacRes.data[0];
       setPacoteSelecionado(disponivel);
+    } else {
+      setPacotes([]);
+      setPacoteSelecionado(null);
     }
 
     if (dolarRes?.USDBRL) {
@@ -163,26 +176,24 @@ export function ExpedicaoPublica() {
   const imagemCapa = expedicao.fotos?.[0] || 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&q=80';
   const galeria = expedicao.fotos && expedicao.fotos.length > 1 ? expedicao.fotos.slice(1) : [];
 
-  const msgWhats = `Olá! Tenho interesse na expedição *${expedicao.nome}* ${pacoteSelecionado ? `(Saída: ${formatarPeriodo(pacoteSelecionado.data_inicio, pacoteSelecionado.data_fim, pacoteSelecionado.duracao)})` : ''}. Poderia me passar mais informações?`;
+  const opcaoAtiva =
+    opcoesAcomodacao.find((o) => o.tipo === acomodacaoSelecionada) || opcoesAcomodacao[0] || null;
+  const precoFinal = opcaoAtiva?.preco || null;
+
+  const valorEmDolar = precoFinal && cotacaoDolar ? precoFinal / cotacaoDolar : null;
+  const valorEmEuro = precoFinal && cotacaoEuro ? precoFinal / cotacaoEuro : null;
+
+  const detalhesWhats = [
+    pacoteSelecionado
+      ? `Saída: ${formatarPeriodo(pacoteSelecionado.data_inicio, pacoteSelecionado.data_fim, pacoteSelecionado.duracao)}`
+      : null,
+    opcaoAtiva ? `Acomodação: ${opcaoAtiva.label} (${formatarMoedaBRL(opcaoAtiva.preco)})` : null,
+  ]
+    .filter(Boolean)
+    .join(' | ');
+
+  const msgWhats = `Olá! Tenho interesse na expedição *${expedicao.nome}*${detalhesWhats ? ` (${detalhesWhats})` : ''}. Poderia me passar mais informações?`;
   const linkWhats = `https://wa.me/5554996468737?text=${encodeURIComponent(msgWhats)}`;
-
-  // Cálculo do preço final (igual à Home)
-  const loteAtualInfo = pacoteSelecionado
-    ? pacoteSelecionado.pacote_lotes?.find((l) => l.lote_numero === pacoteSelecionado.lote_atual) ||
-      pacoteSelecionado.pacote_lotes?.[0]
-    : null;
-
-  const precoFinal = pacoteSelecionado
-    ? loteAtualInfo
-      ? loteAtualInfo.preco_duplo ||
-        loteAtualInfo.preco_single ||
-        pacoteSelecionado.preco_duplo ||
-        pacoteSelecionado.preco_single
-      : pacoteSelecionado.preco_duplo || pacoteSelecionado.preco_single
-    : null;
-
-  const valorEmDolar = precoFinal && cotacaoDolar ? Number(precoFinal) / cotacaoDolar : null;
-  const valorEmEuro = precoFinal && cotacaoEuro ? Number(precoFinal) / cotacaoEuro : null;
 
   // Motor de Temas dinâmico
   const corPrimaria = expedicao.cor_primaria || '#2f4842';
@@ -267,14 +278,36 @@ export function ExpedicaoPublica() {
               </div>
             )}
 
+            {/* Seletor em Pílulas de Acomodação */}
+            {opcoesAcomodacao.length > 0 && (
+              <div className="acomodacao-selector">
+                <span className="acomodacao-selector-label">Tipo de acomodação:</span>
+                <div className="acomodacao-pills" role="tablist" aria-label="Tipo de acomodação">
+                  {opcoesAcomodacao.map((opc) => (
+                    <button
+                      key={opc.tipo}
+                      type="button"
+                      role="tab"
+                      aria-selected={opcaoAtiva?.tipo === opc.tipo}
+                      className={`acomodacao-pill ${opcaoAtiva?.tipo === opc.tipo ? 'active' : ''}`}
+                      onClick={() => setAcomodacaoSelecionada(opc.tipo)}
+                    >
+                      {opc.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="summary-price-box">
               <span className="summary-price-label">
                 {pacoteSelecionado?.lote_atual
-                  ? `${pacoteSelecionado.lote_atual}º Lote`
+                  ? `${pacoteSelecionado.lote_atual}º Lote · Investimento por pessoa`
                   : pacoteSelecionado?.nome || pacoteSelecionado?.titulo || 'Investimento por pessoa'}
               </span>
+
               <div className="summary-price-value">
-                {precoFinal ? formatarMoedaBRL(Number(precoFinal)) : 'Sob Consulta'}
+                {precoFinal ? formatarMoedaBRL(precoFinal) : 'Sob Consulta'}
               </div>
 
               {precoFinal && (valorEmEuro !== null || valorEmDolar !== null) && (
@@ -295,6 +328,30 @@ export function ExpedicaoPublica() {
                 </div>
               )}
 
+              {/* Descrição dinâmica da acomodação selecionada */}
+              {opcaoAtiva && (
+                <div className="acomodacao-desc-box">
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ flexShrink: 0, marginTop: 2 }}
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="16" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                  </svg>
+                  <span>
+                    <strong>{opcaoAtiva.label}:</strong> {opcaoAtiva.descricao}
+                  </span>
+                </div>
+              )}
+
               {pacoteSelecionado && (
                 <span
                   style={{
@@ -303,7 +360,7 @@ export function ExpedicaoPublica() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 6,
-                    marginTop: 8,
+                    marginTop: 10,
                     fontWeight: 500,
                   }}
                 >
@@ -361,7 +418,7 @@ export function ExpedicaoPublica() {
                 <path d="M9 9h.01"></path>
                 <path d="M15 15h.01"></path>
               </svg>
-              <h4>Desconto no Pix</h4>
+              <h4>5% de desconto no Pix</h4>
               <p>Economize pagando à vista diretamente pelo Pix.</p>
             </div>
 
@@ -372,7 +429,7 @@ export function ExpedicaoPublica() {
                   <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
                   <path d="M2 12h20"></path>
                 </svg>
-                <h4>Desconto no Wise</h4>
+                <h4>7% de desconto no Wise</h4>
                 <p>Condição exclusiva para pagamentos em euros no Wise.</p>
               </div>
             )}
@@ -382,11 +439,11 @@ export function ExpedicaoPublica() {
                 <rect x="2" y="5" width="20" height="14" rx="2"></rect>
                 <line x1="2" y1="10" x2="22" y2="10"></line>
               </svg>
-              <h4>Parcelamento no cartão de crédito</h4>
+              <h4>Até 12x no cartão</h4>
               <p>
-                Parcele sua experiência no cartão de crédito.
+                Parcele sua experiência em até 12 vezes no cartão de crédito.
                 <span style={{ display: 'block', fontSize: '12px', marginTop: '6px', opacity: 0.75 }}>
-                  * Taxas de juros e prazo a consultar.
+                  * Taxas de juros a consultar.
                 </span>
               </p>
             </div>
@@ -458,7 +515,7 @@ export function ExpedicaoPublica() {
         </div>
       </section>
 
-      {/* --- 6. CRONOGRAMA EM ABAS (MODELO ANTIGO COM IMAGEM AO LADO) --- */}
+      {/* --- 6. CRONOGRAMA EM ABAS --- */}
       <section className="bg-beige">
         <div className="container" style={{ padding: '60px 0' }}>
           {(expedicao.motivo_epoca_titulo || expedicao.motivo_epoca_texto) && (

@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/services/supabase';
+import {
+  formatarMoedaBRL,
+  formatarMoedaEUR,
+  formatarMoedaUSD,
+  obterOpcoesAcomodacao,
+} from '@/utils/precos';
 
 function formatarDataCard(inicio: string, fim: string) {
   if (!inicio || !fim) return '';
@@ -20,18 +26,6 @@ function formatarDataCard(inicio: string, fim: string) {
     return `${diaI} ${mesI} — ${diaF} ${mesF}, ${anoI}`;
   }
   return `${diaI} ${mesI} ${anoI} — ${diaF} ${mesF} ${anoF}`;
-}
-
-function formatarMoedaBRL(valor: number) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
-}
-
-function formatarMoedaUSD(valor: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(valor);
-}
-
-function formatarMoedaEUR(valor: number) {
-  return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(valor);
 }
 
 const FILTROS = [
@@ -65,7 +59,9 @@ export function HomePublica() {
           data_inicio, 
           data_fim, 
           preco_single,
-          preco_duplo, 
+          preco_duplo,
+          preco_triplo,
+          preco_compartilhado,
           status, 
           expedicao_id,
           lote_atual,
@@ -77,18 +73,20 @@ export function HomePublica() {
           ),
           pacote_lotes (
             lote_numero,
+            preco_single,
             preco_duplo,
-            preco_single
+            preco_triplo,
+            preco_compartilhado
           )
         `)
         .eq('oculto', false)
         .in('status', ['Ativo', 'Esgotado', 'Em breve'])
         .order('status', { ascending: true })
         .order('data_inicio', { ascending: true }),
-      
+
       fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL')
-        .then(res => res.json())
-        .catch(() => null)
+        .then((res) => res.json())
+        .catch(() => null),
     ]);
 
     if (!pacotesRes.error && pacotesRes.data) {
@@ -114,7 +112,7 @@ export function HomePublica() {
     if (filtroAtivo === 'Internacional') return exp.tipo_destino === 'Internacional';
     if (filtroAtivo === '2027') return pacote.data_inicio?.startsWith('2027');
     if (filtroAtivo === '2028') return pacote.data_inicio?.startsWith('2028');
-    
+
     return true;
   });
 
@@ -160,7 +158,7 @@ export function HomePublica() {
           {pacotesFiltrados.map((pacote) => {
             const exp = pacote.expedicoes;
             const imagemCapa = exp?.fotos && exp.fotos.length > 0 ? exp.fotos[0] : '';
-            
+
             let statusLabel = 'Lista de Espera';
             let statusClass = 'status-esgotado';
 
@@ -172,19 +170,26 @@ export function HomePublica() {
               statusClass = 'status-breve';
             }
 
-            const loteAtualInfo = pacote.pacote_lotes?.find((l: any) => l.lote_numero === pacote.lote_atual) || pacote.pacote_lotes?.[0];
-            const precoFinal = loteAtualInfo
-                  ? (loteAtualInfo.preco_duplo || loteAtualInfo.preco_single || pacote.preco_duplo || pacote.preco_single)
-                  : (pacote.preco_duplo || pacote.preco_single);
-            const valorEmDolar = cotacaoDolar ? precoFinal / cotacaoDolar : null;
-            const valorEmEuro = cotacaoEuro ? precoFinal / cotacaoEuro : null;
+            const opcoesPreco = obterOpcoesAcomodacao(pacote);
+            const opcaoPrioritaria = opcoesPreco[0] || null;
+            const precoFinal = opcaoPrioritaria?.preco || null;
+
+            const valorEmDolar = precoFinal && cotacaoDolar ? precoFinal / cotacaoDolar : null;
+            const valorEmEuro = precoFinal && cotacaoEuro ? precoFinal / cotacaoEuro : null;
+
+            const labelPreco = [
+              pacote.lote_atual ? `${pacote.lote_atual}º Lote` : null,
+              opcoesPreco.length > 1 ? 'A partir de' : opcaoPrioritaria?.label || 'Investimento',
+            ]
+              .filter(Boolean)
+              .join(' · ');
 
             return (
               <Link to={`/expedicao/${pacote.expedicao_id}`} className="exp-card" key={pacote.id}>
                 {/* Metade Superior: Mídia Limpa */}
                 <div className="exp-card-media">
-                  <div 
-                    className="exp-card-img" 
+                  <div
+                    className="exp-card-img"
                     style={{ backgroundImage: imagemCapa ? `url(${imagemCapa})` : 'none' }}
                   />
                   <div className="exp-card-badges">
@@ -207,12 +212,12 @@ export function HomePublica() {
 
                   <h3 className="exp-card-title">{pacote.nome}</h3>
                   <p className="exp-card-desc">{exp?.descricao}</p>
-                  
+
                   <div className="exp-card-footer">
                     <div className="exp-card-price">
                       {precoFinal ? (
                         <>
-                          <small>{pacote.lote_atual ? `${pacote.lote_atual}º Lote` : 'Investimento'}</small>
+                          <small>{labelPreco}</small>
                           <strong>{formatarMoedaBRL(precoFinal)}</strong>
                           <div className="moedas-estrangeiras">
                             {valorEmEuro !== null && <span>≈ {formatarMoedaEUR(valorEmEuro)}</span>}

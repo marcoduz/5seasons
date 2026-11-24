@@ -1,12 +1,13 @@
+// src/pages/admin/Pacotes/index.tsx
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/services/supabase";
 import type { Pacote } from "@/types";
+import { formatarMoedaBRL, obterOpcoesAcomodacao } from "@/utils/precos";
 import "../admin-theme.css";
 
 interface PacoteComExpedicao extends Pacote {
   expedicoes?: { nome: string };
-  oculto?: boolean;
 }
 
 const VISIBILIDADE_OPCOES = ["Visíveis", "Ocultos", "Todos"];
@@ -21,7 +22,7 @@ export function PacotesList() {
   const [statusFiltro, setStatusFiltro] = useState("");
   const [dataFiltro, setDataFiltro] = useState("");
   const [vagasFiltro, setVagasFiltro] = useState("");
-  const [visibilidadeFiltro, setVisibilidadeFiltro] = useState("Visíveis"); 
+  const [visibilidadeFiltro, setVisibilidadeFiltro] = useState("Visíveis");
 
   const filterBarRef = useRef<HTMLDivElement>(null);
   const filterBtnRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -71,13 +72,13 @@ export function PacotesList() {
 
     const { data, error } = await supabase
       .from("pacotes")
-      .select("*, expedicoes(nome)")
+      .select("*, expedicoes(nome), pacote_lotes(*)")
       .order("data_inicio", { ascending: true });
 
     if (error) {
       setError("Não foi possível carregar os pacotes.");
     } else {
-      setPacotes(data ?? []);
+      setPacotes((data as PacoteComExpedicao[]) ?? []);
     }
     setLoading(false);
   }
@@ -87,7 +88,7 @@ export function PacotesList() {
     e.stopPropagation();
 
     const confirmado = window.confirm(
-      `Remover o pacote "${pacote.nome}"?\nAtenção: Você não poderá excluir se houver reservas vinculadas a ele.`,
+      `Remover o pacote "${pacote.nome}"?\nAtenção: Você não poderá excluir se houver reservas vinculadas a ele.`
     );
 
     if (!confirmado) return;
@@ -102,7 +103,7 @@ export function PacotesList() {
 
     if (error) {
       window.alert(
-        "Erro ao excluir. Verifique se existem reservas ativas neste pacote.",
+        "Erro ao excluir. Verifique se existem reservas ativas neste pacote."
       );
       return;
     }
@@ -114,17 +115,6 @@ export function PacotesList() {
     if (!dataString) return "-";
     const [ano, mes, dia] = dataString.split("-");
     return `${dia}/${mes}/${ano}`;
-  }
-
-  function formatarMoeda(valor: number | null | undefined) {
-    if (valor === null || valor === undefined || valor === 0) {
-      return "";
-    }
-    
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(valor);
   }
 
   const pacotesFiltrados = useMemo(() => {
@@ -193,7 +183,7 @@ export function PacotesList() {
         /* Remove a rolagem da página inteira para garantir o efeito fixo */
         body { overflow: hidden !important; }
         
-        /* Estiliza o da barra de rolagem exclusiva da listagem */
+        /* Estilização da barra de rolagem exclusiva da listagem */
         .scroll-area::-webkit-scrollbar { width: 8px; }
         .scroll-area::-webkit-scrollbar-track { background: transparent; }
         .scroll-area::-webkit-scrollbar-thumb { background: rgba(38, 51, 47, 0.15); border-radius: 10px; }
@@ -469,7 +459,7 @@ export function PacotesList() {
                   <th>Nome / Expedição</th>
                   <th>Período</th>
                   <th>Vagas</th>
-                  <th>Valor (Individual)</th>
+                  <th>Valor (A partir de)</th>
                   <th>Status</th>
                   <th style={{ width: 90 }}>Ações</th>
                 </tr>
@@ -478,6 +468,10 @@ export function PacotesList() {
                 {pacotesFiltrados.map((pacote) => {
                   const esgotado = (pacote.vagas_ocupadas || 0) >= pacote.vagas;
                   const isOculto = pacote.oculto === true;
+
+                  const opcoesPreco = obterOpcoesAcomodacao(pacote);
+                  const opcaoPrioritaria = opcoesPreco[0] || null;
+                  const extrasCount = opcoesPreco.length - 1;
 
                   let badgeStyle = {
                     background: "rgba(151, 183, 177, 0.2)",
@@ -518,7 +512,6 @@ export function PacotesList() {
                           }}
                         >
                           {pacote.nome}
-                          {/* SINALIZADOR VISUAL DE PACOTE OCULTO */}
                           {isOculto && (
                             <span
                               style={{
@@ -561,8 +554,7 @@ export function PacotesList() {
                             opacity: 0.65,
                           }}
                         >
-                          {pacote.expedicoes?.nome ||
-                            "Expedição encontrada"}
+                          {pacote.expedicoes?.nome || "Expedição não encontrada"}
                         </div>
                       </td>
                       <td style={{ color: "var(--ink)" }}>
@@ -581,13 +573,41 @@ export function PacotesList() {
                           {pacote.vagas_ocupadas || 0} / {pacote.vagas}
                         </span>
                       </td>
-                      <td
-                        style={{
-                          color: "var(--forest-deep)",
-                          fontWeight: 500,
-                        }}
-                      >
-                        {formatarMoeda(pacote.preco_single)}
+                      <td>
+                        {opcaoPrioritaria ? (
+                          <div>
+                            <div
+                              style={{
+                                color: "var(--forest-deep)",
+                                fontWeight: 600,
+                              }}
+                            >
+                              {formatarMoedaBRL(opcaoPrioritaria.preco)}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: 11.5,
+                                color: "var(--ink)",
+                                opacity: 0.65,
+                              }}
+                            >
+                              {opcaoPrioritaria.label}
+                              {extrasCount > 0
+                                ? ` · +${extrasCount} ${extrasCount === 1 ? "opção" : "opções"}`
+                                : ""}
+                            </div>
+                          </div>
+                        ) : (
+                          <span
+                            style={{
+                              fontSize: 12.5,
+                              color: "var(--ink)",
+                              opacity: 0.5,
+                            }}
+                          >
+                            Sob consulta
+                          </span>
+                        )}
                       </td>
                       <td>
                         <span

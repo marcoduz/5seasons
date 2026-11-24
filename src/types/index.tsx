@@ -56,6 +56,8 @@ export interface Pacote {
   data_fim: string;
   vagas: number;
   vagas_ocupadas: number;
+  preco_compartilhado?: number | null;
+  preco_triplo?: number | null;
   preco_duplo?: number | null;
   preco_single?: number | null;
   status: string;
@@ -108,7 +110,9 @@ export interface PacoteLote {
   id: string;
   pacote_id: string;
   lote_numero: number;
-  preco_duplo: number;
-  preco_single?: number;
+  preco_compartilhado?: number | null;
+  preco_triplo?: number | null;
+  preco_duplo?: number | null;
+  preco_single?: number | null;
   vagas_gatilho: number;
 }
